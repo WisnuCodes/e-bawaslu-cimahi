@@ -9,12 +9,11 @@ use App\Http\Resources\C1\C1Resource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Storage;
 
 class C1Controller extends Controller
 {
-    /**
-     * Get all C1 files (with optional TPS filter)
-     */
     public function index(Request $request)
     {
         $query = C1::query();
@@ -25,18 +24,14 @@ class C1Controller extends Controller
         return C1Resource::collection($query->orderBy('created_at', 'desc')->get());
     }
 
-    /**
-     * Store a newly created C1 in storage and hash it.
-     */
     public function store(StoreC1Request $request)
     {
         $userId = $request->user()->user_id;
         $file = $request->file('file_c1');
 
-        // Calculate SHA-256 Hash of the file for integrity
+        // Calculate SHA-256 Hash
         $hash = hash_file('sha256', $file->getRealPath());
 
-        // Check if a file with the same hash already exists (duplicate prevention)
         $existing = C1::where('sha256_hash', $hash)->first();
         if ($existing) {
             return response()->json([
@@ -45,18 +40,22 @@ class C1Controller extends Controller
             ], 409);
         }
 
-        $path = $file->store('c1_uploads', 'public');
+        // AES-256 Encryption via Laravel Crypt
+        $fileContents = file_get_contents($file->getRealPath());
+        $encryptedContents = Crypt::encrypt($fileContents);
+        
+        $filename = 'c1_encrypted_' . Str::uuid() . '.dat';
+        Storage::disk('public')->put('c1_uploads/' . $filename, $encryptedContents);
+        $path = 'c1_uploads/' . $filename;
 
-        // Cross-Check Validation Algorithm
-        // total_suara_sah + total_suara_tidak_sah must equal total_pemilih
+        // Auto Cross-Check
         $totalSah = (int) $request->total_suara_sah;
         $totalTidakSah = (int) $request->total_suara_tidak_sah;
         $totalPemilih = (int) $request->total_pemilih;
         $status_c1 = 'Draft';
 
         if (($totalSah + $totalTidakSah) !== $totalPemilih) {
-            // Flag as mismatch for manual review
-            $status_c1 = 'Mismatch';
+            $status_c1 = 'Mismatch'; // Red Flag
         }
 
         $c1 = C1::create([
@@ -73,14 +72,11 @@ class C1Controller extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Berkas C1 berhasil diunggah' . ($status_c1 === 'Mismatch' ? ', namun terdapat ketidaksesuaian jumlah suara.' : ' dan diverifikasi.'),
+            'message' => 'Berkas C1 berhasil dienkripsi (AES-256) dan disimpan' . ($status_c1 === 'Mismatch' ? ', terdapat Red Flag (Ketidaksesuaian jumlah suara).' : '.'),
             'data' => new C1Resource($c1)
         ], 201);
     }
 
-    /**
-     * Approval Workflow (State Machine)
-     */
     public function approve(Request $request, $id)
     {
         $request->validate([

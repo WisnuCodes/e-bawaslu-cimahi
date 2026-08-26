@@ -2,78 +2,86 @@
   <h1>📐 Spesifikasi Sistem & Arsitektur Teknis</h1>
   <p><strong>Dokumen Acuan Inti (Core Blueprint) - SIM Bawaslu Kota Cimahi</strong></p>
 
-  ![Architecture](https://img.shields.io/badge/Architecture-Modular_Monolith-8A2BE2?style=for-the-badge)
-  ![Database](https://img.shields.io/badge/Database-PostgreSQL_15-4169E1?style=for-the-badge)
-  ![Security](https://img.shields.io/badge/Security-Sanctum_%7C_SHA--256-000000?style=for-the-badge)
+  <p>
+    <img src="https://img.shields.io/badge/Frontend-Angular_17+-DD0031?style=for-the-badge" alt="Frontend">
+    <img src="https://img.shields.io/badge/Backend-Laravel_Modular_Monolith-8A2BE2?style=for-the-badge" alt="Backend">
+    <img src="https://img.shields.io/badge/Database-PostgreSQL_15-4169E1?style=for-the-badge" alt="Database">
+  </p>
 </div>
 
 ---
 
-> **⚠️ PEMBERITAHUAN FASE PENGEMBANGAN**  
-> Semua arsitektur dan spesifikasi API yang dijelaskan di dokumen ini saat ini baru diimplementasikan secara mutlak pada tingkat **Backend (Mesin API)**. Antarmuka Visual / *Frontend* (Angular) akan menyusul dibangun pada fase berikutnya, namun wajib mematuhi seluruh kontrak API yang tertulis di bawah ini.
+## 🏗️ Ikhtisar Arsitektur (System Overview)
+
+Sistem ini didesain berlandaskan prinsip *Decoupled Architecture*, memisahkan antarmuka pengguna *(Frontend)* dengan layanan pemrosesan data *(Backend API)* untuk memungkinkan skalabilitas independen di lingkungan kerja Bawaslu Kota Cimahi.
+
+1. **Frontend (Angular)**: Bertindak sebagai *Single Page Application* (SPA) dengan pemisahan komponen cerdas, sistem modular *routing*, interseptor HTTP untuk *Token Injection*, serta visual dinamis menggunakan TailwindCSS.
+2. **Backend (Laravel API)**: Menjadi *Central Hub* berskema **Modular Monolith** guna mengorkestrasi keamanan logika bisnis spesifik, seperti penjagaan integritas swafoto lokasi presensi, *indexing* mesin arsip, dan komputasi silang keaslian data suara.
 
 ---
 
-## 🏗️ Ikhtisar Sistem
+## 🗄️ Topologi Basis Data & Skema (Backend)
 
-Sistem ini dirancang sebagai portal terpusat (*Central Hub*) berstandar *Enterprise* yang mengintegrasikan tiga pilar layanan kritikal di lingkungan Bawaslu Kota Cimahi:
+Demi mengantisipasi celah keamanan *IDOR (Insecure Direct Object References)*, basis data **TIDAK MENGGUNAKAN** pengenal Auto-Increment tradisional. Seluruh tabel inti diinisialisasi menggunakan **UUIDv4 (varchar 36)**.
 
-1. 📍 **Sistem Presensi WFH**: Pelacakan kehadiran pegawai secara nirkabel dan pelaporan log kerja (*Daily Worklog*).
-2. 🗃️ **Sistem Manajemen Arsip**: Sentralisasi dokumen digital dengan dukungan indeks metadata yang kuat.
-3. 📊 **Sistem Rekapitulasi C1 (P2H)**: Modul spesifik untuk unggah form C1 Pemilu, dilengkapi verifikasi silang (*cross-check*) suara dan jaminan orisinalitas data (hashing kriptografi).
+### Model Relasional Utama:
 
-Sistem ini berdiri di atas arsitektur **Modular Monolith** demi mempertahankan pemisahan ranah bisnis (Domain-Driven) tanpa mengorbankan kepraktisan *deployment* pada server pemerintah.
-
----
-
-## 🗄️ Arsitektur Basis Data (ERD)
-
-Untuk mencegah eksploitasi peretasan melalui enumerasi ID *(ID Insecure Direct Object References)*, basis data dibangun **tanpa** Auto-Increment. Seluruh tabel menggunakan **UUID (varchar 36)** sebagai *Primary Key*.
-
-Berikut adalah topologi tabel inti:
-- 👥 `users` : Pusat kredensial pengguna, direlasikan secara ketat ke tabel presensi, arsip, dan rekam jejak.
-- 🏢 `divisi` : Referensi hierarki struktural unit kerja.
-- 📸 `presensi_wfh` : Perekam *timestamp* kedatangan/kepulangan lengkap dengan bukti tautan swafoto (*selfie*).
-- 📝 `daily_worklog` : Laporan kegiatan spesifik yang wajib diisi oleh pengguna harian.
-- 📂 `arsip_dokumen` : Repositori metadata nomor surat, tanggal, dan lokasi fisik berkas.
-- 🗳️ `berkas_c1` : Menyimpan parameter pemilu, suara sah/tidak sah, checksum (SHA-256), serta *State Machine* (Persetujuan/Penolakan).
-- 🔐 `audit_log_trail` : *Buku Besar Kekal (Immutable Ledger)* yang merekam mutasi data guna keperluan audit forensik.
+| Tabel | Deskripsi & Peran | Kunci Tamu (Foreign Key) |
+| :--- | :--- | :--- |
+| `users` | Entitas pengguna pusat, mengelola kredensial dan hak akses (RBAC). | `divisi_id` |
+| `divisi` | Referensi struktur hierarki unit kerja. | - |
+| `presensi_wfh`| Catatan absensi dengan presisi *timestamp* dan *attachment* swafoto. | `user_id` |
+| `daily_worklog`| Laporan rincian kegiatan kerja harian spesifik tiap entitas pengguna. | `user_id`, `presensi_id` |
+| `arsip_dokumen`| Repositori arsip tersentralisasi berikut lokasi penempatan fisik & digital. | `uploader_id` |
+| `berkas_c1` | Modul Pemilu: parameter suara, checksum (SHA-256), *State Machine* C1. | `petugas_id` |
+| `audit_log_trail`| **Immutable Ledger**. Mencatat log Aktor, IP, endpoint, dan *payload*. | `user_id` (opsional) |
 
 ---
 
-## 🔌 Spesifikasi Kontrak API (RESTful)
+## 🔌 Spesifikasi Kontrak RESTful API (Konektor)
 
-Seluruh layanan backend mengekspos API yang merespons dalam format JSON standar `(application/json)`. Akses rute tertutup (*protected routes*) dimediasi melalui otorisasi *Bearer Token* **Laravel 13 Sanctum**.
+Klien (Angular) berkomunikasi secara murni ke API menggunakan HTTP. Payload pertukaran dan respons wajib menggunakan format `application/json`.
+Seluruh rute terproteksi (Protected Routes) dimediasi melalui injeksi HTTP Interceptor Angular untuk header: `Authorization: Bearer <token>`.
 
-### 🛡️ Modul Autentikasi (IAM)
-- `POST /api/login` : Autentikasi kredensial, mengembalikan token akses terenkripsi.
-- `POST /api/logout` : Pencabutan sesi token secara instan (Revocation).
+### 🛡️ 1. Identity & Access Management (IAM)
+| Endpoint | Method | Deskripsi Fungsionalitas |
+| :--- | :---: | :--- |
+| `/api/login` | `POST` | Klien mengirim *form* autentikasi. API mengembalikan *Access Token*. |
+| `/api/logout` | `POST` | Klien menghapus token sesi lokal; API menggugurkan token di server. |
 
-### 🏠 Modul Work From Home (WFH)
-- `POST /api/wfh/checkin` : Perekaman kedatangan dengan injeksi foto masuk.
-- `POST /api/wfh/checkout` : Perekaman kepulangan dengan injeksi foto keluar.
-- `GET /api/wfh/worklogs` : Mengambil daftar aktivitas harian milik pengguna (*User-scoped*).
-- `POST /api/wfh/worklogs` : Menambahkan log pekerjaan baru.
+### 🏠 2. Work From Home (WFH) & Presensi
+| Endpoint | Method | Deskripsi Fungsionalitas |
+| :--- | :---: | :--- |
+| `/api/wfh/checkin` | `POST` | Klien mengirimkan koordinat GeoLocation & *File* Base64 Foto Masuk. |
+| `/api/wfh/checkout`| `POST` | Perekaman *timestamp* kepulangan (wajib setelah Check-In). |
+| `/api/wfh/worklogs`| `GET` | Aplikasi menarik (*fetch*) daftar log kerja harian pengguna. |
+| `/api/wfh/worklogs`| `POST` | Pencatatan entitas rincian kegiatan harian yang diketik di *UI*. |
 
-### 📑 Modul Manajemen Arsip
-- `GET /api/arsip` : Pengambilan katalog arsip digital.
-- `POST /api/arsip` : Registrasi dokumen baru dengan metadata Bawaslu.
+### 📑 3. Arsip Digital & Sentralisasi Dokumen
+| Endpoint | Method | Deskripsi Fungsionalitas |
+| :--- | :---: | :--- |
+| `/api/arsip` | `GET` | Penarikan data katalog arsip (didukung *Query Parameter* / Pencarian). |
+| `/api/arsip` | `POST` | *Multipart Upload* arsip fisik PDF/DOCX beserta metadatanya. |
 
-### 🗳️ Modul P2H (Form C1)
-- `GET /api/c1` : Mengambil daftar rekapitulasi C1 terunggah.
-- `POST /api/c1` : Pengunggahan berkas C1, perhitungan integritas **SHA-256**, dan kalkulasi kecocokan *Total Suara* secara otomatis.
-- `POST /api/c1/{id}/approve` : Transisi *State Machine* untuk menyetujui atau menolak dokumen C1.
+### 🗳️ 4. Pengawasan C1 (P2H)
+| Endpoint | Method | Deskripsi Fungsionalitas |
+| :--- | :---: | :--- |
+| `/api/c1` | `GET` | Agregasi dokumen C1 yang telah dilaporkan. |
+| `/api/c1` | `POST` | Ingesti C1: Kalkulasi kecocokan *Total Suara* & pembuatan **SHA-256** checksum. |
+| `/api/c1/{id}/approve` | `POST` | Transisi status persetujuan dokumen pada dasbor manajemen. |
 
 ---
 
-## 🔒 Standar Keamanan & Integritas Data
+## 🔒 Postur Keamanan & Integritas Data Sistem
 
-Sistem ini mematuhi protokol keamanan data yang ketat:
+Integrasi lapisan antar kedua teknologi (Angular & Laravel) ditopang dengan prinsip pengamanan holistik:
 
-1. **Kriptografi Lapis Ganda**: 
-   - Kata sandi dilindungi algoritma **Bcrypt**.
-   - Dokumen krusial (seperti form C1) dikalkulasi menggunakan **SHA-256** *(Duplicate Upload Prevention)* untuk menghindari manipulasi hasil suara di tingkat *database*.
-2. **Immutable Audit Trail**: 
-   - Melalui `AuditTrailMiddleware`, setiap permintaan manipulasi data (`POST`, `PUT`, `DELETE`) disadap pada tingkat proksi HTTP. Segala bentuk perubahan akan tercatat ke dalam tabel `audit_log_trail` (mencakup Aktor, IP Address, Waktu, dan Potongan *Payload*) sebelum diproses oleh sistem utama.
-3. **Penyimpanan Objek Netral**: 
-   - Konfigurasi sistem penyimpanan (*Filesystem*) dirancang sedemikian rupa agar siap menerima adaptor **MinIO (S3)** guna melepaskan beban I/O dari memori server lokal.
+1. **Proteksi Kriptografi Data**: 
+   - Sandi (*Password*) di *hash* menggunakan mesin **Bcrypt**.
+   - Keaslian berkas penting (Form C1) dikunci lewat kalkulasi **SHA-256** ketika Frontend melakukan *upload*. Berfungsi ganda untuk mencegah duplikasi unggah maupun perubahan fisik (*tampering*).
+2. **Immutable Audit Trail (Buku Besar Audit)**: 
+   - Middleware API menyadap seluruh *state-mutating request* (`POST`, `PUT`, `PATCH`, `DELETE`).
+   - Alamat IP, *User-Agent* Angular Klien, dan potongan muatan (*Payload*) direkam abadi untuk keperluan forensik *(Non-Repudiation)*.
+3. **Penyimpanan Objek Skalabilitas Tinggi**: 
+   - Semua *file blob* (Foto swafoto, Arsip) dikonfigurasi melalui abstraksi Filesystem Laravel untuk diarahkan ke kompartemen S3/MinIO. Node backend bisa dikembangkan horizontal tanpa kendala sinkronisasi aset *file*.
+

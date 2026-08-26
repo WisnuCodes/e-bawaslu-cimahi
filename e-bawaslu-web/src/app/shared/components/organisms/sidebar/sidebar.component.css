@@ -1,0 +1,143 @@
+.sidebar {
+  width: 260px;
+  height: 100vh;
+  background-color: var(--color-secondary);
+  color: #F8FAFC;
+  display: flex;
+  flex-direction: column;
+  transition: width var(--transition-normal);
+  position: relative;
+  z-index: 10;
+}
+
+.sidebar.collapsed {
+  width: 80px;
+}
+
+.sidebar-header {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.25rem;
+  border-bottom: 1px solid #1E293B;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  overflow: hidden;
+}
+
+.logo {
+  height: 28px;
+  width: 28px;
+  flex-shrink: 0;
+}
+
+.brand-text {
+  font-weight: 600;
+  color: #FFFFFF;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  color: #94A3B8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.toggle-btn:hover {
+  background-color: #1E293B;
+  color: #FFFFFF;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 1rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  overflow-y: auto;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  color: #CBD5E1;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.nav-item svg {
+  color: #94A3B8;
+  flex-shrink: 0;
+}
+
+.nav-item:hover {
+  background-color: #1E293B;
+  color: #FFFFFF;
+}
+.nav-item:hover svg {
+  color: #CBD5E1;
+}
+
+.nav-item.active {
+  background-color: var(--color-primary);
+  color: #FFFFFF;
+  font-weight: 600;
+}
+.nav-item.active svg {
+  color: #FFFFFF;
+}
+
+.sidebar-footer {
+  padding: 1rem 0.75rem;
+  border-top: 1px solid #1E293B;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  background: none;
+  border: none;
+  color: #94A3B8;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: left;
+}
+
+.logout-btn svg {
+  color: #94A3B8;
+  flex-shrink: 0;
+}
+
+.logout-btn:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--color-error);
+}
+.logout-btn:hover svg {
+  color: var(--color-error);
+}

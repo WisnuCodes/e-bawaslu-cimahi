@@ -1,0 +1,31 @@
+<form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+  <app-input
+    label="Email / NIP"
+    type="email"
+    formControlName="email"
+    placeholder="Masukkan Email atau NIP"
+    [error]="(loginForm.get('email')?.invalid && loginForm.get('email')?.touched) ? 'Email/NIP wajib diisi' : ''">
+  </app-input>
+
+  <app-input
+    label="Password"
+    type="password"
+    formControlName="password"
+    placeholder="Masukkan password"
+    [error]="(loginForm.get('password')?.invalid && loginForm.get('password')?.touched) ? 'Password wajib diisi' : ''">
+  </app-input>
+
+  <div class="form-actions" style="margin-top: 16px;">
+    <app-button 
+      type="submit" 
+      variant="primary" 
+      [loading]="isLoading" 
+      [disabled]="loginForm.invalid">
+      Login SSO Keycloak
+    </app-button>
+  </div>
+  
+  <div class="error-alert" *ngIf="errorMessage" style="color: #f44336; margin-top: 16px; text-align: center;">
+    {{ errorMessage }}
+  </div>
+</form>

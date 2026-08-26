@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +9,7 @@ class Presensi extends Model
     protected $primaryKey = 'presensi_id';
     public $incrementing = false;
     protected $keyType = 'string';
-    public $timestamps = false; // We use custom timestamps for check-in/out, wait ERD doesn't have created_at? No, ERD has no created_at for presensi_wfh.
+    public $timestamps = false; 
 
     protected $fillable = [
         'presensi_id',
@@ -19,6 +18,8 @@ class Presensi extends Model
         'selfie_masuk_url',
         'status_kehadiran',
         'timestamp_checkout',
-        'selfie_keluar_url'
+        'selfie_keluar_url',
+        'gps_koordinat',
+        'liveness_score'
     ];
 }

@@ -15,11 +15,30 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        \Illuminate\Support\Facades\DB::table('divisi')->insert([
+            'divisi_id' => \Illuminate\Support\Str::uuid(),
+            'nama_divisi' => 'Divisi Pengawasan',
+            'deskripsi' => 'Divisi utama pengawasan lapangan',
+            'created_at' => now(),
+        ]);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        \Illuminate\Support\Facades\DB::table('wilayah_tps')->insert([
+            'tps_id' => \Illuminate\Support\Str::uuid(),
+            'kecamatan' => 'Cimahi Tengah',
+            'kelurahan' => 'Cimahi',
+            'no_tps' => 1,
+        ]);
+
+        \Illuminate\Support\Facades\DB::table('users')->insert([
+            'user_id' => \Illuminate\Support\Str::uuid(),
+            'divisi_id' => \Illuminate\Support\Facades\DB::table('divisi')->first()->divisi_id,
+            'username' => 'admin_bawaslu',
+            'email' => 'admin@bawaslu.go.id',
+            'password_hash' => \Illuminate\Support\Facades\Hash::make('password'),
+            'role' => 'Kepala Divisi',
+            'mfa_enabled' => true,
+            'status_aktif' => true,
+            'created_at' => now(),
         ]);
     }
 }

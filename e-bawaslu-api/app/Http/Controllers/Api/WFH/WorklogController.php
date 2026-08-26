@@ -4,73 +4,143 @@ namespace App\Http\Controllers\Api\WFH;
 
 use App\Http\Controllers\Controller;
 use App\Models\Worklog;
-use App\Http\Requests\WFH\StoreWorklogRequest;
-use App\Http\Requests\WFH\UpdateWorklogRequest;
-use App\Http\Resources\WFH\WorklogResource;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Api\WFH\TukinController;
 
 class WorklogController extends Controller
 {
-    /**
-     * Get all worklogs for current user
-     */
     public function index(Request $request)
     {
-        $userId = $request->user()->user_id;
-        $worklogs = Worklog::where('user_id', $userId)->orderBy('created_at', 'desc')->get();
-        return WorklogResource::collection($worklogs);
+        $user = $request->user();
+        if (strtolower($user->role) === 'kepala divisi' || strtolower($user->role) === 'admin') {
+            $worklogs = Worklog::orderBy('tgl_kerja', 'desc')->get();
+        } else {
+            $worklogs = Worklog::where('user_id', $user->user_id)->orderBy('tgl_kerja', 'desc')->get();
+        }
+        
+        return response()->json([
+            'success' => true,
+            'data' => $worklogs
+        ], 200);
     }
 
-    /**
-     * Store a newly created worklog in storage.
-     */
-    public function store(StoreWorklogRequest $request)
+    public function store(Request $request)
     {
-        $userId = $request->user()->user_id;
+        $request->validate([
+            'tgl_kerja' => 'required|date',
+            'rincian_aktivitas' => 'required|string',
+            'file_lampiran' => 'nullable|file|mimes:pdf,jpeg,png,jpg'
+        ]);
 
         $path = null;
-        if ($request->hasFile('attachment')) {
-            $path = $request->file('attachment')->store('worklogs', 'public');
+        if ($request->hasFile('file_lampiran')) {
+            $path = $request->file('file_lampiran')->store('worklogs', 'public');
         }
 
         $worklog = Worklog::create([
             'worklog_id' => (string) Str::uuid(),
-            'user_id' => $userId,
+            'user_id' => $request->user()->user_id,
             'tgl_kerja' => $request->tgl_kerja,
             'rincian_aktivitas' => $request->rincian_aktivitas,
             'attachment_url' => $path,
-            'status_approval' => 'Pending',
-            'created_at' => Carbon::now(),
+            'status_approval' => 'Pending Approval',
+            'created_at' => Carbon::now()
         ]);
 
+        // MOCK: Event listener/Notification trigger to Kepala Divisi
+        Log::info("Notifikasi Waktu Nyata (Real-time): Worklog baru diajukan oleh {$request->user()->nama} dan menunggu persetujuan.");
+
         return response()->json([
-            'message' => 'Worklog berhasil disimpan.',
-            'data' => new WorklogResource($worklog)
+            'success' => true,
+            'message' => 'Worklog berhasil diajukan dan sedang Menunggu Persetujuan.',
+            'data' => $worklog
         ], 201);
     }
 
     /**
-     * Update the specified worklog in storage.
+     * Endpoint untuk Kepala Divisi menyetujui Worklog
      */
-    public function update(UpdateWorklogRequest $request, $id)
+    public function approve(Request $request, $id)
     {
+        $request->validate([
+            'status' => 'required|in:Approved,Revised',
+            'catatan_revisi' => 'nullable|string'
+        ]);
+
         $worklog = Worklog::findOrFail($id);
+        
+        // Asumsi user auth adalah Kadiv
+        $worklog->update([
+            'status_approval' => $request->status,
+            'approved_by' => $request->user()->user_id,
+            'catatan_revisi' => $request->catatan_revisi
+        ]);
+
+        if ($request->status === 'Approved') {
+            Log::info("Notifikasi: Worklog ID {$id} telah disetujui.");
+            // Trigger recalculation tukin if necessary
+            // e.g. TukinController::calculate(...)
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Worklog berhasil di-review.',
+            'data' => $worklog
+        ], 200);
+    }
+    
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'tgl_kerja' => 'required|date',
+            'rincian_aktivitas' => 'required|string',
+            'file_lampiran' => 'nullable|file|mimes:pdf,jpeg,png,jpg'
+        ]);
+
+        $worklog = Worklog::findOrFail($id);
+        
+        // Authorization: only owner or admin can update
+        $user = $request->user();
+        if ($worklog->user_id !== $user->user_id && strtolower($user->role) !== 'kepala divisi' && strtolower($user->role) !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
 
         $path = $worklog->attachment_url;
-        if ($request->hasFile('attachment')) {
-            $path = $request->file('attachment')->store('worklogs', 'public');
+        if ($request->hasFile('file_lampiran')) {
+            $path = $request->file('file_lampiran')->store('worklogs', 'public');
         }
 
         $worklog->update([
-            'rincian_aktivitas' => $request->rincian_aktivitas ?? $worklog->rincian_aktivitas,
+            'tgl_kerja' => $request->tgl_kerja,
+            'rincian_aktivitas' => $request->rincian_aktivitas,
             'attachment_url' => $path,
+            'status_approval' => 'Pending Approval' // Reset to pending after edit
         ]);
 
         return response()->json([
+            'success' => true,
             'message' => 'Worklog berhasil diperbarui.',
-            'data' => new WorklogResource($worklog)
+            'data' => $worklog
+        ], 200);
+    }
+
+    public function destroy(Request $request, $id)
+    {
+        $worklog = Worklog::findOrFail($id);
+        
+        $user = $request->user();
+        if ($worklog->user_id !== $user->user_id && strtolower($user->role) !== 'kepala divisi' && strtolower($user->role) !== 'admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $worklog->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Worklog berhasil dihapus.'
         ], 200);
     }
 }

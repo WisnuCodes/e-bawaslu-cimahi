@@ -1,93 +1,107 @@
 <div align="center">
-  <h1>🛡️ SIM Bawaslu Kota Cimahi (Backend)</h1>
-  <p><strong>Sistem Informasi Manajemen Presensi, Arsip, & P2H Bawaslu Kota Cimahi</strong></p>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Bawaslu_Logo.svg" alt="Bawaslu Logo" width="150" />
+  
+  <h1>🛡️ SIM Bawaslu Kota Cimahi</h1>
+  <p><strong>Sistem Informasi Manajemen Presensi, Arsip, & Rekapitulasi C1 (P2H) Terpadu</strong></p>
 
-  ![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php&logoColor=white)
-  ![Laravel](https://img.shields.io/badge/Laravel-13.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
-  ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+  <p>
+    <a href="https://angular.dev/"><img src="https://img.shields.io/badge/Angular-17+-DD0031?style=for-the-badge&logo=angular&logoColor=white" alt="Angular"></a>
+    <a href="https://php.net/"><img src="https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP"></a>
+    <a href="https://laravel.com/"><img src="https://img.shields.io/badge/Laravel-13.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel"></a>
+    <a href="https://postgresql.org/"><img src="https://img.shields.io/badge/PostgreSQL-15+-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL"></a>
+    <a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/Tailwind_CSS-3.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS"></a>
+  </p>
 </div>
-
----
-
-> **⚠️ PEMBERITAHUAN PENTING (FASE PENGEMBANGAN)**  
-> Repositori ini saat ini **HANYA** memuat infrastruktur **Backend (API)**. Modul **Frontend** (Antarmuka Pengguna) yang berbasis Angular 17+ akan **menyusul** dan dikembangkan secara terpisah pada repositori / fase selanjutnya (Fase 6). 
 
 ---
 
 ## 📖 Deskripsi Proyek
 
-Repositori ini memuat kode sumber untuk layanan API (Backend) Sistem Informasi Manajemen Bawaslu Kota Cimahi. Sistem ini dibangun dengan arsitektur **Modular Monolith** untuk memastikan skalabilitas dan performa tinggi.
+Repositori ini memuat kode sumber ( *Fullstack* ) **Sistem Informasi Manajemen Bawaslu Kota Cimahi**. Sistem ini dirancang secara terpadu (*End-to-End*) untuk mengelola proses internal dengan performa tinggi. Arsitektur aplikasi dipisah secara modern (API berbasis **Laravel** dan *Single Page Application* berbasis **Angular**).
 
-Layanan ini menangani seluruh logika bisnis, pemrosesan data, autentikasi berbasis Token (Sanctum), hingga penjagaan integritas dokumen (Hashing SHA-256) untuk tiga modul utama:
-- 🏢 **Modul WFH**: Presensi Check-In/Out & Catatan Kerja Harian.
-- 🗂️ **Modul Arsip**: Manajemen dokumen terindeks.
-- 🗳️ **Modul C1 (P2H)**: Pengawasan form C1 & Algoritma Verifikasi Selisih Suara.
+Layanan ini menangani seluruh logika bisnis kompleks, pengalaman pengguna (*User Experience*) yang interaktif dan *real-time*, hingga integritas dan keamanan data untuk tiga pilar utama:
 
----
-
-## ⚙️ Prasyarat Lingkungan (Requirements)
-
-Sebelum melakukan instalasi, pastikan *server* atau lingkungan pengembangan (*local environment*) Anda telah terpasang:
-
-- **PHP** `^8.2`
-- **Composer** `^2.7`
-- **PostgreSQL** `^15` (Wajib mengaktifkan ekstensi `pdo_pgsql`)
-- **Ekstensi PHP**: OpenSSL, PDO, Mbstring, Tokenizer, XML, Ctype, JSON, BCMath, Fileinfo
-- **MinIO Server** (Opsional, untuk kompatibilitas *S3 Object Storage*)
+- 🏢 **Modul Work From Home (WFH)**: Sistem Presensi *Check-In/Out* berbasis lokasi & Catatan Kerja Harian terintegrasi.
+- 🗂️ **Modul Arsip Digital**: Manajemen dokumen persuratan dengan pelabelan metadata dan mesin pencarian efisien.
+- 🗳️ **Modul P2H (Form C1)**: Pengawasan form C1 Pemilu & Algoritma Verifikasi Selisih Suara otomatis.
 
 ---
 
-## 🚀 Panduan Instalasi Lokal
+## ⚙️ Prasyarat Lingkungan (Environment Requirements)
 
-Ikuti langkah-langkah berikut untuk mengonfigurasi dan menjalankan *Backend* di komputer lokal Anda:
+Pastikan mesin Anda telah dilengkapi dengan dependensi berikut sebelum menjalankan proyek ini:
 
-1. **Instal Dependensi**  
-   Unduh semua *library* pihak ketiga yang dibutuhkan:
+| Kebutuhan | Versi Minimal | Peruntukan / Keterangan |
+| :--- | :---: | :--- |
+| **Node.js** | `v18.x` | Menjalankan *environment* Frontend Angular |
+| **Angular CLI** | `^17.x` | Membangun dan melayani ( *serve* ) UI |
+| **PHP** | `^8.2` | Menjalankan mesin *Backend* |
+| **Composer** | `^2.7` | Manajemen dependensi PHP |
+| **PostgreSQL**| `^15` | Dukungan UUID & JSONB (*Ekstensi `pdo_pgsql` aktif*) |
+| **MinIO/S3** | (Opsional) | Direkomendasikan untuk *Object Storage* (Arsip & Foto) |
+
+---
+
+## 🚀 Panduan Instalasi Cepat
+
+Proyek ini terbagi menjadi 2 area kerja utama ( *workspace* ) yaitu `e-bawaslu-api` untuk *Backend* dan `e-bawaslu-web` untuk *Frontend*.
+
+### 1️⃣ Konfigurasi Backend (Laravel)
+
+Buka terminal dan arahkan ke direktori API:
+```bash
+cd e-bawaslu-api
+```
+1. Instal dependensi dan atur env:
    ```bash
    composer install
-   ```
-
-2. **Konfigurasi Environment**  
-   Salin *file* konfigurasi bawaan dan sesuaikan nilainya:
-   ```bash
    cp .env.example .env
    ```
-   Buka *file* `.env` Anda, lalu atur kredensial *database* Anda seperti contoh berikut:
-   ```ini
-   DB_CONNECTION=pgsql
-   DB_HOST=127.0.0.1
-   DB_PORT=5432
-   DB_DATABASE=bawaslu_cimahi
-   DB_USERNAME=postgres
-   DB_PASSWORD=password_anda
-   ```
-
-3. **Hasilkan Kunci Enkripsi (Application Key)**  
+2. Atur kredensial *database* PostgreSQL pada berkas `.env` Anda.
+3. *Generate* kunci enkripsi dan jalankan migrasi:
    ```bash
    php artisan key:generate
+   php artisan migrate --seed
    ```
-
-4. **Jalankan Migrasi Database**  
-   Membangun seluruh tabel ke dalam PostgreSQL Anda:
-   ```bash
-   php artisan migrate
-   ```
-
-5. **Nyalakan Server**  
-   Jalankan server API lokal (secara bawaan akan berjalan di port `8000`):
+4. Jalankan *server backend*:
    ```bash
    php artisan serve
+   # Server API berjalan di http://localhost:8000
    ```
-   *Selamat! Backend API Anda kini berjalan di `http://localhost:8000`.*
+
+### 2️⃣ Konfigurasi Frontend (Angular)
+
+Buka tab terminal **baru** dan arahkan ke direktori Web:
+```bash
+cd e-bawaslu-web
+```
+1. Instal *Node modules*:
+   ```bash
+   npm install
+   ```
+2. Jalankan *Development Server* Angular:
+   ```bash
+   ng serve
+   # Atau: npm run start
+   ```
+3. Buka *browser* dan akses aplikasi pada **`http://localhost:4200`** 🎉
 
 ---
 
-## 📚 Dokumentasi Teknis Lanjutan
+## 📚 Dokumentasi Teknis & Spesifikasi (API Contract)
 
-Untuk memahami arsitektur, spesifikasi teknis, model relasional (ERD), dan skema basis data secara lebih mendalam, silakan merujuk pada dokumen terpisah kami di: **[`spec.md`](./spec.md)**.
+Untuk memahami arsitektur *Modular Monolith* di sisi API, model relasional (ERD), dan standar integritas data keamanan, silakan merujuk pada:
+👉 **[`spec.md`](./spec.md)**
 
 ---
 
-## 🤝 Standar Kontribusi
+## 🤝 Standar Kontribusi (Contribution Guidelines)
 
-Setiap modifikasi kode sumber wajib mengikuti standar **PSR-12** untuk PHP. Sangat dilarang keras melakukan modifikasi tabel migrasi utama secara destruktif; selalu gunakan berkas migrasi baru (*alter table*) apabila terjadi penyesuaian logika bisnis di masa mendatang demi menjaga integritas *Audit Trail*.
+- **Frontend (Angular)**: Ikuti standar penamaan *Component/Service*, hindari komponen gemuk, dan terapkan *Tailwind Utility Classes* dengan rapi.
+- **Backend (Laravel)**: Wajib mematuhi **PSR-12**. Gunakan berkas migrasi baru (*alter table*) alih-alih merombak skema lama untuk konsistensi *Audit Trail*.
+- **Pull Request**: Harap pastikan semua layanan berhasil di-*build* dan kode berjalan sempurna sebelum mengajukan integrasi.
+
+<div align="center">
+  <br>
+  <i>Dipersembahkan dengan ❤️ untuk Demokrasi yang Lebih Baik</i>
+</div>

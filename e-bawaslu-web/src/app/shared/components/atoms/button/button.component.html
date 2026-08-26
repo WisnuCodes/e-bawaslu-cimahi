@@ -1,0 +1,11 @@
+<button 
+  [type]="type"
+  class="btn"
+  [ngClass]="'btn-' + variant"
+  [disabled]="disabled || loading"
+  (click)="onClick.emit($event)">
+  <span *ngIf="loading" class="spinner"></span>
+  <span [class.opacity-0]="loading">
+    <ng-content></ng-content>
+  </span>
+</button>

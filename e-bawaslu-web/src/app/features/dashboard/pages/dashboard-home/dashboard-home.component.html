@@ -1,0 +1,29 @@
+<div class="dashboard-header animate-fade-in">
+  <h1>Selamat Datang di Portal E-Bawaslu</h1>
+  <p>Hari ini: {{ today | bawasluDate:'EEEE, dd MMMM yyyy' }}</p>
+  <p>Kelola Presensi WFH, Dokumen Arsip, dan Laporan C1 Anda dari satu tempat.</p>
+</div>
+
+<div class="stats-grid animate-fade-in">
+  <app-card title="Dokumen Arsip">
+    <div class="stat-content">
+      <div class="stat-icon bg-primary-light text-primary">
+        <mat-icon>folder</mat-icon>
+      </div>
+      <div class="stat-info">
+        <p class="stat-value">124</p>
+      </div>
+    </div>
+  </app-card>
+
+  <app-card title="Status WFH">
+    <div class="stat-content">
+      <div class="stat-icon bg-success-light text-success">
+        <mat-icon>work_outline</mat-icon>
+      </div>
+      <div class="stat-info">
+        <p class="stat-value text-success">Checked In</p>
+      </div>
+    </div>
+  </app-card>
+</div>

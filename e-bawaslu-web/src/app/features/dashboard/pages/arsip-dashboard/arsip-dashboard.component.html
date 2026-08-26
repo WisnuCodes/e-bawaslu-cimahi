@@ -1,0 +1,82 @@
+<div class="page-header animate-fade-in" style="margin-bottom: 2rem;">
+  <h2 style="margin: 0; color: var(--color-text); font-weight: 600;">E-Arsip</h2>
+  <p style="margin: 0; color: var(--color-text-muted);">Pencarian Pintar & Penyimpanan Dokumen Dinas Bawaslu.</p>
+</div>
+
+<div class="arsip-container animate-fade-in">
+  <mat-card>
+    <mat-card-header style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+      <mat-card-title>Daftar Arsip Dokumen</mat-card-title>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <!-- Top Bar: Search & Upload -->
+      <div style="display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; align-items: flex-start;">
+        <mat-form-field appearance="outline" style="flex: 1; max-width: 500px;">
+          <mat-label>Cari dokumen...</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput placeholder="Judul, isi, klasifikasi..." (keyup)="onSearch($event)">
+        </mat-form-field>
+        
+        <button mat-flat-button color="primary" (click)="triggerUpload()" [disabled]="isUploading" style="height: 56px;">
+          <mat-icon>cloud_upload</mat-icon> Unggah Arsip
+        </button>
+        <!-- Hidden file input -->
+        <input type="file" #fileInput style="display: none" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx,.xls,.xlsx">
+      </div>
+
+      <!-- Documents Table -->
+      <div style="overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-md);">
+        <table mat-table [dataSource]="documents" style="width: 100%;">
+          
+          <!-- Icon Column -->
+          <ng-container matColumnDef="ikon">
+            <th mat-header-cell *matHeaderCellDef style="width: 60px; text-align: center;"> </th>
+            <td mat-cell *matCellDef="let doc" style="text-align: center;"> 
+              <mat-icon color="primary">description</mat-icon>
+            </td>
+          </ng-container>
+
+          <!-- Judul Column -->
+          <ng-container matColumnDef="judul">
+            <th mat-header-cell *matHeaderCellDef> Judul Dokumen </th>
+            <td mat-cell *matCellDef="let doc" style="font-weight: 500;"> {{ doc.title }} </td>
+          </ng-container>
+
+          <!-- Klasifikasi Column -->
+          <ng-container matColumnDef="klasifikasi">
+            <th mat-header-cell *matHeaderCellDef> Klasifikasi </th>
+            <td mat-cell *matCellDef="let doc">
+              <span style="padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 500; background-color: #e2e8f0; color: #475569;">
+                {{ doc.klasifikasi }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Tanggal Column -->
+          <ng-container matColumnDef="tanggal">
+            <th mat-header-cell *matHeaderCellDef> Diupload </th>
+            <td mat-cell *matCellDef="let doc"> {{ doc.created_at | date:'dd MMM yyyy' }} </td>
+          </ng-container>
+
+          <!-- Aksi Column -->
+          <ng-container matColumnDef="aksi">
+            <th mat-header-cell *matHeaderCellDef style="text-align: right;"> Aksi </th>
+            <td mat-cell *matCellDef="let doc" style="text-align: right;">
+              <button mat-icon-button color="primary" matTooltip="Download Dokumen">
+                <mat-icon>download</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell" colspan="5" style="text-align: center; padding: 2rem;">Tidak ada arsip yang ditemukan.</td>
+          </tr>
+        </table>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

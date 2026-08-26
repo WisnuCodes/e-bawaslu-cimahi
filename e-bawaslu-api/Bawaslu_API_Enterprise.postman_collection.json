@@ -1,0 +1,427 @@
+{
+  "info": {
+    "name": "E-Bawaslu API Enterprise (Otomatisasi Penuh)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:8000", "type": "string" },
+    { "key": "bearer_token", "value": "", "type": "string" },
+    { "key": "user_id", "value": "", "type": "string" },
+    { "key": "divisi_id", "value": "", "type": "string" },
+    { "key": "tps_id", "value": "", "type": "string" },
+    { "key": "presensi_id", "value": "", "type": "string" },
+    { "key": "worklog_id", "value": "", "type": "string" },
+    { "key": "arsip_id", "value": "", "type": "string" },
+    { "key": "c1_id", "value": "", "type": "string" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{bearer_token}}", "type": "string" }
+    ]
+  },
+  "item": [
+    {
+      "name": "1. Auth & IAM",
+      "item": [
+        {
+          "name": "Login (Tahap 1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "if(jsonData.data && jsonData.data.user_id) {",
+                  "    pm.collectionVariables.set(\"user_id\", jsonData.data.user_id);",
+                  "    console.log(\"user_id tersimpan: \" + jsonData.data.user_id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@bawaslu.go.id\",\n  \"password\": \"password\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/login", "host": [ "{{base_url}}" ], "path": [ "api", "login" ] }
+          }
+        },
+        {
+          "name": "Verify MFA (Tahap 2)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "if(jsonData.data && jsonData.data.access_token) {",
+                  "    pm.collectionVariables.set(\"bearer_token\", jsonData.data.access_token);",
+                  "    console.log(\"bearer_token tersimpan otomatis!\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{user_id}}\",\n  \"otp\": \"123456\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/verify-mfa", "host": [ "{{base_url}}" ], "path": [ "api", "verify-mfa" ] }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "url": { "raw": "{{base_url}}/api/logout", "host": [ "{{base_url}}" ], "path": [ "api", "logout" ] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Master Data",
+      "item": [
+        {
+          "name": "Get Divisi",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if(jsonData.data && jsonData.data.length > 0) {",
+                  "    pm.collectionVariables.set(\"divisi_id\", jsonData.data[0].divisi_id);",
+                  "    console.log(\"divisi_id pertama tersimpan: \" + jsonData.data[0].divisi_id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "url": { "raw": "{{base_url}}/api/master/divisi", "host": [ "{{base_url}}" ], "path": [ "api", "master", "divisi" ] }
+          }
+        },
+        {
+          "name": "Get TPS",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if(jsonData.data && jsonData.data.length > 0) {",
+                  "    pm.collectionVariables.set(\"tps_id\", jsonData.data[0].tps_id);",
+                  "    console.log(\"tps_id pertama tersimpan: \" + jsonData.data[0].tps_id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "url": { "raw": "{{base_url}}/api/master/tps", "host": [ "{{base_url}}" ], "path": [ "api", "master", "tps" ] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. WFH & Presensi",
+      "item": [
+        {
+          "name": "Check In",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if(jsonData.data && jsonData.data.presensi_id) {",
+                  "    pm.collectionVariables.set(\"presensi_id\", jsonData.data.presensi_id);",
+                  "    console.log(\"presensi_id tersimpan: \" + jsonData.data.presensi_id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "gps_koordinat", "value": "-6.200000, 106.816666", "type": "text" },
+                { "key": "liveness_score", "value": "0.95", "type": "text" },
+                { "key": "selfie_image", "type": "file", "src": [] }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/api/wfh/checkin", "host": [ "{{base_url}}" ], "path": [ "api", "wfh", "checkin" ] }
+          }
+        },
+        {
+          "name": "Check Out",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "presensi_id", "value": "{{presensi_id}}", "type": "text" },
+                { "key": "gps_koordinat", "value": "-6.200000, 106.816666", "type": "text" },
+                { "key": "liveness_score", "value": "0.95", "type": "text" },
+                { "key": "selfie_image", "type": "file", "src": [] }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/api/wfh/checkout", "host": [ "{{base_url}}" ], "path": [ "api", "wfh", "checkout" ] }
+          }
+        },
+        {
+          "name": "Get Worklogs",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "url": { "raw": "{{base_url}}/api/wfh/worklogs", "host": [ "{{base_url}}" ], "path": [ "api", "wfh", "worklogs" ] }
+          }
+        },
+        {
+          "name": "Store Worklog",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if(jsonData.data && jsonData.data.worklog_id) {",
+                  "    pm.collectionVariables.set(\"worklog_id\", jsonData.data.worklog_id);",
+                  "    console.log(\"worklog_id tersimpan: \" + jsonData.data.worklog_id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "tgl_kerja", "value": "2026-08-26", "type": "text" },
+                { "key": "rincian_aktivitas", "value": "Melakukan rekap data DPT", "type": "text" },
+                { "key": "file_lampiran", "type": "file", "src": [] }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/api/wfh/worklogs", "host": [ "{{base_url}}" ], "path": [ "api", "wfh", "worklogs" ] }
+          }
+        },
+        {
+          "name": "Approve Worklog",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Approved\",\n  \"catatan_revisi\": \"Bagus, lanjutkan!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/wfh/worklogs/{{worklog_id}}/approve", "host": [ "{{base_url}}" ], "path": [ "api", "wfh", "worklogs", "{{worklog_id}}", "approve" ] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Form C1 P2H",
+      "item": [
+        {
+          "name": "Get C1",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "url": { "raw": "{{base_url}}/api/c1", "host": [ "{{base_url}}" ], "path": [ "api", "c1" ] }
+          }
+        },
+        {
+          "name": "Upload C1 (Enkripsi)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if(jsonData.data && jsonData.data.id) {",
+                  "    pm.collectionVariables.set(\"c1_id\", jsonData.data.id);",
+                  "    console.log(\"c1_id tersimpan: \" + jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "tps_id", "value": "{{tps_id}}", "type": "text" },
+                { "key": "total_suara_sah", "value": "200", "type": "text" },
+                { "key": "total_suara_tidak_sah", "value": "5", "type": "text" },
+                { "key": "total_pemilih", "value": "205", "type": "text" },
+                { "key": "file_c1", "type": "file", "src": [] }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/api/c1", "host": [ "{{base_url}}" ], "path": [ "api", "c1" ] }
+          }
+        },
+        {
+          "name": "Approve C1",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Approved\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/c1/{{c1_id}}/approve", "host": [ "{{base_url}}" ], "path": [ "api", "c1", "{{c1_id}}", "approve" ] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Arsip Dokumen",
+      "item": [
+        {
+          "name": "Get Arsip",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "url": { "raw": "{{base_url}}/api/arsip", "host": [ "{{base_url}}" ], "path": [ "api", "arsip" ] }
+          }
+        },
+        {
+          "name": "Store Arsip",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if(jsonData.data && jsonData.data.id) {",
+                  "    pm.collectionVariables.set(\"arsip_id\", jsonData.data.id);",
+                  "    console.log(\"arsip_id tersimpan: \" + jsonData.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "divisi_id", "value": "{{divisi_id}}", "type": "text" },
+                { "key": "no_surat", "value": "001/BWS/2026", "type": "text" },
+                { "key": "tgl_surat", "value": "2026-08-26", "type": "text" },
+                { "key": "perihal", "value": "Dokumen Penting", "type": "text" },
+                { "key": "kategori", "value": "Internal", "type": "text" },
+                { "key": "klasifikasi", "value": "Rahasia", "type": "text" },
+                { "key": "file_dokumen", "type": "file", "src": [] }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/api/arsip", "host": [ "{{base_url}}" ], "path": [ "api", "arsip" ] }
+          }
+        },
+        {
+          "name": "Revisi Arsip",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "catatan_revisi", "value": "Revisi bagian tanda tangan", "type": "text" },
+                { "key": "file_dokumen", "type": "file", "src": [] }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/api/arsip/{{arsip_id}}/revisi", "host": [ "{{base_url}}" ], "path": [ "api", "arsip", "{{arsip_id}}", "revisi" ] }
+          }
+        },
+        {
+          "name": "Get Arsip Versions",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "url": { "raw": "{{base_url}}/api/arsip/{{arsip_id}}/versions", "host": [ "{{base_url}}" ], "path": [ "api", "arsip", "{{arsip_id}}", "versions" ] }
+          }
+        },
+        {
+          "name": "Download Arsip (Watermark)",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "url": { "raw": "{{base_url}}/api/arsip/{{arsip_id}}/download", "host": [ "{{base_url}}" ], "path": [ "api", "arsip", "{{arsip_id}}", "download" ] }
+          }
+        },
+        {
+          "name": "Soft Delete Arsip",
+          "request": {
+            "method": "DELETE",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"alasan_penghapusan\": \"Salah upload file atau format tidak sesuai\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/arsip/{{arsip_id}}", "host": [ "{{base_url}}" ], "path": [ "api", "arsip", "{{arsip_id}}" ] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Laporan & Export",
+      "item": [
+        {
+          "name": "Export Laporan PDF",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "url": {
+              "raw": "{{base_url}}/api/reports/export?tipe_laporan=presensi&bulan=8&tahun=2026",
+              "host": [ "{{base_url}}" ],
+              "path": [ "api", "reports", "export" ],
+              "query": [
+                { "key": "tipe_laporan", "value": "presensi" },
+                { "key": "bulan", "value": "8" },
+                { "key": "tahun", "value": "2026" }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
