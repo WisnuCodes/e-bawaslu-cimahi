@@ -1,31 +1,49 @@
 <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-  <app-input
-    label="Email / NIP"
-    type="email"
-    formControlName="email"
-    placeholder="Masukkan Email atau NIP"
-    [error]="(loginForm.get('email')?.invalid && loginForm.get('email')?.touched) ? 'Email/NIP wajib diisi' : ''">
-  </app-input>
+  <mat-form-field appearance="outline" class="w-full mb-3">
+    <mat-label>Email / Akun SSO Bawaslu</mat-label>
+    <input matInput type="email" formControlName="email" placeholder="contoh: ketua@cimahi.bawaslu.go.id">
+    <mat-icon matSuffix>person_outline</mat-icon>
+    <mat-error *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+      Email wajib diisi
+    </mat-error>
+  </mat-form-field>
 
-  <app-input
-    label="Password"
-    type="password"
-    formControlName="password"
-    placeholder="Masukkan password"
-    [error]="(loginForm.get('password')?.invalid && loginForm.get('password')?.touched) ? 'Password wajib diisi' : ''">
-  </app-input>
+  <mat-form-field appearance="outline" class="w-full mb-3">
+    <mat-label>Password</mat-label>
+    <input matInput type="password" formControlName="password" placeholder="Masukkan password">
+    <mat-icon matSuffix>lock_outline</mat-icon>
+    <mat-error *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+      Password wajib diisi
+    </mat-error>
+  </mat-form-field>
 
-  <div class="form-actions" style="margin-top: 16px;">
-    <app-button 
-      type="submit" 
-      variant="primary" 
-      [loading]="isLoading" 
-      [disabled]="loginForm.invalid">
-      Login SSO Keycloak
-    </app-button>
+  <div class="form-actions" style="margin-top: 8px;">
+    <button mat-flat-button color="primary" type="submit" [disabled]="loginForm.invalid || isLoading" style="width: 100%; padding: 24px 0; font-size: 1rem; border-radius: 8px;">
+      <mat-spinner *ngIf="isLoading" diameter="24" style="margin-right: 8px; display: inline-block; vertical-align: middle;"></mat-spinner>
+      <span style="vertical-align: middle;">{{ isLoading ? 'Memverifikasi...' : 'Login SSO Bawaslu' }}</span>
+    </button>
   </div>
   
-  <div class="error-alert" *ngIf="errorMessage" style="color: #f44336; margin-top: 16px; text-align: center;">
+  <div class="error-alert" *ngIf="errorMessage" style="color: #dc2626; background: #fee2e2; padding: 12px; border-radius: 8px; margin-top: 16px; font-size: 0.85rem; text-align: center; border: 1px solid #fecaca; display: flex; align-items: center; justify-content: center; gap: 8px;">
+    <mat-icon style="font-size: 18px; width: 18px; height: 18px;">error_outline</mat-icon>
     {{ errorMessage }}
+  </div>
+
+  <!-- Quick Demo Role Accounts Selector (Formatted like a help panel) -->
+  <div class="demo-accounts-panel">
+    <div class="demo-panel-header">
+      <mat-icon style="font-size: 16px; width: 16px; height: 16px;">info_outline</mat-icon>
+      <span>Pilih Cepat Akun Aparatur Bawaslu Cimahi</span>
+    </div>
+    
+    <div class="demo-list">
+      <button 
+        type="button" 
+        *ngFor="let acc of demoAccounts" 
+        (click)="selectDemoAccount(acc.email)"
+        class="demo-btn">
+        <span class="demo-title">{{ acc.title }}</span>
+      </button>
+    </div>
   </div>
 </form>

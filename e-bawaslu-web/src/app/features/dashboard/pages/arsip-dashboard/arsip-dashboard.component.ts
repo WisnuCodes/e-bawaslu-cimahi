@@ -1,6 +1,9 @@
 import { Component, inject, ViewChild, ElementRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ArsipService } from '../../../../core/services/arsip/arsip.service';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ArsipService, ArsipItem, VersionHistoryItem } from '../../../../core/services/arsip/arsip.service';
+import { MasterDataService, Divisi } from '../../../../core/services/master-data.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
@@ -9,90 +12,298 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
+import { MatTableDataSource } from '@angular/material/table';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-arsip-dashboard',
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
     MatCardModule,
     MatTableModule,
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
     MatButtonModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatSelectModule,
+    MatDialogModule,
+    MatProgressSpinnerModule,
+    MatPaginatorModule
   ],
   templateUrl: './arsip-dashboard.component.html',
   styleUrl: './arsip-dashboard.component.css'
 })
 export class ArsipDashboardComponent implements OnInit {
   private arsipService = inject(ArsipService);
+  private masterDataService = inject(MasterDataService);
+  public authService = inject(AuthService);
+  private fb = inject(FormBuilder);
   
-  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('uploadFileInput') uploadFileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('revisiFileInput') revisiFileInput!: ElementRef<HTMLInputElement>;
   
-  documents: any[] = [];
-  displayedColumns: string[] = ['ikon', 'judul', 'klasifikasi', 'tanggal', 'aksi'];
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  documents = new MatTableDataSource<ArsipItem>([]);
+  divisiList: Divisi[] = [];
+  selectedDivisiFilter: string = '';
+  searchQuery: string = '';
+
+  applyFilterArsip = _.debounce((event: Event) => {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.documents.filter = filterValue.trim().toLowerCase();
+    if (this.documents.paginator) {
+      this.documents.paginator.firstPage();
+    }
+  }, 300);
+
+  displayedColumns: string[] = ['no_surat', 'perihal', 'kategori', 'klasifikasi', 'versi', 'tanggal', 'aksi'];
+  
+  // Modals & Panels
+  showUploadModal = false;
+  showRevisiModal = false;
+  showVersionModal = false;
+  showDeleteModal = false;
+
+  // Selected Target for Modal Actions
+  selectedArsip: ArsipItem | null = null;
+  versionHistory: VersionHistoryItem[] = [];
+  isLoadingVersions = false;
+
+  // Loading flags
   isUploading = false;
-  
+  isSubmittingRevisi = false;
+  isDeleting = false;
+  isDownloading: { [id: string]: boolean } = {};
+
+  // Form Upload Arsip
+  uploadForm: FormGroup = this.fb.group({
+    divisi_id: ['', Validators.required],
+    no_surat: ['', Validators.required],
+    tgl_surat: [new Date().toISOString().split('T')[0], Validators.required],
+    perihal: ['', Validators.required],
+    kategori: ['Surat Keputusan', Validators.required],
+    klasifikasi: ['Biasa', Validators.required]
+  });
+  uploadFile: File | null = null;
+
+  // Form Revisi
+  revisiCatatan: string = '';
+  revisiFile: File | null = null;
+
+  // Form Soft Delete
+  deleteReason: string = '';
+
+  kategoriList = ['Surat Keputusan', 'Surat Masuk', 'Surat Keluar', 'Berita Acara', 'Nota Dinas', 'Laporan Pengawasan'];
+  klasifikasiList = ['Biasa', 'Penting', 'Rahasia', 'Sangat Rahasia'];
+
   ngOnInit() {
+    this.loadDivisi();
     this.loadDocuments();
   }
 
+  loadDivisi() {
+    this.masterDataService.getDivisi().subscribe({
+      next: (res) => this.divisiList = res.data || [],
+      error: () => this.divisiList = []
+    });
+  }
+
   loadDocuments() {
-    this.arsipService.getArsip().subscribe({
+    this.arsipService.getArsip(this.selectedDivisiFilter || undefined).subscribe({
       next: (res) => {
-        // Mock data fallback if API is not fully running
-        this.documents = res?.data || [
-          { id: 1, title: 'Laporan Keuangan Q1.pdf', klasifikasi: 'Keuangan', created_at: new Date() },
-          { id: 2, title: 'SK Pengangkatan 2026.docx', klasifikasi: 'SDM', created_at: new Date() }
-        ];
+        this.documents.data = res.data || [];
+        this.documents.paginator = this.paginator;
       },
       error: () => {
-        // Fallback for visual demonstration
-        this.documents = [
-          { id: 1, title: 'Laporan Keuangan Q1.pdf', klasifikasi: 'Keuangan', created_at: new Date() },
-          { id: 2, title: 'SK Pengangkatan 2026.docx', klasifikasi: 'SDM', created_at: new Date() },
-          { id: 3, title: 'Bukti Pelanggaran 001.jpg', klasifikasi: 'Hukum', created_at: new Date() }
-        ];
+        this.documents.data = [];
       }
     });
   }
 
-  triggerUpload() {
-    this.fileInput.nativeElement.click();
-  }
-
-  onFileSelected(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      this.isUploading = true;
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      this.arsipService.uploadArsip(formData).subscribe({
-        next: () => {
-          this.isUploading = false;
-          alert('File berhasil diunggah!');
-          this.loadDocuments();
-        },
-        error: () => {
-          this.isUploading = false;
-          alert('Gagal mengunggah file. Pastikan server API berjalan.');
-        }
-      });
-    }
+  onFilterDivisiChange(divisiId: string) {
+    this.selectedDivisiFilter = divisiId;
+    this.loadDocuments();
   }
 
   onSearch(event: any) {
     const query = event.target.value;
-    if (query.length > 2) {
+    this.searchQuery = query;
+    if (query.length >= 2) {
       this.arsipService.searchArsip(query).subscribe({
-        next: (res) => this.documents = res.data,
-        error: () => console.log('Search error fallback')
+        next: (res) => this.documents.data = res.data || [],
+        error: () => this.loadDocuments()
       });
     } else if (query.length === 0) {
       this.loadDocuments();
     }
+  }
+
+  // Upload Arsip Baru
+  openUploadModal() {
+    this.uploadForm.reset({
+      divisi_id: this.divisiList.length > 0 ? this.divisiList[0].divisi_id : '',
+      no_surat: '',
+      tgl_surat: new Date().toISOString().split('T')[0],
+      perihal: '',
+      kategori: 'Surat Keputusan',
+      klasifikasi: 'Biasa'
+    });
+    this.uploadFile = null;
+    this.showUploadModal = true;
+  }
+
+  onUploadFileSelected(event: any) {
+    if (event.target.files.length > 0) {
+      this.uploadFile = event.target.files[0];
+    }
+  }
+
+  submitUpload() {
+    if (this.uploadForm.invalid || !this.uploadFile) {
+      alert('Mohon lengkapi semua field dan sertakan file dokumen.');
+      return;
+    }
+
+    this.isUploading = true;
+    const formData = new FormData();
+    formData.append('divisi_id', this.uploadForm.value.divisi_id);
+    formData.append('no_surat', this.uploadForm.value.no_surat);
+    formData.append('tgl_surat', this.uploadForm.value.tgl_surat);
+    formData.append('perihal', this.uploadForm.value.perihal);
+    formData.append('kategori', this.uploadForm.value.kategori);
+    formData.append('klasifikasi', this.uploadForm.value.klasifikasi);
+    formData.append('file_dokumen', this.uploadFile);
+
+    this.arsipService.uploadArsip(formData).subscribe({
+      next: () => {
+        this.isUploading = false;
+        this.showUploadModal = false;
+        alert('Dokumen arsip berhasil didaftarkan (v1.0)!');
+        this.loadDocuments();
+      },
+      error: (err) => {
+        this.isUploading = false;
+        alert(err.error?.message || 'Gagal mengunggah arsip.');
+      }
+    });
+  }
+
+  // Revisi Dokumen
+  openRevisiModal(doc: ArsipItem) {
+    this.selectedArsip = doc;
+    this.revisiCatatan = '';
+    this.revisiFile = null;
+    this.showRevisiModal = true;
+  }
+
+  onRevisiFileSelected(event: any) {
+    if (event.target.files.length > 0) {
+      this.revisiFile = event.target.files[0];
+    }
+  }
+
+  submitRevisi() {
+    if (!this.selectedArsip || !this.revisiFile || !this.revisiCatatan.trim()) {
+      alert('Mohon pilih berkas revisi dan berikan catatan alasan revisi.');
+      return;
+    }
+
+    this.isSubmittingRevisi = true;
+    const formData = new FormData();
+    formData.append('file_dokumen', this.revisiFile);
+    formData.append('catatan_revisi', this.revisiCatatan);
+
+    this.arsipService.uploadRevisi(this.selectedArsip.id, formData).subscribe({
+      next: (res) => {
+        this.isSubmittingRevisi = false;
+        this.showRevisiModal = false;
+        alert(`Revisi berhasil diunggah (${res.data?.version})!`);
+        this.loadDocuments();
+      },
+      error: (err) => {
+        this.isSubmittingRevisi = false;
+        alert(err.error?.message || 'Gagal mengunggah revisi.');
+      }
+    });
+  }
+
+  // Riwayat Versi
+  openVersionModal(doc: ArsipItem) {
+    this.selectedArsip = doc;
+    this.versionHistory = [];
+    this.isLoadingVersions = true;
+    this.showVersionModal = true;
+
+    this.arsipService.getVersions(doc.id).subscribe({
+      next: (res) => {
+        this.isLoadingVersions = false;
+        this.versionHistory = res.data?.history || [];
+      },
+      error: () => {
+        this.isLoadingVersions = false;
+      }
+    });
+  }
+
+  // Download dengan Watermark
+  downloadDocument(doc: ArsipItem) {
+    this.isDownloading[doc.id] = true;
+    this.arsipService.downloadWatermarked(doc.id).subscribe({
+      next: (blob: Blob) => {
+        this.isDownloading[doc.id] = false;
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${doc.no_surat.replace(/\//g, '_')}_watermarked.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => {
+        this.isDownloading[doc.id] = false;
+        alert('Gagal mengunduh berkas dengan dynamic watermark.');
+      }
+    });
+  }
+
+  // Soft Delete dengan Alasan
+  openDeleteModal(doc: ArsipItem) {
+    this.selectedArsip = doc;
+    this.deleteReason = '';
+    this.showDeleteModal = true;
+  }
+
+  submitDelete() {
+    if (!this.selectedArsip || this.deleteReason.trim().length < 10) {
+      alert('Alasan penghapusan wajib diisi minimal 10 karakter untuk keperluan audit trail.');
+      return;
+    }
+
+    this.isDeleting = true;
+    this.arsipService.deleteArsip(this.selectedArsip.id, this.deleteReason).subscribe({
+      next: () => {
+        this.isDeleting = false;
+        this.showDeleteModal = false;
+        alert('Dokumen berhasil dihapus secara aman (Soft Delete recorded in Audit Log).');
+        this.loadDocuments();
+      },
+      error: (err) => {
+        this.isDeleting = false;
+        alert(err.error?.message || 'Gagal menghapus dokumen.');
+      }
+    });
+  }
+
+  getDivisiName(divisiId: string): string {
+    const found = this.divisiList.find(d => d.divisi_id === divisiId);
+    return found ? found.nama_divisi : '-';
   }
 }

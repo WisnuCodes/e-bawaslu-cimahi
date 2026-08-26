@@ -1,0 +1,37 @@
+<div class="mfa-form text-center">
+  <div class="security-icon-wrapper">
+    <mat-icon class="security-icon">security</mat-icon>
+  </div>
+  
+  <h2 class="mfa-title">Verifikasi 2 Langkah</h2>
+  <p class="mfa-subtitle">
+    Kode OTP telah dikirimkan ke perangkat/email Anda.<br>
+    Silakan masukkan 6 digit kode untuk melanjutkan.
+  </p>
+  
+  <mat-form-field appearance="outline" class="otp-input-field">
+    <input 
+      matInput 
+      [(ngModel)]="otpCode" 
+      placeholder="000000" 
+      type="text"
+      maxlength="6"
+      autocomplete="one-time-code"
+      class="otp-input-text">
+    <mat-error *ngIf="errorMsg">{{ errorMsg }}</mat-error>
+  </mat-form-field>
+
+  <div class="form-actions">
+    <button mat-flat-button color="primary" [disabled]="otpCode.length < 6 || isLoading()" (click)="verifyOtp()" class="verify-btn">
+      <mat-spinner *ngIf="isLoading()" diameter="24" style="margin-right: 8px; display: inline-block; vertical-align: middle;"></mat-spinner>
+      <span style="vertical-align: middle;">{{ isLoading() ? 'Memverifikasi...' : 'Verifikasi' }}</span>
+    </button>
+  </div>
+  
+  <div class="resend-wrapper">
+    <p>Belum menerima kode?</p>
+    <button mat-button color="primary" style="font-weight: 600;">
+      Kirim ulang OTP (60s)
+    </button>
+  </div>
+</div>

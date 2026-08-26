@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
@@ -14,6 +14,10 @@ export class ApiService {
     return this.http.get<T>(`${this.baseUrl}${path}`, { params });
   }
 
+  getBlob(path: string, params: HttpParams = new HttpParams()): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}${path}`, { params, responseType: 'blob' });
+  }
+
   post<T>(path: string, body: any = {}): Observable<T> {
     return this.http.post<T>(`${this.baseUrl}${path}`, body);
   }
@@ -22,7 +26,7 @@ export class ApiService {
     return this.http.put<T>(`${this.baseUrl}${path}`, body);
   }
 
-  delete<T>(path: string): Observable<T> {
-    return this.http.delete<T>(`${this.baseUrl}${path}`);
+  delete<T>(path: string, body?: any): Observable<T> {
+    return this.http.request<T>('delete', `${this.baseUrl}${path}`, { body });
   }
 }

@@ -1,0 +1,88 @@
+.mfa-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.security-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: #eff6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 0 0 8px #f8fafc;
+}
+
+.security-icon {
+  color: #3b82f6;
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.mfa-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.75rem 0;
+  letter-spacing: -0.025em;
+}
+
+.mfa-subtitle {
+  color: #64748b;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0 0 2rem 0;
+}
+
+.otp-input-field {
+  width: 100%;
+  max-width: 250px;
+  text-align: center;
+}
+
+::ng-deep .otp-input-field .mat-mdc-text-field-wrapper {
+  background-color: #f8fafc !important;
+}
+
+.otp-input-text {
+  text-align: center !important;
+  font-size: 2rem !important;
+  letter-spacing: 0.5em !important;
+  font-weight: 700 !important;
+  padding-left: 0.25em !important; /* To offset letter spacing visually */
+}
+
+.form-actions {
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+.verify-btn {
+  width: 100%;
+  padding: 24px 0 !important;
+  font-size: 1rem !important;
+  border-radius: 8px !important;
+}
+
+.resend-wrapper {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.resend-wrapper p {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}

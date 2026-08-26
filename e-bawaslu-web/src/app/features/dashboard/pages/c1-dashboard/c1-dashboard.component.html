@@ -1,76 +1,404 @@
-<div class="page-header animate-fade-in" style="margin-bottom: 2rem;">
-  <h2 style="margin: 0; color: var(--color-text); font-weight: 600;">Formulir C1 (P2H)</h2>
-  <p style="margin: 0; color: var(--color-text-muted);">Pengawasan dan Unggah Form C1 yang Diamankan (Enkripsi AES-256).</p>
-</div>
+<div class="c1-dashboard-container animate-fade-in">
 
-<div class="content-grid animate-fade-in" style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; align-items: start;">
-  <!-- Form Upload -->
-  <mat-card>
-    <mat-card-header style="margin-bottom: 1rem;">
-      <mat-card-title>Upload Form C1</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <form (ngSubmit)="onSubmit()" style="display: flex; flex-direction: column; gap: 1rem;">
-        <mat-form-field appearance="outline" style="width: 100%;">
-          <mat-label>TPS ID</mat-label>
-          <mat-icon matPrefix>how_to_vote</mat-icon>
-          <input matInput [(ngModel)]="tpsId" name="tpsId" placeholder="Misal: 001" required>
-        </mat-form-field>
-        
-        <div class="file-drop-area" (click)="fileInput.click()" style="border: 2px dashed var(--color-border); border-radius: var(--radius-md); padding: 2rem; text-align: center; cursor: pointer; background: var(--color-background); transition: all 0.2s;">
-          <mat-icon color="primary" style="font-size: 32px; width: 32px; height: 32px; margin-bottom: 0.5rem;">upload_file</mat-icon><br>
-          <span *ngIf="!selectedFile" style="color: var(--color-text-muted);">Klik untuk memilih berkas</span>
-          <span *ngIf="selectedFile" class="text-success" style="font-weight: 500; color: var(--color-primary);">{{ selectedFile.name }}</span>
-        </div>
-        <input type="file" #fileInput style="display: none" (change)="onFileSelected($event)">
-        <small class="text-muted d-block" style="font-size: 0.75rem; color: var(--color-text-muted);">* Berkas akan dienkripsi secara otomatis sebelum disimpan ke database.</small>
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div>
+      <span class="status-badge badge-neutral" style="margin-bottom: 8px; display: inline-block;">
+        DIVISI P2H (PENCEGAHAN, PARMAS & HUMAS)
+      </span>
+      <h1 class="page-title">
+        Pengawasan, Ingesti & Rekapitulasi Berkas C1-Hasil
+      </h1>
+      <p class="page-subtitle">
+        Terproteksi Enkripsi Storage AES-256, Hash SHA-256 Anti-Tampering, dan Auto Cross-Check Rekapitulasi.
+      </p>
+    </div>
 
-        <button mat-flat-button color="primary" type="submit" [disabled]="!selectedFile || !tpsId || isUploading" style="margin-top: 1rem; width: 100%;">
-          <mat-icon>lock</mat-icon> Enkripsi & Unggah
-        </button>
-      </form>
-    </mat-card-content>
-  </mat-card>
+    <!-- FILTER TPS -->
+    <div style="display: flex; align-items: center;">
+      <mat-form-field appearance="outline" style="width: 300px; margin-bottom: -1.25rem;">
+        <mat-label>Filter Berdasarkan TPS</mat-label>
+        <mat-select [(value)]="selectedFilterTps" (selectionChange)="onFilterTpsChange($event.value)">
+          <mat-option value="">Semua TPS Kota Cimahi</mat-option>
+          <mat-option *ngFor="let t of tpsList" [value]="t.tps_id">
+            TPS {{ t.no_tps }} - {{ t.kelurahan }} (Kec. {{ t.kecamatan }})
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
 
-  <!-- Riwayat Uploaded C1 -->
-  <mat-card>
-    <mat-card-header style="margin-bottom: 1rem;">
-      <mat-card-title>Riwayat C1 Terenkripsi</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <div style="overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-md);">
-        <table mat-table [dataSource]="c1List" style="width: 100%;">
-          
-          <!-- TPS ID Column -->
-          <ng-container matColumnDef="tps_id">
-            <th mat-header-cell *matHeaderCellDef> ID TPS </th>
-            <td mat-cell *matCellDef="let c1" style="font-weight: 500;"> {{ c1.tps_id }} </td>
-          </ng-container>
-
-          <!-- Status Column -->
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef> Status </th>
-            <td mat-cell *matCellDef="let c1">
-              <div style="display: flex; align-items: center; gap: 4px; color: #059669; background: #d1fae5; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 500; width: max-content;">
-                <mat-icon style="font-size: 14px; width: 14px; height: 14px;">verified_user</mat-icon> {{ c1.status || 'Terenkripsi AES' }}
-              </div>
-            </td>
-          </ng-container>
-
-          <!-- Tanggal Column -->
-          <ng-container matColumnDef="tanggal">
-            <th mat-header-cell *matHeaderCellDef> Waktu Unggah </th>
-            <td mat-cell *matCellDef="let c1"> {{ c1.created_at | date:'dd MMM yyyy, HH:mm' }} </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-          
-          <tr class="mat-row" *matNoDataRow>
-            <td class="mat-cell" colspan="3" style="text-align: center; padding: 2rem;">Belum ada form C1 yang diunggah.</td>
-          </tr>
-        </table>
+  <!-- PROGRESS BAR KOTA CIMAHI -->
+  <div class="clean-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 8px;">
+      <div style="display: flex; align-items: center; gap: 8px; color: #212121;">
+        <mat-icon style="color: #616161;">show_chart</mat-icon>
+        <strong style="font-size: 1rem; font-weight: 500;">Live Progress Ingesti Form C1 Kota Cimahi</strong>
       </div>
-    </mat-card-content>
-  </mat-card>
+      <div style="font-size: 0.9rem; color: #424242;">
+        Total Berkas Masuk: <strong>{{ c1List.data.length }}</strong> dari <strong>{{ totalTpsPilot }} TPS</strong> ({{ progressPercentage }}%)
+      </div>
+    </div>
+    
+    <mat-progress-bar mode="determinate" [value]="progressPercentage" style="height: 6px; border-radius: 3px;"></mat-progress-bar>
+    
+    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #757575; margin-top: 12px;">
+      <span style="display: flex; align-items: center; gap: 4px;">
+        <mat-icon style="font-size: 16px; width: 16px; height: 16px;">{{ progressPercentage === 100 ? 'done_all' : 'hourglass_empty' }}</mat-icon> 
+        {{ progressPercentage === 100 ? 'Seluruh TPS Terekapitulasi' : 'Menunggu Unggahan Petugas Lapangan/TPS' }}
+      </span>
+      <span>Tervalidasi & Approved: <strong>{{ verifiedProgressPercentage }}%</strong></span>
+    </div>
+  </div>
+
+  <!-- KPI GRID -->
+  <div class="kpi-grid">
+    
+    <!-- Total Suara Sah -->
+    <div class="kpi-card">
+      <div class="kpi-title">TOTAL SUARA SAH (KOTA)</div>
+      <div class="kpi-value text-success">
+        {{ totalSuaraSahKota | number }}
+      </div>
+      <div class="kpi-desc">Akumulasi dari {{ c1List.data.length }} TPS</div>
+    </div>
+
+    <!-- Total Suara Tidak Sah -->
+    <div class="kpi-card">
+      <div class="kpi-title">TOTAL SUARA TIDAK SAH</div>
+      <div class="kpi-value" style="color: #f57c00;">
+        {{ totalSuaraTidakSahKota | number }}
+      </div>
+      <div class="kpi-desc">Surat suara batal/rusak</div>
+    </div>
+
+    <!-- Total Pemilih Hadir -->
+    <div class="kpi-card">
+      <div class="kpi-title">TOTAL PEMILIH HADIR</div>
+      <div class="kpi-value text-primary">
+        {{ totalPemilihKota | number }}
+      </div>
+      <div class="kpi-desc">Tingkat partisipasi tercatat</div>
+    </div>
+
+    <!-- Red Flag Mismatch Alerts -->
+    <div class="kpi-card" [style.border-color]="totalMismatchCount > 0 ? '#ffcdd2' : '#e0e0e0'">
+      <div class="kpi-title">INDIKASI MISMATCH</div>
+      <div class="kpi-value" [ngClass]="totalMismatchCount > 0 ? 'text-error' : ''">
+        {{ totalMismatchCount }} TPS
+      </div>
+      <div class="kpi-desc" [ngClass]="totalMismatchCount > 0 ? 'text-error' : ''" style="display: flex; align-items: center; gap: 4px;">
+        <mat-icon style="font-size: 14px; width: 14px; height: 14px;">{{ totalMismatchCount > 0 ? 'error_outline' : 'check_circle_outline' }}</mat-icon>
+        {{ totalMismatchCount > 0 ? 'Butuh Verifikasi Ulang' : 'Seluruh Rumus Sinkron' }}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SUMMARY PASLON -->
+  <div *ngIf="totalSuaraPaslonKota.length > 0" class="clean-card" style="margin-top: 1.5rem; padding: 1.5rem; border-top: 4px solid #3b82f6;">
+    <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+      <mat-icon style="color: #3b82f6;">how_to_vote</mat-icon>
+      REKAPITULASI PEROLEHAN SUARA PASLON
+    </h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+      <div *ngFor="let paslon of totalSuaraPaslonKota" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+        <span style="font-size: 0.9rem; font-weight: 600; color: #64748b; margin-bottom: 4px; letter-spacing: 0.5px;">PASANGAN CALON {{ paslon.key }}</span>
+        <span style="font-size: 2rem; font-weight: 700; color: #0f172a; line-height: 1.2;">{{ paslon.val | number }}</span>
+        <span style="font-size: 0.75rem; color: #94a3b8; margin-top: 4px;">Suara Sah</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORM UPLOAD C1 -->
+  <div class="clean-card">
+    <div style="margin-bottom: 1.5rem;">
+      <h3 style="margin: 0; font-size: 1.1rem; font-weight: 500; color: #212121; display: flex; align-items: center; gap: 8px;">
+        <mat-icon style="color: #616161;">publish</mat-icon> Unggah Lembar Model C1-Hasil (Enkripsi AES-256)
+      </h3>
+      <p style="margin: 6px 0 0; font-size: 0.9rem; color: #757575;">
+        Sistem secara otomatis menghitung Hash SHA-256 berkas fisik dan memvalidasi rumus konsistensi suara secara real-time.
+      </p>
+    </div>
+
+    <form [formGroup]="c1Form" (ngSubmit)="onSubmit()" style="display: flex; flex-direction: column; gap: 1.5rem;">
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem;">
+        <!-- PILIH TPS -->
+        <mat-form-field appearance="outline">
+          <mat-label>Wilayah TPS</mat-label>
+          <mat-select formControlName="tps_id">
+            <mat-option *ngFor="let t of tpsList" [value]="t.tps_id">
+              TPS {{ t.no_tps }} - {{ t.kelurahan }} (Kec. {{ t.kecamatan }})
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- TOTAL SUARA SAH -->
+          <mat-form-field appearance="outline" style="flex: 1 1 30%;">
+            <mat-label>Total Suara Sah*</mat-label>
+            <input matInput type="number" formControlName="total_suara_sah" min="0">
+          </mat-form-field>
+          <mat-form-field appearance="outline" style="flex: 1 1 30%;">
+            <mat-label>Total Suara Tidak Sah*</mat-label>
+            <input matInput type="number" formControlName="total_suara_tidak_sah" min="0">
+          </mat-form-field>
+          <mat-form-field appearance="outline" style="flex: 1 1 30%;">
+            <mat-label>Total Pemilih yang Hadir*</mat-label>
+            <input matInput type="number" formControlName="total_pemilih" min="0">
+          </mat-form-field>
+        </div>
+
+        <!-- FORM PASLON DINAMIS -->
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin-top: 1rem; margin-bottom: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="margin: 0; font-size: 1rem; font-weight: 600; color: #334155;">Rincian Suara per Paslon</h3>
+            
+            <mat-form-field appearance="outline" style="width: 200px;">
+              <mat-label>Jumlah Paslon</mat-label>
+              <mat-select formControlName="jumlah_paslon" (selectionChange)="onJumlahPaslonChange($event.value)">
+                <mat-option [value]="2">2 Paslon</mat-option>
+                <mat-option [value]="3">3 Paslon</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Dynamic Array Inputs -->
+          <div formArrayName="suara_paslon" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <mat-form-field *ngFor="let ctrl of suaraPaslonControls; let i = index" appearance="outline" style="flex: 1 1 30%;">
+              <mat-label>Suara Paslon {{ i + 1 }}</mat-label>
+              <input matInput type="number" [formControlName]="i" min="0">
+            </mat-form-field>
+          </div>
+
+          <!-- Validasi Peringatan Interaktif -->
+          <div *ngIf="c1Form.value.suara_paslon && c1Form.value.total_suara_sah > 0" 
+               style="margin-top: 0.5rem; padding: 0.75rem; border-radius: 6px; display: flex; align-items: center; gap: 8px; font-size: 0.875rem;"
+               [ngStyle]="{'background-color': c1Form.value.total_suara_sah == (c1Form.value.suara_paslon[0] + c1Form.value.suara_paslon[1] + (c1Form.value.suara_paslon[2] || 0)) ? '#ecfdf5' : '#fef2f2', 'border': '1px solid ' + (c1Form.value.total_suara_sah == (c1Form.value.suara_paslon[0] + c1Form.value.suara_paslon[1] + (c1Form.value.suara_paslon[2] || 0)) ? '#a7f3d0' : '#fecaca'), 'color': c1Form.value.total_suara_sah == (c1Form.value.suara_paslon[0] + c1Form.value.suara_paslon[1] + (c1Form.value.suara_paslon[2] || 0)) ? '#059669' : '#e11d48'}">
+            
+            <mat-icon style="font-size: 18px; width: 18px; height: 18px;">
+              {{ c1Form.value.total_suara_sah == (c1Form.value.suara_paslon[0] + c1Form.value.suara_paslon[1] + (c1Form.value.suara_paslon[2] || 0)) ? 'check_circle' : 'error' }}
+            </mat-icon>
+            <span *ngIf="c1Form.value.total_suara_sah == (c1Form.value.suara_paslon[0] + c1Form.value.suara_paslon[1] + (c1Form.value.suara_paslon[2] || 0))">
+              Validasi Berhasil: Total Suara Paslon persis sama dengan Total Suara Sah ({{ c1Form.value.total_suara_sah }}).
+            </span>
+            <span *ngIf="c1Form.value.total_suara_sah != (c1Form.value.suara_paslon[0] + c1Form.value.suara_paslon[1] + (c1Form.value.suara_paslon[2] || 0))">
+              Validasi Gagal: Penjumlahan suara paslon ({{ (c1Form.value.suara_paslon[0] + c1Form.value.suara_paslon[1] + (c1Form.value.suara_paslon[2] || 0)) }}) tidak sama dengan Total Suara Sah ({{ c1Form.value.total_suara_sah }}).
+            </span>
+          </div>
+        </div>
+
+
+
+      <!-- FR-REC-02: LIVE AUTO CROSS-CHECK VALIDATION BANNER -->
+      <div *ngIf="isMismatch" class="status-badge badge-error" style="display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px;">
+        <mat-icon>error_outline</mat-icon>
+        <div>
+          <strong style="font-size: 0.9rem; display: block; margin-bottom: 4px;">MISMATCH: Rumus Matematika Tidak Sinkron!</strong>
+          <span style="font-size: 0.85rem;">
+            (Suara Sah: {{ c1Form.value.total_suara_sah }} + Suara Tidak Sah: {{ c1Form.value.total_suara_tidak_sah }} = {{ totalSuaraMasukForm }}) ≠ (Total Pemilih: {{ c1Form.value.total_pemilih }}). Berkas akan ditandai Mismatch.
+          </span>
+        </div>
+      </div>
+
+      <div *ngIf="!isMismatch && totalSuaraMasukForm > 0" class="status-badge badge-success" style="display: flex; align-items: center; gap: 12px; padding: 10px 16px;">
+        <mat-icon style="font-size: 20px; width: 20px; height: 20px;">check_circle_outline</mat-icon>
+        <span style="font-size: 0.85rem;">
+          Cross-Check Valid: Jumlah Suara Masuk ({{ totalSuaraMasukForm }}) Sesuai dengan Total Pemilih ({{ c1Form.value.total_pemilih }}).
+        </span>
+      </div>
+
+      <!-- FILE SCAN UPLOAD (Material Style) -->
+      <div style="display: flex; gap: 1.5rem; align-items: flex-start; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 250px;">
+          <div style="font-size: 0.85rem; font-weight: 500; color: #424242; margin-bottom: 8px;">Berkas Scan Form C1 (PDF/JPG/PNG)</div>
+          
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <div class="file-upload-wrapper">
+              <button mat-stroked-button color="primary" type="button" style="pointer-events: none;">
+                <mat-icon>attach_file</mat-icon>
+                Pilih Berkas
+              </button>
+              <input type="file" (change)="onFileSelected($event)" accept="image/*,application/pdf" class="file-upload-input" title="Pilih Berkas">
+            </div>
+            <span style="font-size: 0.85rem; color: #616161; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">
+              {{ selectedFile ? selectedFile.name : 'Belum ada berkas dipilih' }}
+            </span>
+          </div>
+        </div>
+
+        <div *ngIf="imagePreviewUrl" style="border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; width: 140px; height: 100px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; position: relative;">
+          <img [src]="imagePreviewUrl" alt="Preview C1" style="max-width: 100%; max-height: 100%; object-fit: contain;" [style.opacity]="isOcrScanning ? '0.3' : '1'">
+          <div *ngIf="isOcrScanning" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; text-align: center;">
+             <mat-spinner diameter="24" style="margin-bottom: 4px;"></mat-spinner>
+             <span style="font-size: 0.65rem; color: #1e40af; font-weight: 700;">{{ ocrStatusText }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBMIT BUTTON -->
+      <div style="display: flex; justify-content: flex-end; padding-top: 1.5rem; border-top: 1px solid #eeeeee; gap: 16px;">
+        <button *ngIf="editingC1Id" mat-stroked-button color="warn" type="button" (click)="resetForm()" style="padding: 0 2rem; border-radius: 8px; font-weight: 600;">
+          <mat-icon style="margin-right: 4px;">close</mat-icon> Batal Edit
+        </button>
+        <button mat-flat-button color="primary" type="submit" [disabled]="isUploading || isOcrScanning || c1Form.invalid || (!editingC1Id && !selectedFile)" style="padding: 0 2rem; border-radius: 8px; font-weight: 600;">
+          <mat-spinner *ngIf="isUploading" diameter="18" style="display: inline-block; margin-right: 8px; vertical-align: middle;"></mat-spinner>
+          <mat-icon *ngIf="!isUploading" style="margin-right: 4px;">{{ editingC1Id ? 'save_as' : 'lock' }}</mat-icon>
+          <span style="vertical-align: middle;">{{ editingC1Id ? 'Perbarui Data C1' : 'Enkripsi & Simpan' }}</span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- TABEL RIWAYAT & APPROVAL BERKAS C1 -->
+  <div class="clean-card" style="padding: 0; overflow: hidden;">
+    <div style="padding: 1.5rem; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
+      <h3 style="margin: 0; font-size: 1.1rem; font-weight: 500; color: #212121; display: flex; align-items: center; gap: 8px;">
+        <mat-icon style="color: #616161;">history</mat-icon> Log Rekapitulasi Berkas C1
+      </h3>
+      <span class="status-badge badge-neutral">
+        Total: {{ c1List.data.length }} Berkas
+      </span>
+    </div>
+    
+    <div style="padding: 1rem 1.5rem 0;">
+      <mat-form-field appearance="outline" style="width: 100%; margin-bottom: -1.25em;">
+        <mat-label>Pencarian Form C1...</mat-label>
+        <input matInput (input)="applyFilterC1($event)" placeholder="Ketik TPS, Kelurahan, Kecamatan, Hash, atau Status...">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="table-responsive" style="overflow-x: auto;">
+      <table mat-table [dataSource]="c1List" style="width: 100%;">
+        
+        <!-- TPS Column -->
+        <ng-container matColumnDef="tps">
+          <th mat-header-cell *matHeaderCellDef> Wilayah TPS </th>
+          <td mat-cell *matCellDef="let element">
+            <span style="color: #212121; font-weight: 500;">{{ getTpsInfo(element.tps_id) }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Suara Sah Column -->
+        <ng-container matColumnDef="suara_sah">
+          <th mat-header-cell *matHeaderCellDef> Suara Sah </th>
+          <td mat-cell *matCellDef="let element">
+            <span style="color: #2e7d32; font-weight: 500;">{{ element.total_suara_sah | number }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Rincian Paslon Column -->
+        <ng-container matColumnDef="rincian_paslon">
+          <th mat-header-cell *matHeaderCellDef> Rincian Paslon </th>
+          <td mat-cell *matCellDef="let element">
+            <div *ngIf="getPaslonBreakdown(element).length > 0; else noBreakdown" style="display: flex; flex-direction: column; gap: 4px; padding: 4px 0;">
+              <span *ngFor="let paslon of getPaslonBreakdown(element)" style="font-size: 0.8rem; background-color: #f1f5f9; padding: 2px 6px; border-radius: 4px; border: 1px solid #e2e8f0;">
+                <strong style="color: #475569;">P{{paslon.key}}:</strong> <span style="color: #0f172a; font-weight: 500;">{{paslon.val | number}}</span>
+              </span>
+            </div>
+            <ng-template #noBreakdown>
+              <span style="font-size: 0.8rem; color: #94a3b8; font-style: italic;">Tidak ada rincian</span>
+            </ng-template>
+          </td>
+        </ng-container>
+
+        <!-- Suara Tidak Sah Column -->
+        <ng-container matColumnDef="suara_tidak_sah">
+          <th mat-header-cell *matHeaderCellDef> Tidak Sah </th>
+          <td mat-cell *matCellDef="let element">
+            <span style="color: #f57c00; font-weight: 500;">{{ element.total_suara_tidak_sah | number }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Total Pemilih Column -->
+        <ng-container matColumnDef="total_pemilih">
+          <th mat-header-cell *matHeaderCellDef> Total Pemilih </th>
+          <td mat-cell *matCellDef="let element">
+            <span style="color: #1976d2; font-weight: 500;">{{ element.total_pemilih | number }}</span>
+          </td>
+        </ng-container>
+
+        <!-- SHA-256 Hash Column -->
+        <ng-container matColumnDef="hash">
+          <th mat-header-cell *matHeaderCellDef> SHA-256 Hash </th>
+          <td mat-cell *matCellDef="let element">
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <code style="font-size: 0.75rem; background: #f5f5f5; color: #424242; padding: 2px 6px; border-radius: 4px; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border: 1px solid #e0e0e0;">
+                {{ element.sha256_hash }}
+              </code>
+              <button mat-icon-button (click)="copyHash(element.sha256_hash)" matTooltip="Salin Hash" style="width: 32px; height: 32px; line-height: 32px;">
+                <mat-icon style="font-size: 16px; width: 16px; height: 16px;">content_copy</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef> Status </th>
+          <td mat-cell *matCellDef="let element">
+            <span *ngIf="element.status_c1 === 'Approved'" class="status-badge badge-success">Approved</span>
+            <span *ngIf="element.status_c1 === 'Mismatch'" class="status-badge badge-error">Mismatch</span>
+            <span *ngIf="element.status_c1 === 'Pending'" class="status-badge badge-warning">Pending</span>
+            <span *ngIf="element.status_c1 === 'Rejected'" class="status-badge badge-neutral">Rejected</span>
+            <span *ngIf="element.status_c1 === 'Revision'" class="status-badge badge-warning" style="background: #fff3e0; color: #ef6c00; border-color: #ffe0b2;">Revision</span>
+          </td>
+        </ng-container>
+
+        <!-- Tanggal Column -->
+        <ng-container matColumnDef="tanggal">
+          <th mat-header-cell *matHeaderCellDef> Waktu Entri </th>
+          <td mat-cell *matCellDef="let element" style="font-size: 0.85rem; color: #757575;">
+            {{ element.created_at | bawasluDate:'dd MMM yyyy, HH:mm' }}
+          </td>
+        </ng-container>
+
+        <!-- Aksi Approval Column -->
+        <ng-container matColumnDef="aksi">
+          <th mat-header-cell *matHeaderCellDef> Tindakan </th>
+          <td mat-cell *matCellDef="let element">
+            <div style="display: flex; gap: 8px; align-items: center;">
+              
+              <!-- Pimpinan Approval Buttons -->
+              <ng-container *ngIf="canApprove && element.status_c1 === 'Draft'">
+                <button mat-stroked-button (click)="onApprove(element, 'Approved')" style="height: 32px; line-height: 30px; padding: 0 12px; font-size: 0.75rem; border-color: #10b981; color: #047857; font-weight: 600; border-radius: 6px; background-color: #ecfdf5;">
+                  Setujui
+                </button>
+                <button mat-stroked-button (click)="onApprove(element, 'Rejected')" style="height: 32px; line-height: 30px; padding: 0 12px; font-size: 0.75rem; border-color: #f43f5e; color: #be123c; font-weight: 600; border-radius: 6px; background-color: #fff1f2;">
+                  Tolak
+                </button>
+              </ng-container>
+
+              <!-- Tombol Edit (Tampil untuk Staf, Pimpinan & Kadiv jika perlu direvisi) -->
+              <ng-container *ngIf="(isStaf || isPimpinan || isKepalaDivisi) && element.status_c1 !== 'Approved'">
+                <button mat-icon-button (click)="onEdit(element)" matTooltip="Edit & Koreksi Data" style="background-color: #eff6ff; color: #3b82f6; width: 32px; height: 32px; line-height: 32px; border-radius: 8px; transition: all 0.2s;">
+                  <mat-icon style="font-size: 16px; width: 16px; height: 16px; line-height: 16px;">edit_square</mat-icon>
+                </button>
+              </ng-container>
+
+              <!-- Tombol Hapus (Hanya Kadiv P2H & Admin) -->
+              <ng-container *ngIf="canDeleteC1">
+                <button mat-icon-button (click)="onDelete(element)" matTooltip="Hapus Permanen" style="background-color: #fef2f2; color: #ef4444; width: 32px; height: 32px; line-height: 32px; border-radius: 8px; transition: all 0.2s;">
+                  <mat-icon style="font-size: 18px; width: 18px; height: 18px; line-height: 18px;">delete_outline</mat-icon>
+                </button>
+              </ng-container>
+
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+
+      <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]" aria-label="Pilih Halaman Form C1"></mat-paginator>
+
+      <div *ngIf="c1List.data.length === 0" style="text-align: center; padding: 3rem; color: #9e9e9e;">
+        Belum ada berkas scan Form C1 yang diunggah atau sesuai kriteria pencarian.
+      </div>
+    </div>
+  </div>
+
 </div>

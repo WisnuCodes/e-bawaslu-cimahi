@@ -1,0 +1,17 @@
+.card-pimpinan {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card-pimpinan:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+}
+
+.card-pimpinan-ketua {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card-pimpinan-ketua:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 10px 20px rgba(30, 58, 138, 0.25) !important;
+}

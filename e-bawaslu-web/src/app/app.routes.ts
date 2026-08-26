@@ -27,6 +27,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/dashboard/pages/dashboard-home/dashboard-home.component').then(m => m.DashboardHomeComponent)
       },
       {
+        path: 'struktur-organisasi',
+        loadComponent: () => import('./features/dashboard/pages/struktur-organisasi/struktur-organisasi.component').then(m => m.StrukturOrganisasiComponent)
+      },
+      {
         path: 'wfh',
         loadComponent: () => import('./features/dashboard/pages/wfh-dashboard/wfh-dashboard.component').then(m => m.WfhDashboardComponent)
       },
@@ -37,6 +41,14 @@ export const routes: Routes = [
       {
         path: 'c1',
         loadComponent: () => import('./features/dashboard/pages/c1-dashboard/c1-dashboard.component').then(m => m.C1DashboardComponent)
+      },
+      {
+        path: 'reports',
+        loadComponent: () => import('./features/dashboard/pages/report-dashboard/report-dashboard.component').then(m => m.ReportDashboardComponent)
+      },
+      {
+        path: 'audit-logs',
+        loadComponent: () => import('./features/dashboard/pages/audit-dashboard/audit-dashboard.component').then(m => m.AuditDashboardComponent)
       }
     ]
   },

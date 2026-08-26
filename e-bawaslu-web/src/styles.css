@@ -47,6 +47,11 @@
   box-sizing: border-box;
 }
 
+html, body {
+  height: 100%;
+  overflow: hidden; /* Mencegah window scroll, serahkan ke .content-area */
+}
+
 body {
   font-family: var(--font-family);
   background-color: var(--color-background);
@@ -54,7 +59,6 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  min-height: 100vh;
 }
 
 /* Base Component Panel (replaces glass-panel) */
@@ -157,4 +161,11 @@ body {
 
 .animate-fade-in {
   animation: fadeIn var(--transition-normal) forwards;
+}
+
+/* Material Premium Dialog Override */
+.premium-dialog-container .mat-mdc-dialog-surface {
+  padding: 0 !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
 }

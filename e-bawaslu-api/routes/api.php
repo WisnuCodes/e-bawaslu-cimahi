@@ -61,7 +61,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('c1')->group(function () {
         Route::get('/', [C1Controller::class, 'index']);
         Route::post('/', [C1Controller::class, 'store']); // Enkripsi AES-256
+        Route::put('/{id}', [C1Controller::class, 'update']);
         Route::post('/{id}/approve', [C1Controller::class, 'approve']);
+        Route::delete('/{id}', [C1Controller::class, 'destroy']);
     });
 
     // Report (Eksport BPK)

@@ -7,39 +7,26 @@ import { ButtonComponent } from '../../../../shared/components/atoms/button/butt
 import { InputComponent } from '../../../../shared/components/atoms/input/input.component';
 import { useLoading } from '../../../../shared/hooks/use-loading';
 
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
 @Component({
   selector: 'app-mfa',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent, InputComponent],
-  template: `
-    <div class="mfa-container text-center">
-      <h2 class="mb-4">Verifikasi 2 Langkah</h2>
-      <p class="mb-4 text-muted">Masukkan kode OTP yang dikirimkan ke perangkat Anda.</p>
-      
-      <app-input 
-        [(ngModel)]="otpCode" 
-        placeholder="6 Digit OTP" 
-        type="text" 
-        [error]="errorMsg">
-      </app-input>
-
-      <div class="mt-4">
-        <app-button 
-          variant="primary" 
-          [loading]="isLoading()" 
-          [disabled]="otpCode.length < 6"
-          (onClick)="verifyOtp()">
-          Verifikasi
-        </app-button>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .text-center { text-align: center; }
-    .mb-4 { margin-bottom: 1rem; }
-    .mt-4 { margin-top: 1rem; }
-    .text-muted { color: var(--color-text-muted); }
-  `]
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    MatButtonModule, 
+    MatInputModule, 
+    MatFormFieldModule, 
+    MatIconModule,
+    MatProgressSpinnerModule
+  ],
+  templateUrl: './mfa.component.html',
+  styleUrl: './mfa.component.css'
 })
 export class MfaComponent {
   private router = inject(Router);
@@ -67,4 +54,4 @@ export class MfaComponent {
       }
     });
   }
-}
+} // trigger rebuild
