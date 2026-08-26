@@ -1,107 +1,60 @@
-<div align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Bawaslu_Logo.svg" alt="Bawaslu Logo" width="150" />
-  
-  <h1>🛡️ SIM Bawaslu Kota Cimahi</h1>
-  <p><strong>Sistem Informasi Manajemen Presensi, Arsip, & Rekapitulasi C1 (P2H) Terpadu</strong></p>
+# E-Bawaslu Cimahi
+Sistem Informasi Manajemen Arsip, Presensi WFH, dan Rekapitulasi C1 - Pilot Project Bawaslu Kota Cimahi.
 
-  <p>
-    <a href="https://angular.dev/"><img src="https://img.shields.io/badge/Angular-17+-DD0031?style=for-the-badge&logo=angular&logoColor=white" alt="Angular"></a>
-    <a href="https://php.net/"><img src="https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP"></a>
-    <a href="https://laravel.com/"><img src="https://img.shields.io/badge/Laravel-13.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel"></a>
-    <a href="https://postgresql.org/"><img src="https://img.shields.io/badge/PostgreSQL-15+-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL"></a>
-    <a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/Tailwind_CSS-3.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS"></a>
-  </p>
-</div>
+## Kebutuhan Fungsional (Sesuai SRS Bab III)
 
----
+Aplikasi ini mencakup 6 modul utama dan 1 modul khusus sesuai Spesifikasi Kebutuhan Perangkat Lunak (SRS):
 
-## 📖 Deskripsi Proyek
+- **Modul 1: Manajemen Arsip & Dokumen Digital Internal Divisi**
+  - `FR-ARC-01`: Klasifikasi & Pengindeksan Berkas / Metadata Engine
+  - `FR-ARC-02`: OCR & Full-Text Search
+  - `FR-ARC-03`: Controls File Versioning & Locking
+  - `FR-ARC-04`: Dynamic Watermarking
+  - `FR-ARC-05`: Upload & Pengelolaan Berkas C1
+- **Modul 2: Absensi WFH & Monitoring Aktivitas Pegawai**
+  - `FR-ABS-01`: Presensi WFH Check-In & Check-Out
+  - `FR-ABS-02`: Daily Worklog / Laporan Aktivitas Harian
+  - `FR-ABS-03`: Dashboard Rekapitulasi & Kalkulasi Jam Kerja
+- **Modul 3: Engine Persetujuan / Approval Workflow**
+  - `FR-APP-01`: Multi-Tier Approval
+  - `FR-APP-02`: Notifikasi Real-Time & Cross-Channel
+- **Modul 4: Audit Trail & Observabilitas Keamanan**
+  - `FR-AUD-01`: Immutable Log Trail
+  - `FR-AUD-02`: Logging Aktivitas Berkas Sensitif
+  - `FR-AUD-03`: Dashboard Pemantauan Anomali
+- **Modul 5: Keamanan & Akses Terpusat**
+  - `FR-SEC-01`: Access Control - RBAC & ABAC
+  - `FR-SEC-02`: Keycloak SSO & MFA
+- **Modul 6: Laporan & Dashboard Eksekutif**
+  - `FR-REP-01`: Real-Time Executive Dashboard
+  - `FR-REP-02`: Automated Export
+- **Modul Khusus: Rekapitulasi Keseluruhan Hasil Suara C1**
+  - `FR-REC-01`: Agregasi Berjenjang Otomatis
+  - `FR-REC-02`: Auto Cross-Check Validation & Red Flag
+  - `FR-REC-03`: Live Progress Bar
 
-Repositori ini memuat kode sumber ( *Fullstack* ) **Sistem Informasi Manajemen Bawaslu Kota Cimahi**. Sistem ini dirancang secara terpadu (*End-to-End*) untuk mengelola proses internal dengan performa tinggi. Arsitektur aplikasi dipisah secara modern (API berbasis **Laravel** dan *Single Page Application* berbasis **Angular**).
+## Arsitektur
+- **Backend**: Laravel 11 (Modular Monolith)
+- **Frontend**: Angular 17 (Standalone Components)
+- **Database**: PostgreSQL
+- **Keamanan**: Keycloak (SSO) & Sanctum
 
-Layanan ini menangani seluruh logika bisnis kompleks, pengalaman pengguna (*User Experience*) yang interaktif dan *real-time*, hingga integritas dan keamanan data untuk tiga pilar utama:
-
-- 🏢 **Modul Work From Home (WFH)**: Sistem Presensi *Check-In/Out* berbasis lokasi & Catatan Kerja Harian terintegrasi.
-- 🗂️ **Modul Arsip Digital**: Manajemen dokumen persuratan dengan pelabelan metadata dan mesin pencarian efisien.
-- 🗳️ **Modul P2H (Form C1)**: Pengawasan form C1 Pemilu & Algoritma Verifikasi Selisih Suara otomatis.
-
----
-
-## ⚙️ Prasyarat Lingkungan (Environment Requirements)
-
-Pastikan mesin Anda telah dilengkapi dengan dependensi berikut sebelum menjalankan proyek ini:
-
-| Kebutuhan | Versi Minimal | Peruntukan / Keterangan |
-| :--- | :---: | :--- |
-| **Node.js** | `v18.x` | Menjalankan *environment* Frontend Angular |
-| **Angular CLI** | `^17.x` | Membangun dan melayani ( *serve* ) UI |
-| **PHP** | `^8.2` | Menjalankan mesin *Backend* |
-| **Composer** | `^2.7` | Manajemen dependensi PHP |
-| **PostgreSQL**| `^15` | Dukungan UUID & JSONB (*Ekstensi `pdo_pgsql` aktif*) |
-| **MinIO/S3** | (Opsional) | Direkomendasikan untuk *Object Storage* (Arsip & Foto) |
-
----
-
-## 🚀 Panduan Instalasi Cepat
-
-Proyek ini terbagi menjadi 2 area kerja utama ( *workspace* ) yaitu `e-bawaslu-api` untuk *Backend* dan `e-bawaslu-web` untuk *Frontend*.
-
-### 1️⃣ Konfigurasi Backend (Laravel)
-
-Buka terminal dan arahkan ke direktori API:
-```bash
-cd e-bawaslu-api
-```
-1. Instal dependensi dan atur env:
+## Panduan Instalasi (Development)
+1. Clone repositori ini.
+2. Setup Backend:
    ```bash
+   cd e-bawaslu-api
    composer install
    cp .env.example .env
-   ```
-2. Atur kredensial *database* PostgreSQL pada berkas `.env` Anda.
-3. *Generate* kunci enkripsi dan jalankan migrasi:
-   ```bash
    php artisan key:generate
-   php artisan migrate --seed
-   ```
-4. Jalankan *server backend*:
-   ```bash
+   php artisan migrate:fresh --seed
    php artisan serve
-   # Server API berjalan di http://localhost:8000
    ```
-
-### 2️⃣ Konfigurasi Frontend (Angular)
-
-Buka tab terminal **baru** dan arahkan ke direktori Web:
-```bash
-cd e-bawaslu-web
-```
-1. Instal *Node modules*:
+3. Setup Frontend:
    ```bash
+   cd e-bawaslu-web
    npm install
+   npm run start
    ```
-2. Jalankan *Development Server* Angular:
-   ```bash
-   ng serve
-   # Atau: npm run start
-   ```
-3. Buka *browser* dan akses aplikasi pada **`http://localhost:4200`** 🎉
 
----
-
-## 📚 Dokumentasi Teknis & Spesifikasi (API Contract)
-
-Untuk memahami arsitektur *Modular Monolith* di sisi API, model relasional (ERD), dan standar integritas data keamanan, silakan merujuk pada:
-👉 **[`spec.md`](./spec.md)**
-
----
-
-## 🤝 Standar Kontribusi (Contribution Guidelines)
-
-- **Frontend (Angular)**: Ikuti standar penamaan *Component/Service*, hindari komponen gemuk, dan terapkan *Tailwind Utility Classes* dengan rapi.
-- **Backend (Laravel)**: Wajib mematuhi **PSR-12**. Gunakan berkas migrasi baru (*alter table*) alih-alih merombak skema lama untuk konsistensi *Audit Trail*.
-- **Pull Request**: Harap pastikan semua layanan berhasil di-*build* dan kode berjalan sempurna sebelum mengajukan integrasi.
-
-<div align="center">
-  <br>
-  <i>Dipersembahkan dengan ❤️ untuk Demokrasi yang Lebih Baik</i>
-</div>
+Lihat [spec.md](./spec.md) untuk rincian Spesifikasi Kebutuhan Perangkat Lunak.

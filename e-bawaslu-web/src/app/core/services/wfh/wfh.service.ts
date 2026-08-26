@@ -37,8 +37,6 @@ export class WfhService {
   }
 
   updateWorklog(id: string, data: FormData | any): Observable<any> {
-    // We use POST to worklogs/{id} to bypass PHP's FormData PUT limitation,
-    // assuming backend treats POST to this route as an update.
     return this.api.post<any>(`/wfh/worklogs/${id}`, data);
   }
 
@@ -48,5 +46,14 @@ export class WfhService {
 
   approveWorklog(id: string, status: 'Approved' | 'Revised', notes?: string): Observable<any> {
     return this.api.post<any>(`/wfh/worklogs/${id}/approve`, { status, catatan_revisi: notes });
+  }
+
+  // Tukin (Tunjangan Kinerja)
+  getTukin(): Observable<any> {
+    return this.api.get<any>('/wfh/tukin');
+  }
+
+  calculateTukin(bulan: number, tahun: number): Observable<any> {
+    return this.api.post<any>('/wfh/tukin/calculate', { bulan, tahun });
   }
 }

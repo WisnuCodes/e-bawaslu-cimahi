@@ -54,8 +54,18 @@ class C1Controller extends Controller
         $totalPemilih = (int) $request->total_pemilih;
         $status_c1 = 'Draft';
 
+        $suaraPaslon = $request->suara_paslon ? json_decode($request->suara_paslon, true) : null;
+
         if (($totalSah + $totalTidakSah) !== $totalPemilih) {
             $status_c1 = 'Mismatch'; // Red Flag
+        }
+        
+        // Validasi tambahan untuk suara paslon
+        if ($suaraPaslon && is_array($suaraPaslon)) {
+            $sumPaslon = array_sum($suaraPaslon);
+            if ($sumPaslon !== $totalSah) {
+                $status_c1 = 'Mismatch';
+            }
         }
 
         $c1 = C1::create([
@@ -65,6 +75,7 @@ class C1Controller extends Controller
             'total_suara_sah' => $totalSah,
             'total_suara_tidak_sah' => $totalTidakSah,
             'total_pemilih' => $totalPemilih,
+            'suara_paslon' => $suaraPaslon ? json_encode($suaraPaslon) : null,
             'sha256_hash' => $hash,
             'file_url' => $path,
             'status_c1' => $status_c1,
@@ -91,6 +102,69 @@ class C1Controller extends Controller
         return response()->json([
             'message' => 'Status berkas C1 berhasil diperbarui menjadi ' . $request->status,
             'data' => new C1Resource($c1)
+        ], 200);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $c1 = C1::findOrFail($id);
+
+        $request->validate([
+            'tps_id' => 'required|exists:wilayah_tps,tps_id',
+            'total_suara_sah' => 'required|integer|min:0',
+            'total_suara_tidak_sah' => 'required|integer|min:0',
+            'total_pemilih' => 'required|integer|min:0',
+            'suara_paslon' => 'nullable|json'
+        ]);
+
+        $totalSah = (int) $request->total_suara_sah;
+        $totalTidakSah = (int) $request->total_suara_tidak_sah;
+        $totalPemilih = (int) $request->total_pemilih;
+        $status_c1 = $c1->status_c1;
+
+        $suaraPaslon = $request->suara_paslon ? json_decode($request->suara_paslon, true) : null;
+
+        if (($totalSah + $totalTidakSah) !== $totalPemilih) {
+            $status_c1 = 'Mismatch'; 
+        } else {
+            // Re-evaluate if it was mismatch but now is fixed
+            if ($status_c1 === 'Mismatch') {
+                $status_c1 = 'Draft';
+            }
+        }
+        
+        if ($suaraPaslon && is_array($suaraPaslon)) {
+            $sumPaslon = array_sum($suaraPaslon);
+            if ($sumPaslon !== $totalSah) {
+                $status_c1 = 'Mismatch';
+            }
+        }
+
+        $c1->update([
+            'tps_id' => $request->tps_id,
+            'total_suara_sah' => $totalSah,
+            'total_suara_tidak_sah' => $totalTidakSah,
+            'total_pemilih' => $totalPemilih,
+            'suara_paslon' => $suaraPaslon ? json_encode($suaraPaslon) : null,
+            'status_c1' => $status_c1
+        ]);
+
+        // File/Hash not strictly updated here unless a new file is uploaded, 
+        // for simplicity we assume edit only changes numbers.
+
+        return response()->json([
+            'message' => 'Data Form C1 berhasil diperbarui',
+            'data' => new C1Resource($c1)
+        ], 200);
+    }
+
+    public function destroy($id)
+    {
+        $c1 = C1::findOrFail($id);
+        $c1->delete();
+
+        return response()->json([
+            'message' => 'Data dan berkas C1 berhasil dihapus secara permanen'
         ], 200);
     }
 }

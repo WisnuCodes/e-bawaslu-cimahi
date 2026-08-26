@@ -15,12 +15,25 @@ class WorklogController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        if (strtolower($user->role) === 'kepala divisi' || strtolower($user->role) === 'admin') {
-            $worklogs = Worklog::orderBy('tgl_kerja', 'desc')->get();
-        } else {
-            $worklogs = Worklog::where('user_id', $user->user_id)->orderBy('tgl_kerja', 'desc')->get();
+        $role = strtolower($user->role);
+        
+        $isAdmin = str_contains($role, 'admin');
+        $isPimpinan = str_contains($role, 'ketua') || str_contains($role, 'pimpinan') || str_contains($role, 'koordinator sekretariat');
+        $isKadiv = str_contains($role, 'kordiv') || str_contains($role, 'kepala divisi') || str_contains($role, 'kasubag') || str_contains($role, 'kabag');
+        
+        $canApprove = $isAdmin || $isPimpinan || $isKadiv;
+
+        $query = Worklog::query()
+            ->join('users', 'daily_worklog.user_id', '=', 'users.user_id')
+            ->select('daily_worklog.*', 'users.username as nama_pegawai')
+            ->orderBy('daily_worklog.tgl_kerja', 'desc');
+
+        if (!$canApprove) {
+            $query->where('daily_worklog.user_id', $user->user_id);
         }
         
+        $worklogs = $query->get();
+
         return response()->json([
             'success' => true,
             'data' => $worklogs
@@ -104,7 +117,13 @@ class WorklogController extends Controller
         
         // Authorization: only owner or admin can update
         $user = $request->user();
-        if ($worklog->user_id !== $user->user_id && strtolower($user->role) !== 'kepala divisi' && strtolower($user->role) !== 'admin') {
+        $role = strtolower($user->role);
+        $isAdmin = str_contains($role, 'admin');
+        $isPimpinan = str_contains($role, 'ketua') || str_contains($role, 'pimpinan') || str_contains($role, 'koordinator sekretariat');
+        $isKadiv = str_contains($role, 'kordiv') || str_contains($role, 'kepala divisi') || str_contains($role, 'kasubag') || str_contains($role, 'kabag');
+        $canApprove = $isAdmin || $isPimpinan || $isKadiv;
+
+        if ($worklog->user_id !== $user->user_id && !$canApprove) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
@@ -132,7 +151,13 @@ class WorklogController extends Controller
         $worklog = Worklog::findOrFail($id);
         
         $user = $request->user();
-        if ($worklog->user_id !== $user->user_id && strtolower($user->role) !== 'kepala divisi' && strtolower($user->role) !== 'admin') {
+        $role = strtolower($user->role);
+        $isAdmin = str_contains($role, 'admin');
+        $isPimpinan = str_contains($role, 'ketua') || str_contains($role, 'pimpinan') || str_contains($role, 'koordinator sekretariat');
+        $isKadiv = str_contains($role, 'kordiv') || str_contains($role, 'kepala divisi') || str_contains($role, 'kasubag') || str_contains($role, 'kabag');
+        $canApprove = $isAdmin || $isPimpinan || $isKadiv;
+
+        if ($worklog->user_id !== $user->user_id && !$canApprove) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 

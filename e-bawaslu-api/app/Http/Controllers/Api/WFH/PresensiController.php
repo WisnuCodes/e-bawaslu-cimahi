@@ -18,7 +18,15 @@ class PresensiController extends Controller
             ->select('presensi_wfh.*', 'users.username as nama_pegawai')
             ->orderBy('timestamp_checkin', 'desc');
             
-        if (strtolower($user->role) !== 'kepala divisi' && strtolower($user->role) !== 'admin') {
+        $role = strtolower($user->role);
+        $isAdmin = str_contains($role, 'admin') || str_contains($role, 'superadmin');
+        $isPimpinan = str_contains($role, 'ketua') || str_contains($role, 'pimpinan') || str_contains($role, 'koordinator sekretariat');
+        $isKadiv = str_contains($role, 'kordiv') || str_contains($role, 'kepala divisi') || str_contains($role, 'kasubag') || str_contains($role, 'kabag');
+        
+        $canManageOther = $isAdmin || $isPimpinan || $isKadiv;
+
+        // Tampilkan semua untuk admin, pimpinan, kadiv. Jika staf, hanya miliknya sendiri.
+        if (!$canManageOther) {
             $query->where('presensi_wfh.user_id', $user->user_id);
         }
 
@@ -29,9 +37,15 @@ class PresensiController extends Controller
     }
     public function update(Request $request, $id)
     {
+        $presensi = Presensi::findOrFail($id);
+
         $user = $request->user();
-        if (strtolower($user->role) !== 'kepala divisi' && strtolower($user->role) !== 'admin') {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        $role = strtolower($user->role);
+        $isAdmin = str_contains($role, 'admin') || str_contains($role, 'superadmin');
+
+        // Yang bisa edit: user itu sendiri (untuk absennya) ATAU Admin (untuk semua orang)
+        if ($presensi->user_id !== $user->user_id && !$isAdmin) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized. Hanya Admin yang dapat mengedit presensi user lain.'], 403);
         }
 
         $presensi = Presensi::findOrFail($id);
@@ -57,12 +71,18 @@ class PresensiController extends Controller
 
     public function destroy(Request $request, $id)
     {
+        $presensi = Presensi::findOrFail($id);
+
         $user = $request->user();
-        if (strtolower($user->role) !== 'kepala divisi' && strtolower($user->role) !== 'admin') {
+        $role = strtolower($user->role);
+        $isAdmin = str_contains($role, 'admin');
+        $isPimpinan = str_contains($role, 'ketua') || str_contains($role, 'pimpinan') || str_contains($role, 'koordinator sekretariat');
+        $isKadiv = str_contains($role, 'kordiv') || str_contains($role, 'kepala divisi') || str_contains($role, 'kasubag') || str_contains($role, 'kabag');
+        $canManageOther = $isAdmin || $isPimpinan || $isKadiv;
+
+        if ($presensi->user_id !== $user->user_id && !$canManageOther) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
-
-        $presensi = Presensi::findOrFail($id);
         $presensi->delete();
 
         return response()->json([

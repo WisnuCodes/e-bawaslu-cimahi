@@ -1,31 +1,79 @@
 .login-form {
-  text-align: left;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
-.is-invalid {
-  border-color: var(--color-error);
+.w-full {
+  width: 100%;
 }
 
-.is-invalid:focus {
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+.mb-3 {
+  margin-bottom: 0.75rem;
 }
 
-.error-msg {
-  color: var(--color-error);
-  font-size: 0.75rem;
-  margin-top: 0.25rem;
+mat-form-field {
+  width: 100%;
 }
 
-.form-actions {
+/* Make outline form fields look cleaner */
+::ng-deep .mat-mdc-text-field-wrapper {
+  background-color: #f8fafc !important;
+}
+
+.demo-accounts-panel {
   margin-top: 2rem;
+  padding: 1.25rem;
+  background-color: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
 }
 
-.error-alert {
-  margin-top: 1rem;
-  padding: 0.75rem;
-  background-color: rgba(239, 68, 68, 0.1);
-  color: var(--color-error);
-  border-radius: var(--radius-md);
-  font-size: 0.875rem;
-  text-align: center;
+.demo-panel-header {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.demo-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-height: 160px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.demo-list::-webkit-scrollbar {
+  width: 6px;
+}
+.demo-list::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 4px;
+}
+
+.demo-btn {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  color: #334155;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.demo-btn:hover {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  color: #1e3a8a;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }

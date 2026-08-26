@@ -1,82 +1,320 @@
-<div class="page-header animate-fade-in" style="margin-bottom: 2rem;">
-  <h2 style="margin: 0; color: var(--color-text); font-weight: 600;">E-Arsip</h2>
-  <p style="margin: 0; color: var(--color-text-muted);">Pencarian Pintar & Penyimpanan Dokumen Dinas Bawaslu.</p>
+<div class="page-header animate-fade-in" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+  <div>
+    <h2 style="margin: 0; color: var(--color-text); font-weight: 600;">E-Arsip Digital Terpadu</h2>
+    <p style="margin: 0; color: var(--color-text-muted);">Repositori dokumen digital, pencarian OCR, versi dokumen, dan unduhan ber-watermark.</p>
+  </div>
+  <button mat-flat-button color="primary" (click)="openUploadModal()" style="height: 44px;">
+    <mat-icon>add</mat-icon> Unggah Dokumen Baru
+  </button>
 </div>
 
-<div class="arsip-container animate-fade-in">
-  <mat-card>
-    <mat-card-header style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
-      <mat-card-title>Daftar Arsip Dokumen</mat-card-title>
-    </mat-card-header>
-    
-    <mat-card-content>
-      <!-- Top Bar: Search & Upload -->
-      <div style="display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; align-items: flex-start;">
-        <mat-form-field appearance="outline" style="flex: 1; max-width: 500px;">
-          <mat-label>Cari dokumen...</mat-label>
-          <mat-icon matPrefix>search</mat-icon>
-          <input matInput placeholder="Judul, isi, klasifikasi..." (keyup)="onSearch($event)">
-        </mat-form-field>
+<mat-card class="animate-fade-in">
+  <mat-card-content>
+    <!-- Filter & Pencarian Bar -->
+    <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 1.5rem;">
+      <mat-form-field appearance="outline" style="flex: 1; min-width: 250px; margin-bottom: -1.25em;">
+        <mat-label>Pencarian Dokumen / Full-Text OCR</mat-label>
+        <input matInput placeholder="Ketik nomor surat atau perihal..." (input)="applyFilterArsip($event)">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" style="min-width: 200px; margin-bottom: -1.25em;">
+        <mat-label>Filter Divisi</mat-label>
+        <mat-select [(ngModel)]="selectedDivisiFilter" (selectionChange)="onFilterDivisiChange($event.value)">
+          <mat-option value="">Semua Divisi</mat-option>
+          <mat-option *ngFor="let div of divisiList" [value]="div.divisi_id">{{ div.nama_divisi }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Tabel Dokumen Arsip -->
+    <div style="border-radius: var(--radius-md); overflow: auto; border: 1px solid var(--color-border);">
+      <table mat-table [dataSource]="documents" style="width: 100%;">
         
-        <button mat-flat-button color="primary" (click)="triggerUpload()" [disabled]="isUploading" style="height: 56px;">
-          <mat-icon>cloud_upload</mat-icon> Unggah Arsip
+        <!-- No Surat -->
+        <ng-container matColumnDef="no_surat">
+          <th mat-header-cell *matHeaderCellDef> No. Surat </th>
+          <td mat-cell *matCellDef="let doc" style="font-weight: 600; color: var(--color-primary);"> 
+            {{ doc.no_surat }} 
+          </td>
+        </ng-container>
+
+        <!-- Perihal -->
+        <ng-container matColumnDef="perihal">
+          <th mat-header-cell *matHeaderCellDef> Perihal & Divisi </th>
+          <td mat-cell *matCellDef="let doc">
+            <div style="font-weight: 500;">{{ doc.perihal }}</div>
+            <small style="color: var(--color-text-muted);">Divisi: {{ getDivisiName(doc.divisi_id) }}</small>
+          </td>
+        </ng-container>
+
+        <!-- Kategori -->
+        <ng-container matColumnDef="kategori">
+          <th mat-header-cell *matHeaderCellDef> Kategori </th>
+          <td mat-cell *matCellDef="let doc">
+            <span style="background: #f1f5f9; color: #475569; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 500;">
+              {{ doc.kategori }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Klasifikasi -->
+        <ng-container matColumnDef="klasifikasi">
+          <th mat-header-cell *matHeaderCellDef> Klasifikasi </th>
+          <td mat-cell *matCellDef="let doc">
+            <span [ngStyle]="{
+              'padding': '4px 8px', 'border-radius': '6px', 'font-size': '0.8rem', 'font-weight': '600',
+              'background-color': doc.klasifikasi === 'Rahasia' || doc.klasifikasi === 'Sangat Rahasia' ? '#fee2e2' : (doc.klasifikasi === 'Penting' ? '#fef3c7' : '#e0f2fe'),
+              'color': doc.klasifikasi === 'Rahasia' || doc.klasifikasi === 'Sangat Rahasia' ? '#991b1b' : (doc.klasifikasi === 'Penting' ? '#92400e' : '#0369a1')
+            }">
+              {{ doc.klasifikasi }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Versi -->
+        <ng-container matColumnDef="versi">
+          <th mat-header-cell *matHeaderCellDef> Versi </th>
+          <td mat-cell *matCellDef="let doc">
+            <button mat-stroked-button color="primary" style="font-size: 0.75rem; height: 28px; line-height: 28px; padding: 0 8px;" (click)="openVersionModal(doc)">
+              <mat-icon style="font-size: 14px; width: 14px; height: 14px; margin-right: 4px;">history</mat-icon>
+              {{ doc.version || 'v1.0' }}
+            </button>
+          </td>
+        </ng-container>
+
+        <!-- Tanggal -->
+        <ng-container matColumnDef="tanggal">
+          <th mat-header-cell *matHeaderCellDef> Tgl Surat </th>
+          <td mat-cell *matCellDef="let doc"> {{ doc.tgl_surat | date:'dd MMM yyyy' }} </td>
+        </ng-container>
+
+        <!-- Aksi -->
+        <ng-container matColumnDef="aksi">
+          <th mat-header-cell *matHeaderCellDef style="text-align: right; width: 180px;"> Aksi </th>
+          <td mat-cell *matCellDef="let doc" style="text-align: right;">
+            <!-- Download Watermarked -->
+            <button mat-icon-button color="primary" matTooltip="Unduh Berkas dengan Dynamic Watermark" [disabled]="isDownloading[doc.id]" (click)="downloadDocument(doc)">
+              <mat-icon *ngIf="!isDownloading[doc.id]">file_download</mat-icon>
+              <mat-progress-spinner *ngIf="isDownloading[doc.id]" diameter="18" mode="indeterminate"></mat-progress-spinner>
+            </button>
+
+            <!-- Upload Revisi -->
+            <button mat-icon-button color="accent" matTooltip="Unggah Revisi Dokumen" (click)="openRevisiModal(doc)" [disabled]="doc.is_locked">
+              <mat-icon>upgrade</mat-icon>
+            </button>
+
+            <!-- Soft Delete (Khusus Kepala Divisi / Super Admin) -->
+            <button *ngIf="authService.canDeleteArsip" mat-icon-button color="warn" matTooltip="Hapus Dokumen (Soft Delete)" (click)="openDeleteModal(doc)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" style="transition: background 0.2s;"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" colspan="7" style="text-align: center; padding: 2rem; color: var(--color-text-muted);">
+            Tidak ada arsip dokumen yang sesuai dengan filter atau pencarian.
+          </td>
+        </tr>
+      </table>
+      <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Pilih Halaman Arsip"></mat-paginator>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<!-- Modal: Unggah Arsip Baru -->
+<div *ngIf="showUploadModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; display: flex; align-items: center; justify-content: center; padding: 1rem;">
+  <div style="background: white; border-radius: var(--radius-lg); width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; padding: 1.5rem; box-shadow: var(--shadow-xl);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+      <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">Registrasi Arsip Baru (v1.0)</h3>
+      <button mat-icon-button (click)="showUploadModal = false">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <form [formGroup]="uploadForm" (ngSubmit)="submitUpload()" style="display: flex; flex-direction: column; gap: 1rem;">
+      <mat-form-field appearance="outline">
+        <mat-label>Divisi Pemilik</mat-label>
+        <mat-select formControlName="divisi_id">
+          <mat-option *ngFor="let div of divisiList" [value]="div.divisi_id">{{ div.nama_divisi }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <mat-form-field appearance="outline">
+          <mat-label>Nomor Surat</mat-label>
+          <input matInput formControlName="no_surat" placeholder="Contoh: 001/BAWASLU/2026">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Tanggal Surat</mat-label>
+          <input matInput type="date" formControlName="tgl_surat">
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Perihal Surat / Dokumen</mat-label>
+        <textarea matInput formControlName="perihal" rows="2" placeholder="Tulis perihal atau ringkasan isi surat..."></textarea>
+      </mat-form-field>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <mat-form-field appearance="outline">
+          <mat-label>Kategori</mat-label>
+          <mat-select formControlName="kategori">
+            <mat-option *ngFor="let kat of kategoriList" [value]="kat">{{ kat }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Klasifikasi Keamanan</mat-label>
+          <mat-select formControlName="klasifikasi">
+            <mat-option *ngFor="let klas of klasifikasiList" [value]="klas">{{ klas }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- File Upload Button -->
+      <div>
+        <label style="display: block; font-size: 0.85rem; font-weight: 500; color: #475569; margin-bottom: 6px;">Berkas Dokumen (.pdf, .docx, .xlsx)</label>
+        <div style="display: flex; align-items: center; gap: 1rem; border: 1px dashed #cbd5e1; padding: 12px; border-radius: var(--radius-md); background: #f8fafc;">
+          <button type="button" mat-stroked-button color="primary" (click)="uploadFileInput.click()">
+            <mat-icon>attach_file</mat-icon> Pilih Berkas
+          </button>
+          <span style="font-size: 0.85rem; color: #64748b; flex: 1; overflow: hidden; text-overflow: ellipsis;">
+            {{ uploadFile ? uploadFile.name : 'Belum ada file dipilih' }}
+          </span>
+          <input type="file" #uploadFileInput (change)="onUploadFileSelected($event)" accept=".pdf,.doc,.docx,.xlsx" style="display: none;">
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 1rem;">
+        <button type="button" mat-stroked-button (click)="showUploadModal = false">Batal</button>
+        <button type="submit" mat-flat-button color="primary" [disabled]="uploadForm.invalid || !uploadFile || isUploading">
+          <mat-icon *ngIf="!isUploading">cloud_upload</mat-icon>
+          <mat-progress-spinner *ngIf="isUploading" diameter="18" mode="indeterminate" style="display: inline-block; margin-right: 8px;"></mat-progress-spinner>
+          {{ isUploading ? 'Mengunggah...' : 'Simpan & Daftarkan' }}
         </button>
-        <!-- Hidden file input -->
-        <input type="file" #fileInput style="display: none" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx,.xls,.xlsx">
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Revisi Dokumen -->
+<div *ngIf="showRevisiModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; display: flex; align-items: center; justify-content: center; padding: 1rem;">
+  <div style="background: white; border-radius: var(--radius-lg); width: 100%; max-width: 500px; padding: 1.5rem; box-shadow: var(--shadow-xl);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600;">Unggah Revisi Dokumen</h3>
+      <button mat-icon-button (click)="showRevisiModal = false">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <p style="margin: 0 0 1rem; color: #64748b; font-size: 0.9rem;">
+      Menaikkan nomor versi untuk nomor surat: <strong>{{ selectedArsip?.no_surat }}</strong>
+    </p>
+
+    <div style="display: flex; flex-direction: column; gap: 1rem;">
+      <mat-form-field appearance="outline">
+        <mat-label>Catatan Alasan Revisi</mat-label>
+        <textarea matInput [(ngModel)]="revisiCatatan" rows="3" placeholder="Jelaskan perubahan yang dibuat pada versi baru ini..."></textarea>
+      </mat-form-field>
+
+      <div>
+        <label style="display: block; font-size: 0.85rem; font-weight: 500; color: #475569; margin-bottom: 6px;">Pilih Berkas Baru (.pdf, .docx)</label>
+        <div style="display: flex; align-items: center; gap: 1rem; border: 1px dashed #cbd5e1; padding: 12px; border-radius: var(--radius-md); background: #f8fafc;">
+          <button type="button" mat-stroked-button color="primary" (click)="revisiFileInput.click()">
+            <mat-icon>attach_file</mat-icon> Pilih Berkas
+          </button>
+          <span style="font-size: 0.85rem; color: #64748b; flex: 1; overflow: hidden; text-overflow: ellipsis;">
+            {{ revisiFile ? revisiFile.name : 'Belum ada file dipilih' }}
+          </span>
+          <input type="file" #revisiFileInput (change)="onRevisiFileSelected($event)" accept=".pdf,.doc,.docx" style="display: none;">
+        </div>
       </div>
 
-      <!-- Documents Table -->
-      <div style="overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-md);">
-        <table mat-table [dataSource]="documents" style="width: 100%;">
-          
-          <!-- Icon Column -->
-          <ng-container matColumnDef="ikon">
-            <th mat-header-cell *matHeaderCellDef style="width: 60px; text-align: center;"> </th>
-            <td mat-cell *matCellDef="let doc" style="text-align: center;"> 
-              <mat-icon color="primary">description</mat-icon>
-            </td>
-          </ng-container>
-
-          <!-- Judul Column -->
-          <ng-container matColumnDef="judul">
-            <th mat-header-cell *matHeaderCellDef> Judul Dokumen </th>
-            <td mat-cell *matCellDef="let doc" style="font-weight: 500;"> {{ doc.title }} </td>
-          </ng-container>
-
-          <!-- Klasifikasi Column -->
-          <ng-container matColumnDef="klasifikasi">
-            <th mat-header-cell *matHeaderCellDef> Klasifikasi </th>
-            <td mat-cell *matCellDef="let doc">
-              <span style="padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 500; background-color: #e2e8f0; color: #475569;">
-                {{ doc.klasifikasi }}
-              </span>
-            </td>
-          </ng-container>
-
-          <!-- Tanggal Column -->
-          <ng-container matColumnDef="tanggal">
-            <th mat-header-cell *matHeaderCellDef> Diupload </th>
-            <td mat-cell *matCellDef="let doc"> {{ doc.created_at | date:'dd MMM yyyy' }} </td>
-          </ng-container>
-
-          <!-- Aksi Column -->
-          <ng-container matColumnDef="aksi">
-            <th mat-header-cell *matHeaderCellDef style="text-align: right;"> Aksi </th>
-            <td mat-cell *matCellDef="let doc" style="text-align: right;">
-              <button mat-icon-button color="primary" matTooltip="Download Dokumen">
-                <mat-icon>download</mat-icon>
-              </button>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-          
-          <tr class="mat-row" *matNoDataRow>
-            <td class="mat-cell" colspan="5" style="text-align: center; padding: 2rem;">Tidak ada arsip yang ditemukan.</td>
-          </tr>
-        </table>
+      <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 1rem;">
+        <button mat-stroked-button (click)="showRevisiModal = false">Batal</button>
+        <button mat-flat-button color="primary" [disabled]="!revisiFile || !revisiCatatan.trim() || isSubmittingRevisi" (click)="submitRevisi()">
+          <mat-icon *ngIf="!isSubmittingRevisi">upgrade</mat-icon>
+          <mat-progress-spinner *ngIf="isSubmittingRevisi" diameter="18" mode="indeterminate" style="display: inline-block; margin-right: 8px;"></mat-progress-spinner>
+          {{ isSubmittingRevisi ? 'Memproses...' : 'Kirim Revisi' }}
+        </button>
       </div>
-    </mat-card-content>
-  </mat-card>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Riwayat Versi -->
+<div *ngIf="showVersionModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; display: flex; align-items: center; justify-content: center; padding: 1rem;">
+  <div style="background: white; border-radius: var(--radius-lg); width: 100%; max-width: 600px; padding: 1.5rem; box-shadow: var(--shadow-xl); max-height: 80vh; overflow-y: auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600;">Riwayat Versi Dokumen</h3>
+      <button mat-icon-button (click)="showVersionModal = false">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <p style="margin: 0 0 1.5rem; color: #64748b; font-size: 0.9rem;">
+      Dokumen: <strong>{{ selectedArsip?.no_surat }}</strong> - Versi Terkini: <span style="color: var(--color-primary); font-weight: 700;">{{ selectedArsip?.version }}</span>
+    </p>
+
+    <div *ngIf="isLoadingVersions" style="text-align: center; padding: 2rem;">
+      <mat-progress-spinner diameter="32" mode="indeterminate" style="margin: 0 auto;"></mat-progress-spinner>
+      <p style="color: #64748b; font-size: 0.85rem; margin-top: 8px;">Memuat riwayat versi...</p>
+    </div>
+
+    <div *ngIf="!isLoadingVersions && versionHistory.length === 0" style="text-align: center; padding: 2rem; color: #64748b;">
+      <mat-icon style="font-size: 32px; width: 32px; height: 32px; color: #cbd5e1;">history_toggle_off</mat-icon>
+      <p style="margin: 8px 0 0;">Dokumen ini belum memiliki riwayat revisi (masih versi awal).</p>
+    </div>
+
+    <div *ngIf="!isLoadingVersions && versionHistory.length > 0" style="display: flex; flex-direction: column; gap: 1rem;">
+      <div *ngFor="let ver of versionHistory" style="border-left: 3px solid var(--color-primary); padding-left: 1rem; background: #f8fafc; padding: 12px; border-radius: 0 var(--radius-md) var(--radius-md) 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-weight: 700; color: var(--color-primary);">Versi {{ ver.version_name }}</span>
+          <span style="font-size: 0.8rem; color: #64748b;">{{ ver.created_at | date:'dd MMM yyyy, HH:mm' }}</span>
+        </div>
+        <p style="margin: 6px 0 0; font-size: 0.85rem; color: #334155;">
+          <strong>Catatan:</strong> {{ ver.catatan_revisi }}
+        </p>
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+      <button mat-stroked-button (click)="showVersionModal = false">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Soft Delete dengan Alasan -->
+<div *ngIf="showDeleteModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; display: flex; align-items: center; justify-content: center; padding: 1rem;">
+  <div style="background: white; border-radius: var(--radius-lg); width: 100%; max-width: 480px; padding: 1.5rem; box-shadow: var(--shadow-xl);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: #dc2626;">Hapus Arsip (Soft Delete)</h3>
+      <button mat-icon-button (click)="showDeleteModal = false">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <p style="margin: 0 0 1rem; color: #475569; font-size: 0.9rem;">
+      Dokumen <strong>{{ selectedArsip?.no_surat }}</strong> akan dinonaktifkan dari publik. Sesuai regulasi audit Bawaslu, Anda <strong>wajib</strong> menyertakan alasan penghapusan.
+    </p>
+
+    <mat-form-field appearance="outline" style="width: 100%;">
+      <mat-label>Alasan Penghapusan (Minimal 10 karakter)</mat-label>
+      <textarea matInput [(ngModel)]="deleteReason" rows="3" placeholder="Contoh: Dokumen dibatalkan berdasarkan SK nomor..."></textarea>
+    </mat-form-field>
+
+    <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 1rem;">
+      <button mat-stroked-button (click)="showDeleteModal = false">Batal</button>
+      <button mat-flat-button color="warn" [disabled]="deleteReason.trim().length < 10 || isDeleting" (click)="submitDelete()">
+        <mat-icon *ngIf="!isDeleting">delete</mat-icon>
+        <mat-progress-spinner *ngIf="isDeleting" diameter="18" mode="indeterminate" style="display: inline-block; margin-right: 8px;"></mat-progress-spinner>
+        {{ isDeleting ? 'Menghapus...' : 'Konfirmasi Hapus' }}
+      </button>
+    </div>
+  </div>
 </div>

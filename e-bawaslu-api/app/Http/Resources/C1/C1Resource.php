@@ -21,6 +21,7 @@ class C1Resource extends JsonResource
             'total_suara_sah' => $this->total_suara_sah,
             'total_suara_tidak_sah' => $this->total_suara_tidak_sah,
             'total_pemilih' => $this->total_pemilih,
+            'suara_paslon' => $this->suara_paslon ? json_decode($this->suara_paslon, true) : null,
             'sha256_hash' => $this->sha256_hash,
             'file_url' => $this->file_url ? url('storage/' . $this->file_url) : null,
             'status_c1' => $this->status_c1,

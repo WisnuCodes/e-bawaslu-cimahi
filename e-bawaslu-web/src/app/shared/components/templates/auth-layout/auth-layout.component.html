@@ -1,24 +1,43 @@
 <div class="auth-wrapper">
-  <!-- Background Elements for Glassmorphism -->
-  <div class="bg-shape shape-1"></div>
-  <div class="bg-shape shape-2"></div>
+  <!-- Split Screen Design -->
+  <div class="auth-visual-side">
+    <div class="visual-content animate-fade-in-up">
+      <div class="brand-badge">
+        <img src="assets/icon/icon_bawaslu.jpg" alt="Logo Bawaslu" class="badge-logo" />
+        <span>SIM BAWASLU</span>
+      </div>
+      <h1 class="visual-heading">Sistem Informasi Manajemen<br/>Bawaslu Kota Cimahi</h1>
+      <p class="visual-subheading">Portal Terpadu untuk Pelaporan Kinerja, Pengawasan WFH, dan Manajemen E-Arsip Berbasis Cloud.</p>
+    </div>
+    <div class="visual-overlay"></div>
+  </div>
   
-  <main class="auth-container">
-    <div class="auth-content glass-panel animate-fade-in">
-      <div class="auth-header">
-        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 100 100" class="brand-logo">
-          <circle cx="50" cy="50" r="50" fill="var(--color-primary)"/>
-          <path d="M 35 25 L 65 25 Q 75 25 75 35 Q 75 45 65 45 L 35 45 Z" fill="white" />
-          <path d="M 35 45 L 65 45 Q 80 45 80 60 Q 80 75 65 75 L 35 75 Z" fill="white" />
-          <rect x="35" y="25" width="15" height="50" fill="var(--color-primary)" />
-          <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
-        </svg>
-        <h1>Portal Internal</h1>
-        <p>Badan Pengawas Pemilu</p>
+  <main class="auth-form-side">
+    <div class="auth-container animate-fade-in">
+      
+      <div class="auth-header-mobile">
+        <img src="assets/icon/icon_bawaslu.jpg" alt="Logo Bawaslu" class="mobile-logo" />
+        <h2>Portal Internal</h2>
       </div>
-      <div class="auth-body">
-        <router-outlet></router-outlet>
+
+      <mat-card class="auth-card">
+        <div class="auth-header">
+          <div class="auth-title">
+            <h1>Selamat Datang</h1>
+            <p>Silakan masuk menggunakan kredensial Anda</p>
+          </div>
+        </div>
+        
+        <mat-card-content class="auth-body">
+          <router-outlet></router-outlet>
+        </mat-card-content>
+      </mat-card>
+
+      <div class="auth-footer">
+        <p>&copy; 2026 Badan Pengawas Pemilihan Umum Kota Cimahi.</p>
+        <p>Aplikasi ini dilindungi oleh Enkripsi End-to-End.</p>
       </div>
+
     </div>
   </main>
 </div>
