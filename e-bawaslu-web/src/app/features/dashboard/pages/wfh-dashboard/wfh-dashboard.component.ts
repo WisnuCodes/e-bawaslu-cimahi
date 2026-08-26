@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { WfhService } from '../../../../core/services/wfh/wfh.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ButtonComponent } from '../../../../shared/components/atoms/button/button.component';
@@ -8,19 +8,22 @@ import { ButtonComponent } from '../../../../shared/components/atoms/button/butt
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
+import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-wfh-dashboard',
   standalone: true,
   imports: [
     CommonModule, 
+    FormsModule,
     ReactiveFormsModule, 
     ButtonComponent,
     MatCardModule,
@@ -32,7 +35,8 @@ import { MatSelectModule } from '@angular/material/select';
     MatDividerModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    MatSelectModule
+    MatSelectModule,
+    MatPaginatorModule
   ],
   templateUrl: './wfh-dashboard.component.html',
   styleUrl: './wfh-dashboard.component.css'
@@ -45,6 +49,9 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
   @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
   @ViewChild('canvasElement') canvasElement!: ElementRef<HTMLCanvasElement>;
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+  
+  @ViewChild('worklogPaginator') worklogPaginator!: MatPaginator;
+  @ViewChild('presensiPaginator') presensiPaginator!: MatPaginator;
 
   // Waktu Real-time
   currentTime: Date = new Date();
@@ -67,8 +74,16 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
   isCameraOpen = false;
   mediaStream: MediaStream | null = null;
 
-  presensiList: any[] = [];
+  presensiList = new MatTableDataSource<any>([]);
   presensiDisplayedColumns: string[] = ['nama', 'waktu_masuk', 'foto_masuk', 'waktu_keluar', 'foto_keluar', 'status', 'aksi'];
+
+  applyFilterPresensi = _.debounce((event: Event) => {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.presensiList.filter = filterValue.trim().toLowerCase();
+    if (this.presensiList.paginator) {
+      this.presensiList.paginator.firstPage();
+    }
+  }, 300);
 
   // Presensi Edit State (Admin only)
   editingPresensiId: string | null = null;
@@ -79,17 +94,54 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
   editWorklogId: string | null = null;
   selectedFile: File | null = null;
 
-  worklogs: any[] = [];
+  worklogs = new MatTableDataSource<any>([]);
   displayedColumns: string[] = ['tanggal', 'aktivitas', 'lampiran', 'status', 'aksi'];
+
+  applyFilterWorklogs = _.debounce((event: Event) => {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.worklogs.filter = filterValue.trim().toLowerCase();
+    if (this.worklogs.paginator) {
+      this.worklogs.paginator.firstPage();
+    }
+  }, 300);
 
   worklogForm: FormGroup = this.fb.group({
     activity: ['', Validators.required]
   });
 
+  // Tukin State
+  tukinList: any[] = [];
+  selectedTukinBulan: number = new Date().getMonth() + 1;
+  selectedTukinTahun: number = new Date().getFullYear();
+  isCalculatingTukin: boolean = false;
+  latestTukin: any = null;
+  tukinColumns: string[] = ['periode', 'jam_kerja', 'keterlambatan', 'total_tukin'];
+
+  months = [
+    { value: 1, label: 'Januari' },
+    { value: 2, label: 'Februari' },
+    { value: 3, label: 'Maret' },
+    { value: 4, label: 'April' },
+    { value: 5, label: 'Mei' },
+    { value: 6, label: 'Juni' },
+    { value: 7, label: 'Juli' },
+    { value: 8, label: 'Agustus' },
+    { value: 9, label: 'September' },
+    { value: 10, label: 'Oktober' },
+    { value: 11, label: 'November' },
+    { value: 12, label: 'Desember' },
+  ];
+
   get isAdmin(): boolean {
-    const user = this.authService.currentUser();
-    const role = (user?.role || '').toLowerCase();
-    return role === 'admin' || role === 'kepala divisi';
+    return this.authService.isAdmin;
+  }
+
+  get canApprove(): boolean {
+    return this.authService.canApprove;
+  }
+
+  get canViewOthersPresensi(): boolean {
+    return this.isAdmin || this.authService.isPimpinan || this.authService.isKepalaDivisi;
   }
 
   getAttachmentUrl(path: string | null): string {
@@ -102,12 +154,24 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
       this.currentTime = new Date();
     }, 1000);
 
-    if (!this.isAdmin) {
+    if (!this.canViewOthersPresensi) {
       this.presensiDisplayedColumns = ['waktu_masuk', 'foto_masuk', 'waktu_keluar', 'foto_keluar', 'status'];
+    } else {
+      this.presensiDisplayedColumns = ['nama', 'waktu_masuk', 'foto_masuk', 'waktu_keluar', 'foto_keluar', 'status'];
+      if (this.isAdmin) {
+        this.presensiDisplayedColumns.push('aksi');
+      }
+    }
+
+    if (this.canApprove) {
+      this.displayedColumns = ['nama', 'tanggal', 'aktivitas', 'lampiran', 'status', 'aksi'];
+    } else {
+      this.displayedColumns = ['tanggal', 'aktivitas', 'lampiran', 'status', 'aksi'];
     }
 
     this.loadWorklogs();
     this.loadPresensi();
+    this.loadTukin();
   }
 
   ngOnDestroy() {
@@ -120,10 +184,11 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
   loadWorklogs() {
     this.wfhService.getWorklogs().subscribe({
       next: (res) => {
-        this.worklogs = res.data || [];
+        this.worklogs.data = res.data || [];
+        this.worklogs.paginator = this.worklogPaginator;
       },
       error: () => {
-        this.worklogs = [];
+        this.worklogs.data = [];
       }
     });
   }
@@ -131,26 +196,20 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
   loadPresensi() {
     this.wfhService.getPresensi().subscribe({
       next: (res) => {
-        this.presensiList = res.data || [];
+        const data = res.data || [];
+        this.presensiList.data = data;
+        this.presensiList.paginator = this.presensiPaginator;
         
-        // Cek status hari ini langsung dari database (jangan pakai local storage)
-        const todayStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-        
-        // Cari record presensi kita hari ini
-        const myTodayLog = this.presensiList.find(p => 
-          p.timestamp_checkin.startsWith(todayStr) && 
+        const todayStr = new Date().toISOString().split('T')[0];
+        const myTodayLog = data.find((p: any) => 
+          p.timestamp_checkin && p.timestamp_checkin.startsWith(todayStr) && 
           p.nama_pegawai === this.authService.currentUser()?.username
         );
 
         if (myTodayLog) {
           this.isCheckedIn = true;
           this.presensiId = myTodayLog.presensi_id;
-          
-          if (myTodayLog.timestamp_checkout) {
-            this.isCheckedOut = true;
-          } else {
-            this.isCheckedOut = false;
-          }
+          this.isCheckedOut = !!myTodayLog.timestamp_checkout;
         } else {
           this.isCheckedIn = false;
           this.isCheckedOut = false;
@@ -158,7 +217,37 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
         }
       },
       error: () => {
-        this.presensiList = [];
+        this.presensiList.data = [];
+      }
+    });
+  }
+
+  loadTukin() {
+    this.wfhService.getTukin().subscribe({
+      next: (res) => {
+        this.tukinList = res.data || [];
+        if (this.tukinList.length > 0) {
+          this.latestTukin = this.tukinList[0];
+        }
+      },
+      error: () => {
+        this.tukinList = [];
+      }
+    });
+  }
+
+  onCalculateTukin() {
+    this.isCalculatingTukin = true;
+    this.wfhService.calculateTukin(this.selectedTukinBulan, this.selectedTukinTahun).subscribe({
+      next: (res) => {
+        this.isCalculatingTukin = false;
+        this.latestTukin = res.data;
+        alert('Kalkulasi Tukin berhasil diperbarui!');
+        this.loadTukin();
+      },
+      error: (err) => {
+        this.isCalculatingTukin = false;
+        alert(err.error?.message || 'Gagal menghitung Tunjangan Kinerja.');
       }
     });
   }
@@ -169,7 +258,7 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
     this.wfhService.approveWorklog(id, status).subscribe({
       next: () => {
         alert(`Worklog berhasil di-${status.toLowerCase()}!`);
-        this.loadWorklogs(); // Reload table
+        this.loadWorklogs();
       },
       error: (err) => {
         alert(err.error?.message || 'Gagal mengubah status worklog.');
@@ -185,7 +274,6 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
       navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
         .then(stream => {
           this.mediaStream = stream;
-          // Timeout to wait for Angular to render the *ngIf video element
           setTimeout(() => {
             if (this.videoElement && this.videoElement.nativeElement) {
               this.videoElement.nativeElement.srcObject = stream;
@@ -217,20 +305,17 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
     const video = this.videoElement.nativeElement;
     const canvas = this.canvasElement.nativeElement;
 
-    // Set canvas dimensions identical to video
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     
-    // Draw current frame to canvas
     const ctx = canvas.getContext('2d');
     if (ctx) {
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       
-      // Convert to Blob/File
       canvas.toBlob((blob) => {
         if (blob) {
           const file = new File([blob], 'selfie.jpg', { type: 'image/jpeg' });
-          this.stopCamera(); // Turn off camera immediately after capturing
+          this.stopCamera();
           this.processPresensi(file);
         }
       }, 'image/jpeg', 0.9);
@@ -245,7 +330,6 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
       this.isCheckingOut = true;
     }
 
-    // Dapatkan GPS Lokasi
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -273,14 +357,14 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
     const formData = new FormData();
     formData.append('selfie_image', file);
     formData.append('gps_koordinat', coords);
-    formData.append('liveness_score', '0.95'); // Mock liveness score
+    formData.append('liveness_score', '0.95');
 
     if (this.captureMode === 'checkin') {
       this.wfhService.checkIn(formData).subscribe({
         next: (res) => {
           this.isCheckingIn = false;
           alert('Berhasil Check In pada lokasi: ' + coords);
-          this.loadPresensi(); // Refresh dari database
+          this.loadPresensi();
         },
         error: (err) => {
           this.isCheckingIn = false;
@@ -293,7 +377,7 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
         next: (res) => {
           this.isCheckingOut = false;
           alert('Berhasil Check Out pada lokasi: ' + coords);
-          this.loadPresensi(); // Refresh dari database
+          this.loadPresensi();
         },
         error: (err) => {
           this.isCheckingOut = false;
@@ -308,7 +392,7 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
     this.isSubmittingLog = true;
 
     const formData = new FormData();
-    formData.append('tgl_kerja', new Date().toISOString().split('T')[0]); // format: YYYY-MM-DD
+    formData.append('tgl_kerja', new Date().toISOString().split('T')[0]);
     formData.append('rincian_aktivitas', this.worklogForm.value.activity);
     
     if (this.selectedFile) {
@@ -383,7 +467,6 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Edit Presensi Inline
   editPresensi(presensi: any) {
     this.editingPresensiId = presensi.presensi_id;
     this.editPresensiStatus = presensi.status_kehadiran || 'Hadir';
@@ -397,7 +480,7 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
   savePresensi(id: string) {
     if (!this.editPresensiStatus) return;
     this.wfhService.updatePresensi(id, { status_kehadiran: this.editPresensiStatus }).subscribe({
-      next: (res) => {
+      next: () => {
         this.editingPresensiId = null;
         this.loadPresensi();
       },
