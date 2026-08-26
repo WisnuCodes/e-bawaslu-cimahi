@@ -1,9 +1,10 @@
 <div class="page-header animate-fade-in" style="margin-bottom: 2rem;">
   <h2 style="margin: 0; color: var(--color-text); font-weight: 600;">WFH & Presensi</h2>
-  <p style="margin: 0; color: var(--color-text-muted);">Catat kehadiran dan log kerja Anda secara online.</p>
+  <p style="margin: 0; color: var(--color-text-muted);">Catat kehadiran, kelola log kerja, dan pantau kalkulasi Tunjangan Kinerja (Tukin).</p>
 </div>
 
-<div class="content-grid animate-fade-in" style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; align-items: start;">
+<div class="content-grid animate-fade-in" style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; align-items: start; margin-bottom: 1.5rem;">
+  <!-- Presensi Card -->
   <mat-card>
     <mat-card-header style="margin-bottom: 1rem;">
       <mat-card-title>Presensi Hari Ini</mat-card-title>
@@ -40,11 +41,9 @@
 
       <!-- Camera Modal / View -->
       <div *ngIf="isCameraOpen" style="margin-top: 1.5rem; background: #000; border-radius: var(--radius-md); overflow: hidden; position: relative;">
-        <!-- Live Video Stream -->
         <video #videoElement autoplay playsinline style="width: 100%; height: auto; max-height: 400px; object-fit: cover;"></video>
         <canvas #canvasElement style="display: none;"></canvas>
         
-        <!-- Camera Controls -->
         <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); padding: 1rem; display: flex; justify-content: center; gap: 1rem;">
           <button mat-flat-button color="primary" (click)="capturePhoto()">
             <mat-icon>camera</mat-icon> Jepret & Simpan
@@ -57,6 +56,7 @@
     </mat-card-content>
   </mat-card>
 
+  <!-- Worklogs Card -->
   <mat-card>
     <mat-card-header style="margin-bottom: 1rem;">
       <mat-card-title>Worklogs (Laporan Harian)</mat-card-title>
@@ -97,23 +97,32 @@
 
       <mat-divider style="margin-bottom: 1rem;"></mat-divider>
       
-      <h3 style="margin-top: 0; font-size: 1rem; font-weight: 500;">Riwayat Log</h3>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; margin-top: 2rem;">
+        <h3 style="margin: 0; font-size: 1rem; font-weight: 500;">Riwayat Log</h3>
+        <mat-form-field appearance="outline" style="width: 300px; margin-bottom: -1.25em;">
+          <mat-label>Cari Worklog...</mat-label>
+          <input matInput (input)="applyFilterWorklogs($event)" placeholder="Ketik kata kunci...">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+      </div>
       
       <div style="overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-md);">
         <table mat-table [dataSource]="worklogs" style="width: 100%;">
-          <!-- Tanggal Column -->
+          <ng-container matColumnDef="nama" *ngIf="canApprove">
+            <th mat-header-cell *matHeaderCellDef> Nama </th>
+            <td mat-cell *matCellDef="let log" style="font-weight: 500;"> {{ log.nama_pegawai || 'Anda' }} </td>
+          </ng-container>
+
           <ng-container matColumnDef="tanggal">
             <th mat-header-cell *matHeaderCellDef> Tanggal </th>
             <td mat-cell *matCellDef="let log"> {{ log.created_at | date:'dd MMM yyyy, HH:mm' }} </td>
           </ng-container>
 
-          <!-- Aktivitas Column -->
           <ng-container matColumnDef="aktivitas">
             <th mat-header-cell *matHeaderCellDef> Aktivitas </th>
             <td mat-cell *matCellDef="let log"> {{ log.rincian_aktivitas || log.activity }} </td>
           </ng-container>
 
-          <!-- Lampiran Column -->
           <ng-container matColumnDef="lampiran">
             <th mat-header-cell *matHeaderCellDef> Lampiran </th>
             <td mat-cell *matCellDef="let log">
@@ -124,7 +133,6 @@
             </td>
           </ng-container>
 
-          <!-- Status Column -->
           <ng-container matColumnDef="status">
             <th mat-header-cell *matHeaderCellDef> Status </th>
             <td mat-cell *matCellDef="let log">
@@ -147,13 +155,10 @@
             </td>
           </ng-container>
 
-          <!-- Aksi Column -->
           <ng-container matColumnDef="aksi">
             <th mat-header-cell *matHeaderCellDef style="text-align: right; width: 150px;"> Aksi </th>
             <td mat-cell *matCellDef="let log" style="text-align: right;">
-              
-              <!-- Khusus Admin: Persetujuan (Approve/Reject) -->
-              <ng-container *ngIf="isAdmin && log.status_approval !== 'Approved'">
+              <ng-container *ngIf="canApprove && log.status_approval !== 'Approved'">
                 <button mat-icon-button color="primary" matTooltip="Setujui Worklog" (click)="approveWorklog(log.worklog_id, 'Approved')">
                   <mat-icon>check_circle</mat-icon>
                 </button>
@@ -162,8 +167,7 @@
                 </button>
               </ng-container>
 
-              <!-- Umum: Edit & Delete -->
-              <ng-container *ngIf="isAdmin || log.status_approval !== 'Approved'">
+              <ng-container *ngIf="canApprove || log.status_approval !== 'Approved'">
                 <button mat-icon-button matTooltip="Edit Worklog" (click)="editWorklog(log)" style="color: #64748b;">
                   <mat-icon>edit</mat-icon>
                 </button>
@@ -171,25 +175,31 @@
                   <mat-icon>delete</mat-icon>
                 </button>
               </ng-container>
-
             </td>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;" style="transition: background 0.2s; cursor: default;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" style="transition: background 0.2s; cursor: default;"></tr>
           
           <tr class="mat-row" *matNoDataRow>
-            <td class="mat-cell" colspan="4" style="text-align: center; padding: 2rem;">Belum ada riwayat worklog.</td>
+            <td class="mat-cell" colspan="5" style="text-align: center; padding: 2rem;">Belum ada riwayat worklog.</td>
           </tr>
         </table>
+        <mat-paginator #worklogPaginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of worklogs"></mat-paginator>
       </div>
 
       <!-- Riwayat Presensi -->
-      <h3 style="font-size: 1.1rem; color: var(--color-text); margin-top: 2rem; margin-bottom: 1rem; border-bottom: 2px solid var(--color-border); padding-bottom: 8px;">Riwayat Presensi</h3>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; margin-top: 2rem; border-bottom: 2px solid var(--color-border); padding-bottom: 8px;">
+        <h3 style="font-size: 1.1rem; color: var(--color-text); margin: 0;">Riwayat Presensi</h3>
+        <mat-form-field appearance="outline" style="width: 300px; margin-bottom: -1.25em;">
+          <mat-label>Cari Presensi...</mat-label>
+          <input matInput (input)="applyFilterPresensi($event)" placeholder="Ketik nama atau status...">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+      </div>
       <div style="border-radius: var(--radius-md); overflow: auto; border: 1px solid var(--color-border);">
         <table mat-table [dataSource]="presensiList" style="width: 100%; box-shadow: none;">
-          
-          <ng-container matColumnDef="nama" *ngIf="isAdmin">
+          <ng-container matColumnDef="nama" *ngIf="canViewOthersPresensi">
             <th mat-header-cell *matHeaderCellDef> Nama </th>
             <td mat-cell *matCellDef="let p" style="font-weight: 500;"> {{ p.nama_pegawai || 'Anda' }} </td>
           </ng-container>
@@ -238,7 +248,7 @@
               </ng-container>
               <ng-container *ngIf="editingPresensiId === p.presensi_id">
                 <mat-form-field appearance="outline" style="width: 140px; margin-bottom: -1.25em;">
-                  <mat-select [value]="editPresensiStatus" (selectionChange)="editPresensiStatus = $event.value">
+                  <mat-select [(value)]="editPresensiStatus">
                     <mat-option value="Hadir">Hadir</mat-option>
                     <mat-option value="Terlambat">Terlambat</mat-option>
                     <mat-option value="Izin">Izin</mat-option>
@@ -273,7 +283,7 @@
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="presensiDisplayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: presensiDisplayedColumns;" style="transition: background 0.2s; cursor: default;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'"></tr>
+          <tr mat-row *matRowDef="let row; columns: presensiDisplayedColumns;" style="transition: background 0.2s; cursor: default;"></tr>
           
           <tr class="mat-row" *matNoDataRow>
             <td class="mat-cell" [attr.colspan]="presensiDisplayedColumns.length" style="text-align: center; padding: 2rem; color: var(--color-text-muted);">
@@ -281,8 +291,105 @@
             </td>
           </tr>
         </table>
+        <mat-paginator #presensiPaginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of presensi"></mat-paginator>
       </div>
-
     </mat-card-content>
   </mat-card>
 </div>
+
+<!-- Section: Tunjangan Kinerja (Tukin) -->
+<mat-card class="animate-fade-in" style="margin-top: 1.5rem;">
+  <mat-card-header style="margin-bottom: 1rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+      <div>
+        <mat-card-title style="display: flex; align-items: center; gap: 8px;">
+          <mat-icon color="primary">account_balance_wallet</mat-icon>
+          Kalkulasi & Rekapitulasi Tunjangan Kinerja (Tukin)
+        </mat-card-title>
+        <mat-card-subtitle>Perhitungan otomatis berdasarkan jam kerja presensi dan akumulasi keterlambatan.</mat-card-subtitle>
+      </div>
+    </div>
+  </mat-card-header>
+
+  <mat-card-content>
+    <!-- Filter & Hitung Bar -->
+    <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; background: #f8fafc; padding: 1rem; border-radius: var(--radius-md); border: 1px solid #e2e8f0; margin-bottom: 1.5rem;">
+      <mat-form-field appearance="outline" style="min-width: 160px; margin-bottom: -1.25em;">
+        <mat-label>Bulan</mat-label>
+        <mat-select [(ngModel)]="selectedTukinBulan">
+          <mat-option *ngFor="let m of months" [value]="m.value">{{ m.label }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" style="min-width: 120px; margin-bottom: -1.25em;">
+        <mat-label>Tahun</mat-label>
+        <input matInput type="number" [(ngModel)]="selectedTukinTahun" min="2020" max="2100">
+      </mat-form-field>
+
+      <button mat-flat-button color="primary" [disabled]="isCalculatingTukin" (click)="onCalculateTukin()" style="height: 52px;">
+        <mat-icon *ngIf="!isCalculatingTukin">calculate</mat-icon>
+        <mat-progress-spinner *ngIf="isCalculatingTukin" diameter="20" mode="indeterminate" style="display: inline-block; margin-right: 8px;"></mat-progress-spinner>
+        {{ isCalculatingTukin ? 'Menghitung...' : 'Hitung Tukin Periode Ini' }}
+      </button>
+    </div>
+
+    <!-- Ringkasan Tukin Highlight -->
+    <div *ngIf="latestTukin" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+      <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 1.25rem; border-radius: var(--radius-md);">
+        <span style="font-size: 0.85rem; color: #1e40af; font-weight: 500; display: block;">Basis Standar Tukin</span>
+        <span style="font-size: 1.4rem; font-weight: 700; color: #1e3a8a;">Rp 5.000.000</span>
+      </div>
+
+      <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 1.25rem; border-radius: var(--radius-md);">
+        <span style="font-size: 0.85rem; color: #166534; font-weight: 500; display: block;">Total Jam Kerja</span>
+        <span style="font-size: 1.4rem; font-weight: 700; color: #14532d;">{{ latestTukin.total_jam_kerja || 0 }} Jam</span>
+      </div>
+
+      <div style="background: #fffbeb; border: 1px solid #fde68a; padding: 1.25rem; border-radius: var(--radius-md);">
+        <span style="font-size: 0.85rem; color: #92400e; font-weight: 500; display: block;">Total Keterlambatan</span>
+        <span style="font-size: 1.4rem; font-weight: 700; color: #78350f;">{{ latestTukin.total_keterlambatan || 0 }} Menit</span>
+        <small style="color: #b45309;">(- Rp {{ (latestTukin.total_keterlambatan * 10000) | number }})</small>
+      </div>
+
+      <div style="background: #fdf2f8; border: 1px solid #fbcfe8; padding: 1.25rem; border-radius: var(--radius-md);">
+        <span style="font-size: 0.85rem; color: #9d174d; font-weight: 500; display: block;">Akumulasi Bersih Diterima</span>
+        <span style="font-size: 1.4rem; font-weight: 700; color: #831843;">Rp {{ (latestTukin.akumulasi_tukin || 0) | number }}</span>
+      </div>
+    </div>
+
+    <!-- Riwayat Tukin Table -->
+    <h3 style="font-size: 1rem; font-weight: 500; margin-bottom: 0.75rem;">Riwayat Rekapitulasi Tukin</h3>
+    <div style="border-radius: var(--radius-md); overflow: auto; border: 1px solid var(--color-border);">
+      <table mat-table [dataSource]="tukinList" style="width: 100%;">
+        <ng-container matColumnDef="periode">
+          <th mat-header-cell *matHeaderCellDef> Periode </th>
+          <td mat-cell *matCellDef="let t" style="font-weight: 600;"> Bulan {{ t.bulan }} / {{ t.tahun }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="jam_kerja">
+          <th mat-header-cell *matHeaderCellDef> Total Jam Kerja </th>
+          <td mat-cell *matCellDef="let t"> {{ t.total_jam_kerja }} Jam </td>
+        </ng-container>
+
+        <ng-container matColumnDef="keterlambatan">
+          <th mat-header-cell *matHeaderCellDef> Keterlambatan </th>
+          <td mat-cell *matCellDef="let t"> {{ t.total_keterlambatan }} Menit </td>
+        </ng-container>
+
+        <ng-container matColumnDef="total_tukin">
+          <th mat-header-cell *matHeaderCellDef> Akumulasi Tukin Bersih </th>
+          <td mat-cell *matCellDef="let t" style="color: #166534; font-weight: 700;"> Rp {{ (t.akumulasi_tukin || 0) | number }} </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="tukinColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: tukinColumns;"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" colspan="4" style="text-align: center; padding: 2rem; color: var(--color-text-muted);">
+            Belum ada catatan kalkulasi Tukin. Silakan klik tombol "Hitung Tukin Periode Ini".
+          </td>
+        </tr>
+      </table>
+    </div>
+  </mat-card-content>
+</mat-card>
