@@ -21,4 +21,9 @@ class AuditLog extends Model
         'reason',
         'timestamp'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'actor_id', 'user_id');
+    }
 }

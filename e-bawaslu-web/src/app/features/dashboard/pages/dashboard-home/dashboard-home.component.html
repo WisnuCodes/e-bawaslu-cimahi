@@ -34,7 +34,7 @@
   <div class="stats-grid">
     
     <!-- Status Presensi Hari Ini -->
-    <div class="stat-card-modern">
+    <div class="stat-card-modern" *ngIf="authService.currentUser()?.role !== 'Saksi TPS'">
       <div class="stat-card-header">
         <h3 class="stat-title">Status Presensi<br>Hari Ini</h3>
         <div class="stat-icon-wrapper">
@@ -53,7 +53,7 @@
     </div>
 
     <!-- Dokumen E-Arsip -->
-    <div class="stat-card-modern">
+    <div class="stat-card-modern" *ngIf="authService.currentUser()?.role !== 'Saksi TPS'">
       <div class="stat-card-header">
         <h3 class="stat-title">Dokumen<br>E-Arsip</h3>
         <div class="stat-icon-wrapper">
@@ -127,7 +127,7 @@
     <div class="quick-actions-grid">
       
       <!-- Presensi WFH -->
-      <a routerLink="/dashboard/wfh" class="action-tile-modern">
+      <a routerLink="/dashboard/wfh" class="action-tile-modern" *ngIf="authService.currentUser()?.role !== 'Saksi TPS'">
         <div class="action-tile-icon">
           <mat-icon>add_a_photo</mat-icon>
         </div>
@@ -138,7 +138,7 @@
       </a>
 
       <!-- E-Arsip -->
-      <a routerLink="/dashboard/arsip" class="action-tile-modern">
+      <a routerLink="/dashboard/arsip" class="action-tile-modern" *ngIf="authService.currentUser()?.role !== 'Saksi TPS'">
         <div class="action-tile-icon">
           <mat-icon>drive_folder_upload</mat-icon>
         </div>

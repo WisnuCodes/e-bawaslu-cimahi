@@ -126,12 +126,14 @@ class DatabaseSeeder extends Seeder
             [
                 'username' => 'SUPER ADMIN IT BAWASLU',
                 'email' => 'superadmin@cimahi.bawaslu.go.id',
+                'whatsapp_number' => '081234567890',
                 'role' => 'Super Administrator',
                 'divisi_id' => $divisiData['IT']['id'],
             ],
             [
                 'username' => 'admin_bawaslu',
                 'email' => 'admin@bawaslu.go.id',
+                'whatsapp_number' => '081234567890',
                 'role' => 'Super Administrator',
                 'divisi_id' => $divisiData['IT']['id'],
             ],

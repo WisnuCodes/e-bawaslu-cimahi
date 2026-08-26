@@ -1,319 +1,314 @@
-<div class="page-header animate-fade-in" style="margin-bottom: 2rem;">
-  <h2 style="margin: 0; color: var(--color-text); font-weight: 600;">WFH & Presensi</h2>
-  <p style="margin: 0; color: var(--color-text-muted);">Catat kehadiran, kelola log kerja, dan pantau kalkulasi Tunjangan Kinerja (Tukin).</p>
+﻿<!-- Page Header -->
+<div class="wfh-header animate-fade-in">
+  <h2>WFH & Presensi</h2>
+  <p>Catat kehadiran, kelola log kerja, dan pantau kalkulasi Tunjangan Kinerja (Tukin).</p>
 </div>
 
-<div class="content-grid animate-fade-in" style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; align-items: start; margin-bottom: 1.5rem;">
-  <!-- Presensi Card -->
-  <mat-card>
-    <mat-card-header style="margin-bottom: 1rem;">
-      <mat-card-title>Presensi Hari Ini</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
+<!-- TOP GRID: Presensi (left) + Worklog Form (right) -->
+<div class="wfh-top-grid animate-fade-in">
+
+  <!-- LEFT: Presensi Card -->
+  <div class="section-card">
+    <div class="card-header">
+      <mat-icon class="card-icon">fingerprint</mat-icon>
+      <h3>Presensi Hari Ini</h3>
+    </div>
+    <div class="card-body">
       <!-- Jam Digital -->
-      <div style="text-align: center; margin-bottom: 1.5rem; background: var(--color-background); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--color-border);">
-        <div style="font-size: 2.5rem; font-weight: 700; color: var(--color-primary); font-family: monospace;">
-          {{ currentTime | date:'HH:mm:ss' }}
-        </div>
-        <div style="color: var(--color-text-muted); font-size: 0.9rem;">
-          {{ currentTime | date:'EEEE, dd MMMM yyyy' }}
-        </div>
+      <div class="clock-box">
+        <div class="clock-time">{{ currentTime | date:'HH:mm:ss' }}</div>
+        <div class="clock-date">{{ currentTime | date:'EEEE, dd MMMM yyyy' }}</div>
       </div>
 
-      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 1.5rem;">
-        <mat-icon [color]="isCheckedOut ? 'accent' : (isCheckedIn ? 'primary' : 'warn')">
-          {{ isCheckedOut ? 'done_all' : (isCheckedIn ? 'check_circle' : 'cancel') }}
+      <!-- Status -->
+      <div class="status-indicator" [ngClass]="{ 'selesai': isCheckedOut, 'hadir': isCheckedIn && !isCheckedOut, 'belum': !isCheckedIn }">
+        <mat-icon>
+          {{ isCheckedOut ? 'done_all' : (isCheckedIn ? 'check_circle' : 'radio_button_unchecked') }}
         </mat-icon>
-        <span [style.color]="isCheckedOut ? 'var(--color-primary)' : (isCheckedIn ? 'var(--color-success)' : 'var(--color-error)')" style="font-weight: 500;">
+        <span>
           {{ isCheckedOut ? 'Selesai (Sudah Check Out)' : (isCheckedIn ? 'Sedang Bekerja (Sudah Check In)' : 'Belum Check In') }}
         </span>
       </div>
-      
-      <div *ngIf="!isGettingLocation && !isCameraOpen" style="display: flex; flex-direction: column; gap: 1rem;">
-        <button mat-flat-button color="primary" [disabled]="isCheckedIn || isCheckingIn" (click)="openCamera('checkin')" style="width: 100%; height: 48px; font-size: 1rem;">
-          <mat-icon>photo_camera</mat-icon> Buka Kamera & Check In
+
+      <!-- Buttons -->
+      <div *ngIf="!isGettingLocation && !isCameraOpen" style="display: flex; flex-direction: column; gap: 10px;">
+        <button mat-flat-button color="primary" class="action-btn" [disabled]="isCheckedIn || isCheckingIn" (click)="openCamera('checkin')">
+          <mat-icon>photo_camera</mat-icon>&nbsp; Check In
         </button>
-        
-        <button mat-stroked-button color="warn" [disabled]="!isCheckedIn || isCheckedOut || isCheckingOut" (click)="openCamera('checkout')" style="width: 100%; height: 48px; font-size: 1rem;">
-          <mat-icon>logout</mat-icon> Buka Kamera & Check Out
+        <button mat-stroked-button color="warn" class="action-btn" [disabled]="!isCheckedIn || isCheckedOut || isCheckingOut" (click)="openCamera('checkout')">
+          <mat-icon>logout</mat-icon>&nbsp; Check Out
         </button>
       </div>
 
-      <!-- Camera Modal / View -->
-      <div *ngIf="isCameraOpen" style="margin-top: 1.5rem; background: #000; border-radius: var(--radius-md); overflow: hidden; position: relative;">
-        <video #videoElement autoplay playsinline style="width: 100%; height: auto; max-height: 400px; object-fit: cover;"></video>
+      <!-- Camera Modal -->
+      <div *ngIf="isCameraOpen" style="margin-top: 16px; background: #000; border-radius: 8px; overflow: hidden; position: relative;">
+        <video #videoElement autoplay playsinline style="width: 100%; height: auto; max-height: 300px; object-fit: cover;"></video>
         <canvas #canvasElement style="display: none;"></canvas>
-        
-        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); padding: 1rem; display: flex; justify-content: center; gap: 1rem;">
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); padding: 12px; display: flex; justify-content: center; gap: 12px;">
           <button mat-flat-button color="primary" (click)="capturePhoto()">
             <mat-icon>camera</mat-icon> Jepret & Simpan
           </button>
-          <button mat-stroked-button color="warn" style="background: white;" (click)="stopCamera()">
+          <button mat-stroked-button style="background: white;" (click)="stopCamera()">
             Batal
           </button>
         </div>
       </div>
-    </mat-card-content>
-  </mat-card>
+    </div>
+  </div>
 
-  <!-- Worklogs Card -->
-  <mat-card>
-    <mat-card-header style="margin-bottom: 1rem;">
-      <mat-card-title>Worklogs (Laporan Harian)</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <form [formGroup]="worklogForm" (ngSubmit)="onSubmitWorklog()" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
+  <!-- RIGHT: Worklog Form -->
+  <div class="section-card">
+    <div class="card-header">
+      <mat-icon class="card-icon">edit_note</mat-icon>
+      <h3>Worklogs (Laporan Harian)</h3>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="worklogForm" (ngSubmit)="onSubmitWorklog()" style="display: flex; flex-direction: column; gap: 12px;">
         <mat-form-field appearance="outline" style="width: 100%;">
           <mat-label>Aktivitas</mat-label>
           <textarea matInput formControlName="activity" rows="3" placeholder="Deskripsikan pekerjaan Anda hari ini..."></textarea>
           <mat-error *ngIf="worklogForm.get('activity')?.hasError('required')">Aktivitas wajib diisi</mat-error>
         </mat-form-field>
-        
-        <div style="margin-top: 8px;">
-          <label style="display:block; font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 8px; font-weight: 500;">Lampiran Dokumen/Foto Bukti Kerja (Opsional)</label>
-          <div style="display: flex; align-items: center; gap: 1rem; border: 1px dashed #cbd5e1; padding: 12px 16px; border-radius: var(--radius-md); background: #f8fafc; transition: all 0.2s;">
+
+        <div>
+          <label style="display: block; font-size: 0.8rem; color: #64748b; margin-bottom: 6px; font-weight: 500;">Lampiran Bukti Kerja (Opsional)</label>
+          <div style="display: flex; align-items: center; gap: 12px; border: 1px dashed #cbd5e1; padding: 10px 14px; border-radius: 6px; background: #fafafa;">
             <button type="button" mat-stroked-button color="primary" (click)="fileInput.click()" style="background: white;">
               <mat-icon>upload_file</mat-icon> Pilih File
             </button>
-            <span style="font-size: 0.9rem; color: var(--color-text-muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-              {{ selectedFile ? selectedFile.name : 'Belum ada file yang dipilih (.pdf, .jpg, .png)' }}
+            <span style="font-size: 0.85rem; color: #64748b; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              {{ selectedFile ? selectedFile.name : 'Belum ada file dipilih' }}
             </span>
-            <button type="button" mat-icon-button color="warn" *ngIf="selectedFile" (click)="selectedFile = null; fileInput.value = ''" matTooltip="Batalkan pilihan">
+            <button type="button" mat-icon-button color="warn" *ngIf="selectedFile" (click)="selectedFile = null; fileInput.value = ''" matTooltip="Batalkan">
               <mat-icon>close</mat-icon>
             </button>
             <input type="file" #fileInput (change)="onFileSelected($event)" accept=".pdf,image/jpeg,image/png" style="display: none;">
           </div>
         </div>
 
-        <div style="display: flex; justify-content: flex-end; gap: 8px;">
-          <button *ngIf="isEditMode" mat-stroked-button type="button" (click)="cancelEdit()">
-            Batal
-          </button>
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px;">
+          <button *ngIf="isEditMode" mat-stroked-button type="button" (click)="cancelEdit()">Batal</button>
           <button mat-flat-button color="primary" type="submit" [disabled]="worklogForm.invalid || isSubmittingLog">
             <mat-icon>{{ isEditMode ? 'update' : 'save' }}</mat-icon> {{ isEditMode ? 'Perbarui Laporan' : 'Simpan Laporan' }}
           </button>
         </div>
       </form>
+    </div>
+  </div>
 
-      <mat-divider style="margin-bottom: 1rem;"></mat-divider>
-      
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; margin-top: 2rem;">
-        <h3 style="margin: 0; font-size: 1rem; font-weight: 500;">Riwayat Log</h3>
-        <mat-form-field appearance="outline" style="width: 300px; margin-bottom: -1.25em;">
-          <mat-label>Cari Worklog...</mat-label>
-          <input matInput (input)="applyFilterWorklogs($event)" placeholder="Ketik kata kunci...">
-          <mat-icon matSuffix>search</mat-icon>
-        </mat-form-field>
-      </div>
-      
-      <div style="overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-md);">
-        <table mat-table [dataSource]="worklogs" style="width: 100%;">
-          <ng-container matColumnDef="nama" *ngIf="canApprove">
-            <th mat-header-cell *matHeaderCellDef> Nama </th>
-            <td mat-cell *matCellDef="let log" style="font-weight: 500;"> {{ log.nama_pegawai || 'Anda' }} </td>
-          </ng-container>
-
-          <ng-container matColumnDef="tanggal">
-            <th mat-header-cell *matHeaderCellDef> Tanggal </th>
-            <td mat-cell *matCellDef="let log"> {{ log.created_at | date:'dd MMM yyyy, HH:mm' }} </td>
-          </ng-container>
-
-          <ng-container matColumnDef="aktivitas">
-            <th mat-header-cell *matHeaderCellDef> Aktivitas </th>
-            <td mat-cell *matCellDef="let log"> {{ log.rincian_aktivitas || log.activity }} </td>
-          </ng-container>
-
-          <ng-container matColumnDef="lampiran">
-            <th mat-header-cell *matHeaderCellDef> Lampiran </th>
-            <td mat-cell *matCellDef="let log">
-              <a *ngIf="log.attachment_url" [href]="getAttachmentUrl(log.attachment_url)" target="_blank" style="color: var(--color-primary); text-decoration: none; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 4px; background: rgba(0,0,0,0.05);">
-                <mat-icon style="font-size: 16px; width: 16px; height: 16px;">attachment</mat-icon> Lihat File
-              </a>
-              <span *ngIf="!log.attachment_url" style="color: var(--color-text-muted); font-size: 0.85rem; font-style: italic;">Tidak ada</span>
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef> Status </th>
-            <td mat-cell *matCellDef="let log">
-              <span [ngStyle]="{
-                  'padding': '6px 12px',
-                  'border-radius': '20px',
-                  'font-size': '0.75rem',
-                  'font-weight': '600',
-                  'display': 'inline-flex',
-                  'align-items': 'center',
-                  'gap': '4px',
-                  'background-color': (log.status_approval === 'Approved' || log.status_approval === 'Disetujui') ? '#dcfce7' : (log.status_approval === 'Revised' ? '#fee2e2' : '#fef9c3'),
-                  'color': (log.status_approval === 'Approved' || log.status_approval === 'Disetujui') ? '#166534' : (log.status_approval === 'Revised' ? '#991b1b' : '#854d0e')
-                }">
-                <mat-icon style="font-size: 14px; width: 14px; height: 14px;">
-                  {{ (log.status_approval === 'Approved' || log.status_approval === 'Disetujui') ? 'check_circle' : (log.status_approval === 'Revised' ? 'cancel' : 'schedule') }}
-                </mat-icon>
-                {{ log.status_approval || 'Pending' }}
-              </span>
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="aksi">
-            <th mat-header-cell *matHeaderCellDef style="text-align: right; width: 150px;"> Aksi </th>
-            <td mat-cell *matCellDef="let log" style="text-align: right;">
-              <ng-container *ngIf="canApprove && log.status_approval !== 'Approved'">
-                <button mat-icon-button color="primary" matTooltip="Setujui Worklog" (click)="approveWorklog(log.worklog_id, 'Approved')">
-                  <mat-icon>check_circle</mat-icon>
-                </button>
-                <button mat-icon-button color="warn" matTooltip="Minta Revisi" (click)="approveWorklog(log.worklog_id, 'Revised')">
-                  <mat-icon>cancel</mat-icon>
-                </button>
-              </ng-container>
-
-              <ng-container *ngIf="canApprove || log.status_approval !== 'Approved'">
-                <button mat-icon-button matTooltip="Edit Worklog" (click)="editWorklog(log)" style="color: #64748b;">
-                  <mat-icon>edit</mat-icon>
-                </button>
-                <button mat-icon-button color="warn" matTooltip="Hapus Worklog" (click)="deleteWorklog(log.worklog_id)">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </ng-container>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;" style="transition: background 0.2s; cursor: default;"></tr>
-          
-          <tr class="mat-row" *matNoDataRow>
-            <td class="mat-cell" colspan="5" style="text-align: center; padding: 2rem;">Belum ada riwayat worklog.</td>
-          </tr>
-        </table>
-        <mat-paginator #worklogPaginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of worklogs"></mat-paginator>
-      </div>
-
-      <!-- Riwayat Presensi -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; margin-top: 2rem; border-bottom: 2px solid var(--color-border); padding-bottom: 8px;">
-        <h3 style="font-size: 1.1rem; color: var(--color-text); margin: 0;">Riwayat Presensi</h3>
-        <mat-form-field appearance="outline" style="width: 300px; margin-bottom: -1.25em;">
-          <mat-label>Cari Presensi...</mat-label>
-          <input matInput (input)="applyFilterPresensi($event)" placeholder="Ketik nama atau status...">
-          <mat-icon matSuffix>search</mat-icon>
-        </mat-form-field>
-      </div>
-      <div style="border-radius: var(--radius-md); overflow: auto; border: 1px solid var(--color-border);">
-        <table mat-table [dataSource]="presensiList" style="width: 100%; box-shadow: none;">
-          <ng-container matColumnDef="nama" *ngIf="canViewOthersPresensi">
-            <th mat-header-cell *matHeaderCellDef> Nama </th>
-            <td mat-cell *matCellDef="let p" style="font-weight: 500;"> {{ p.nama_pegawai || 'Anda' }} </td>
-          </ng-container>
-
-          <ng-container matColumnDef="waktu_masuk">
-            <th mat-header-cell *matHeaderCellDef> Waktu Check-In </th>
-            <td mat-cell *matCellDef="let p"> {{ p.timestamp_checkin | date:'dd MMM yyyy, HH:mm' }} </td>
-          </ng-container>
-
-          <ng-container matColumnDef="foto_masuk">
-            <th mat-header-cell *matHeaderCellDef> Foto Masuk </th>
-            <td mat-cell *matCellDef="let p">
-              <a *ngIf="p.selfie_masuk_url" [href]="getAttachmentUrl(p.selfie_masuk_url)" target="_blank">
-                <img [src]="getAttachmentUrl(p.selfie_masuk_url)" alt="Check In" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover; border: 1px solid #e2e8f0; margin-top: 4px;">
-              </a>
-              <span *ngIf="!p.selfie_masuk_url">-</span>
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="waktu_keluar">
-            <th mat-header-cell *matHeaderCellDef> Waktu Check-Out </th>
-            <td mat-cell *matCellDef="let p"> {{ p.timestamp_checkout ? (p.timestamp_checkout | date:'dd MMM yyyy, HH:mm') : '-' }} </td>
-          </ng-container>
-
-          <ng-container matColumnDef="foto_keluar">
-            <th mat-header-cell *matHeaderCellDef> Foto Keluar </th>
-            <td mat-cell *matCellDef="let p">
-              <a *ngIf="p.selfie_keluar_url" [href]="getAttachmentUrl(p.selfie_keluar_url)" target="_blank">
-                <img [src]="getAttachmentUrl(p.selfie_keluar_url)" alt="Check Out" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover; border: 1px solid #e2e8f0; margin-top: 4px;">
-              </a>
-              <span *ngIf="!p.selfie_keluar_url" style="color: #94a3b8; font-size: 0.85rem;">-</span>
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef> Status </th>
-            <td mat-cell *matCellDef="let p">
-              <ng-container *ngIf="editingPresensiId !== p.presensi_id">
-                <span [ngStyle]="{
-                  'padding': '4px 8px', 'border-radius': '12px', 'font-size': '0.75rem', 'font-weight': '600',
-                  'background-color': p.status_kehadiran === 'Hadir' ? '#dcfce7' : (p.status_kehadiran === 'Terlambat' ? '#fef9c3' : '#fee2e2'),
-                  'color': p.status_kehadiran === 'Hadir' ? '#166534' : (p.status_kehadiran === 'Terlambat' ? '#854d0e' : '#991b1b')
-                }">
-                  {{ p.status_kehadiran || 'Hadir' }}
-                </span>
-              </ng-container>
-              <ng-container *ngIf="editingPresensiId === p.presensi_id">
-                <mat-form-field appearance="outline" style="width: 140px; margin-bottom: -1.25em;">
-                  <mat-select [(value)]="editPresensiStatus">
-                    <mat-option value="Hadir">Hadir</mat-option>
-                    <mat-option value="Terlambat">Terlambat</mat-option>
-                    <mat-option value="Izin">Izin</mat-option>
-                    <mat-option value="Sakit">Sakit</mat-option>
-                    <mat-option value="Alpa">Alpa</mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </ng-container>
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="aksi" *ngIf="isAdmin">
-            <th mat-header-cell *matHeaderCellDef style="text-align: right; width: 120px;"> Aksi </th>
-            <td mat-cell *matCellDef="let p" style="text-align: right;">
-              <ng-container *ngIf="editingPresensiId !== p.presensi_id">
-                <button mat-icon-button matTooltip="Edit Presensi" (click)="editPresensi(p)" style="color: #64748b;">
-                  <mat-icon style="font-size: 20px;">edit</mat-icon>
-                </button>
-                <button mat-icon-button color="warn" matTooltip="Hapus Presensi" (click)="deletePresensi(p.presensi_id)">
-                  <mat-icon style="font-size: 20px;">delete</mat-icon>
-                </button>
-              </ng-container>
-              <ng-container *ngIf="editingPresensiId === p.presensi_id">
-                <button mat-icon-button color="primary" matTooltip="Simpan" (click)="savePresensi(p.presensi_id)">
-                  <mat-icon style="font-size: 20px;">check</mat-icon>
-                </button>
-                <button mat-icon-button color="warn" matTooltip="Batal" (click)="cancelEditPresensi()">
-                  <mat-icon style="font-size: 20px;">close</mat-icon>
-                </button>
-              </ng-container>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="presensiDisplayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: presensiDisplayedColumns;" style="transition: background 0.2s; cursor: default;"></tr>
-          
-          <tr class="mat-row" *matNoDataRow>
-            <td class="mat-cell" [attr.colspan]="presensiDisplayedColumns.length" style="text-align: center; padding: 2rem; color: var(--color-text-muted);">
-              Belum ada riwayat presensi.
-            </td>
-          </tr>
-        </table>
-        <mat-paginator #presensiPaginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of presensi"></mat-paginator>
-      </div>
-    </mat-card-content>
-  </mat-card>
 </div>
 
-<!-- Section: Tunjangan Kinerja (Tukin) -->
-<mat-card class="animate-fade-in" style="margin-top: 1.5rem;">
-  <mat-card-header style="margin-bottom: 1rem;">
-    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-      <div>
-        <mat-card-title style="display: flex; align-items: center; gap: 8px;">
-          <mat-icon color="primary">account_balance_wallet</mat-icon>
-          Kalkulasi & Rekapitulasi Tunjangan Kinerja (Tukin)
-        </mat-card-title>
-        <mat-card-subtitle>Perhitungan otomatis berdasarkan jam kerja presensi dan akumulasi keterlambatan.</mat-card-subtitle>
-      </div>
-    </div>
-  </mat-card-header>
+<!-- TABEL RIWAYAT WORKLOG -->
+<div class="section-card animate-fade-in" style="margin-bottom: 1.5rem;">
+  <div class="table-section-header">
+    <h3>
+      <mat-icon class="card-icon">history</mat-icon>
+      Riwayat Worklog
+    </h3>
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Cari Worklog...</mat-label>
+      <input matInput (input)="applyFilterWorklogs($event)" placeholder="Ketik kata kunci...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
 
-  <mat-card-content>
-    <!-- Filter & Hitung Bar -->
-    <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; background: #f8fafc; padding: 1rem; border-radius: var(--radius-md); border: 1px solid #e2e8f0; margin-bottom: 1.5rem;">
+  <div class="table-responsive-wrapper">
+    <table mat-table [dataSource]="worklogs" style="width: 100%;">
+      <ng-container matColumnDef="nama" *ngIf="canApprove">
+        <th mat-header-cell *matHeaderCellDef> Nama </th>
+        <td mat-cell *matCellDef="let log" style="font-weight: 500;"> {{ log.nama_pegawai || 'Anda' }} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="tanggal">
+        <th mat-header-cell *matHeaderCellDef> Tanggal </th>
+        <td mat-cell *matCellDef="let log"> {{ log.created_at | date:'dd MMM yyyy, HH:mm' }} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="aktivitas">
+        <th mat-header-cell *matHeaderCellDef> Aktivitas </th>
+        <td mat-cell *matCellDef="let log"> {{ log.rincian_aktivitas || log.activity }} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="lampiran">
+        <th mat-header-cell *matHeaderCellDef> Lampiran </th>
+        <td mat-cell *matCellDef="let log">
+          <a *ngIf="log.attachment_url" [href]="getAttachmentUrl(log.attachment_url)" target="_blank" style="color: #3b82f6; text-decoration: none; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 4px;">
+            <mat-icon style="font-size: 16px; width: 16px; height: 16px;">attachment</mat-icon> Lihat
+          </a>
+          <span *ngIf="!log.attachment_url" style="color: #94a3b8; font-size: 0.85rem;">â€”</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef> Status </th>
+        <td mat-cell *matCellDef="let log">
+          <span [ngStyle]="{
+              'padding': '4px 10px',
+              'border-radius': '4px',
+              'font-size': '0.75rem',
+              'font-weight': '600',
+              'background-color': (log.status_approval === 'Approved' || log.status_approval === 'Disetujui') ? '#dcfce7' : (log.status_approval === 'Revised' ? '#fee2e2' : '#fef9c3'),
+              'color': (log.status_approval === 'Approved' || log.status_approval === 'Disetujui') ? '#166534' : (log.status_approval === 'Revised' ? '#991b1b' : '#854d0e')
+            }">
+            {{ log.status_approval || 'Pending' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="aksi">
+        <th mat-header-cell *matHeaderCellDef style="text-align: right; width: 150px;"> Aksi </th>
+        <td mat-cell *matCellDef="let log" style="text-align: right;">
+          <ng-container *ngIf="canApprove && log.status_approval !== 'Approved'">
+            <button mat-icon-button color="primary" matTooltip="Setujui" (click)="approveWorklog(log.worklog_id, 'Approved')">
+              <mat-icon>check_circle</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" matTooltip="Revisi" (click)="approveWorklog(log.worklog_id, 'Revised')">
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </ng-container>
+          <ng-container *ngIf="canApprove || log.status_approval !== 'Approved'">
+            <button mat-icon-button matTooltip="Edit" (click)="editWorklog(log)" style="color: #64748b;">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" matTooltip="Hapus" (click)="deleteWorklog(log.worklog_id)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </ng-container>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" colspan="6" style="text-align: center; padding: 2rem; color: #94a3b8;">Belum ada riwayat worklog.</td>
+      </tr>
+    </table>
+    <mat-paginator #worklogPaginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of worklogs"></mat-paginator>
+  </div>
+</div>
+
+<!-- TABEL RIWAYAT PRESENSI -->
+<div class="section-card animate-fade-in" style="margin-bottom: 1.5rem;">
+  <div class="table-section-header">
+    <h3>
+      <mat-icon class="card-icon">badge</mat-icon>
+      Riwayat Presensi
+    </h3>
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Cari Presensi...</mat-label>
+      <input matInput (input)="applyFilterPresensi($event)" placeholder="Ketik nama atau status...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <div class="table-responsive-wrapper">
+    <table mat-table [dataSource]="presensiList" style="width: 100%;">
+      <ng-container matColumnDef="nama" *ngIf="canViewOthersPresensi">
+        <th mat-header-cell *matHeaderCellDef> Nama </th>
+        <td mat-cell *matCellDef="let p" style="font-weight: 500;"> {{ p.nama_pegawai || 'Anda' }} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="waktu_masuk">
+        <th mat-header-cell *matHeaderCellDef> Waktu Check-In </th>
+        <td mat-cell *matCellDef="let p"> {{ p.timestamp_checkin | date:'dd MMM yyyy, HH:mm' }} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="foto_masuk">
+        <th mat-header-cell *matHeaderCellDef> Foto Masuk </th>
+        <td mat-cell *matCellDef="let p">
+          <a *ngIf="p.selfie_masuk_url" [href]="getAttachmentUrl(p.selfie_masuk_url)" target="_blank">
+            <img [src]="getAttachmentUrl(p.selfie_masuk_url)" alt="Check In" style="width: 36px; height: 36px; border-radius: 4px; object-fit: cover; border: 1px solid #e2e8f0;">
+          </a>
+          <span *ngIf="!p.selfie_masuk_url" style="color: #94a3b8;">â€”</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="waktu_keluar">
+        <th mat-header-cell *matHeaderCellDef> Waktu Check-Out </th>
+        <td mat-cell *matCellDef="let p"> {{ p.timestamp_checkout ? (p.timestamp_checkout | date:'dd MMM yyyy, HH:mm') : 'â€”' }} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="foto_keluar">
+        <th mat-header-cell *matHeaderCellDef> Foto Keluar </th>
+        <td mat-cell *matCellDef="let p">
+          <a *ngIf="p.selfie_keluar_url" [href]="getAttachmentUrl(p.selfie_keluar_url)" target="_blank">
+            <img [src]="getAttachmentUrl(p.selfie_keluar_url)" alt="Check Out" style="width: 36px; height: 36px; border-radius: 4px; object-fit: cover; border: 1px solid #e2e8f0;">
+          </a>
+          <span *ngIf="!p.selfie_keluar_url" style="color: #94a3b8;">â€”</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef> Status </th>
+        <td mat-cell *matCellDef="let p">
+          <ng-container *ngIf="editingPresensiId !== p.presensi_id">
+            <span [ngStyle]="{
+              'padding': '4px 10px', 'border-radius': '4px', 'font-size': '0.75rem', 'font-weight': '600',
+              'background-color': p.status_kehadiran === 'Hadir' ? '#dcfce7' : (p.status_kehadiran === 'Terlambat' ? '#fef9c3' : '#fee2e2'),
+              'color': p.status_kehadiran === 'Hadir' ? '#166534' : (p.status_kehadiran === 'Terlambat' ? '#854d0e' : '#991b1b')
+            }">
+              {{ p.status_kehadiran || 'Hadir' }}
+            </span>
+          </ng-container>
+          <ng-container *ngIf="editingPresensiId === p.presensi_id">
+            <mat-form-field appearance="outline" style="width: 140px; margin-bottom: -1.25em;">
+              <mat-select [(value)]="editPresensiStatus">
+                <mat-option value="Hadir">Hadir</mat-option>
+                <mat-option value="Terlambat">Terlambat</mat-option>
+                <mat-option value="Izin">Izin</mat-option>
+                <mat-option value="Sakit">Sakit</mat-option>
+                <mat-option value="Alpa">Alpa</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </ng-container>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="aksi" *ngIf="isAdmin">
+        <th mat-header-cell *matHeaderCellDef style="text-align: right; width: 120px;"> Aksi </th>
+        <td mat-cell *matCellDef="let p" style="text-align: right;">
+          <ng-container *ngIf="editingPresensiId !== p.presensi_id">
+            <button mat-icon-button matTooltip="Edit" (click)="editPresensi(p)" style="color: #64748b;">
+              <mat-icon style="font-size: 20px;">edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" matTooltip="Hapus" (click)="deletePresensi(p.presensi_id)">
+              <mat-icon style="font-size: 20px;">delete</mat-icon>
+            </button>
+          </ng-container>
+          <ng-container *ngIf="editingPresensiId === p.presensi_id">
+            <button mat-icon-button color="primary" matTooltip="Simpan" (click)="savePresensi(p.presensi_id)">
+              <mat-icon style="font-size: 20px;">check</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" matTooltip="Batal" (click)="cancelEditPresensi()">
+              <mat-icon style="font-size: 20px;">close</mat-icon>
+            </button>
+          </ng-container>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="presensiDisplayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: presensiDisplayedColumns;"></tr>
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" [attr.colspan]="presensiDisplayedColumns.length" style="text-align: center; padding: 2rem; color: #94a3b8;">
+          Belum ada riwayat presensi.
+        </td>
+      </tr>
+    </table>
+    <mat-paginator #presensiPaginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of presensi"></mat-paginator>
+  </div>
+</div>
+
+<!-- SECTION: TUNJANGAN KINERJA (TUKIN) -->
+<div class="section-card animate-fade-in">
+  <div class="card-header">
+    <mat-icon class="card-icon">account_balance_wallet</mat-icon>
+    <h3>Kalkulasi & Rekapitulasi Tunjangan Kinerja (Tukin)</h3>
+  </div>
+  <div class="card-body">
+    <p style="font-size: 0.85rem; color: #64748b; margin: 0 0 16px;">Perhitungan otomatis berdasarkan jam kerja presensi dan akumulasi keterlambatan.</p>
+
+    <!-- Filter & Hitung -->
+    <div class="tukin-filter-bar">
       <mat-form-field appearance="outline" style="min-width: 160px; margin-bottom: -1.25em;">
         <mat-label>Bulan</mat-label>
         <mat-select [(ngModel)]="selectedTukinBulan">
@@ -329,37 +324,34 @@
       <button mat-flat-button color="primary" [disabled]="isCalculatingTukin" (click)="onCalculateTukin()" style="height: 52px;">
         <mat-icon *ngIf="!isCalculatingTukin">calculate</mat-icon>
         <mat-progress-spinner *ngIf="isCalculatingTukin" diameter="20" mode="indeterminate" style="display: inline-block; margin-right: 8px;"></mat-progress-spinner>
-        {{ isCalculatingTukin ? 'Menghitung...' : 'Hitung Tukin Periode Ini' }}
+        {{ isCalculatingTukin ? 'Menghitung...' : 'Hitung Tukin' }}
       </button>
     </div>
 
-    <!-- Ringkasan Tukin Highlight -->
-    <div *ngIf="latestTukin" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-      <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 1.25rem; border-radius: var(--radius-md);">
-        <span style="font-size: 0.85rem; color: #1e40af; font-weight: 500; display: block;">Basis Standar Tukin</span>
-        <span style="font-size: 1.4rem; font-weight: 700; color: #1e3a8a;">Rp 5.000.000</span>
+    <!-- KPI Tukin -->
+    <div *ngIf="latestTukin" class="tukin-kpi-grid">
+      <div class="tukin-kpi" style="background: #eff6ff; border-color: #bfdbfe;">
+        <span class="kpi-label" style="color: #1e40af;">Basis Standar Tukin</span>
+        <span class="kpi-value" style="color: #1e3a8a;">Rp 5.000.000</span>
       </div>
-
-      <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 1.25rem; border-radius: var(--radius-md);">
-        <span style="font-size: 0.85rem; color: #166534; font-weight: 500; display: block;">Total Jam Kerja</span>
-        <span style="font-size: 1.4rem; font-weight: 700; color: #14532d;">{{ latestTukin.total_jam_kerja || 0 }} Jam</span>
+      <div class="tukin-kpi" style="background: #f0fdf4; border-color: #bbf7d0;">
+        <span class="kpi-label" style="color: #166534;">Total Jam Kerja</span>
+        <span class="kpi-value" style="color: #14532d;">{{ latestTukin.total_jam_kerja || 0 }} Jam</span>
       </div>
-
-      <div style="background: #fffbeb; border: 1px solid #fde68a; padding: 1.25rem; border-radius: var(--radius-md);">
-        <span style="font-size: 0.85rem; color: #92400e; font-weight: 500; display: block;">Total Keterlambatan</span>
-        <span style="font-size: 1.4rem; font-weight: 700; color: #78350f;">{{ latestTukin.total_keterlambatan || 0 }} Menit</span>
-        <small style="color: #b45309;">(- Rp {{ (latestTukin.total_keterlambatan * 10000) | number }})</small>
+      <div class="tukin-kpi" style="background: #fffbeb; border-color: #fde68a;">
+        <span class="kpi-label" style="color: #92400e;">Total Keterlambatan</span>
+        <span class="kpi-value" style="color: #78350f;">{{ latestTukin.total_keterlambatan || 0 }} Menit</span>
+        <span class="kpi-sub" style="color: #b45309;">(- Rp {{ (latestTukin.total_keterlambatan * 10000) | number }})</span>
       </div>
-
-      <div style="background: #fdf2f8; border: 1px solid #fbcfe8; padding: 1.25rem; border-radius: var(--radius-md);">
-        <span style="font-size: 0.85rem; color: #9d174d; font-weight: 500; display: block;">Akumulasi Bersih Diterima</span>
-        <span style="font-size: 1.4rem; font-weight: 700; color: #831843;">Rp {{ (latestTukin.akumulasi_tukin || 0) | number }}</span>
+      <div class="tukin-kpi" style="background: #fdf2f8; border-color: #fbcfe8;">
+        <span class="kpi-label" style="color: #9d174d;">Akumulasi Bersih</span>
+        <span class="kpi-value" style="color: #831843;">Rp {{ (latestTukin.akumulasi_tukin || 0) | number }}</span>
       </div>
     </div>
 
     <!-- Riwayat Tukin Table -->
-    <h3 style="font-size: 1rem; font-weight: 500; margin-bottom: 0.75rem;">Riwayat Rekapitulasi Tukin</h3>
-    <div style="border-radius: var(--radius-md); overflow: auto; border: 1px solid var(--color-border);">
+    <h4 style="font-size: 0.9rem; font-weight: 600; color: #334155; margin-bottom: 10px;">Riwayat Rekapitulasi</h4>
+    <div class="table-responsive-wrapper" style="border-radius: 6px; border: 1px solid #e2e8f0;">
       <table mat-table [dataSource]="tukinList" style="width: 100%;">
         <ng-container matColumnDef="periode">
           <th mat-header-cell *matHeaderCellDef> Periode </th>
@@ -383,13 +375,12 @@
 
         <tr mat-header-row *matHeaderRowDef="tukinColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: tukinColumns;"></tr>
-
         <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell" colspan="4" style="text-align: center; padding: 2rem; color: var(--color-text-muted);">
-            Belum ada catatan kalkulasi Tukin. Silakan klik tombol "Hitung Tukin Periode Ini".
+          <td class="mat-cell" colspan="4" style="text-align: center; padding: 2rem; color: #94a3b8;">
+            Belum ada catatan kalkulasi Tukin. Klik "Hitung Tukin" untuk memulai.
           </td>
         </tr>
       </table>
     </div>
-  </mat-card-content>
-</mat-card>
+  </div>
+</div>

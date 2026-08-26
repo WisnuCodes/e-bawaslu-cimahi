@@ -11,6 +11,8 @@ use App\Http\Controllers\Api\MasterDataController;
 use App\Http\Controllers\Api\C1\C1Controller;
 use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\SaksiController;
+use App\Http\Controllers\Api\Whatsapp\WhatsappController;
 
 // Auth Routes (MOCK SSO Keycloak)
 Route::post('/login', [AuthController::class, 'login']);
@@ -50,6 +52,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('arsip')->group(function () {
         Route::get('/', [ArsipController::class, 'index']);
         Route::get('/search', [ArsipController::class, 'search']); // Mock Elasticsearch
+        Route::get('/logs', [ArsipController::class, 'logs']); // Audit Logs for Arsip
         Route::post('/', [ArsipController::class, 'store']);
         Route::post('/{id}/revisi', [ArsipController::class, 'uploadRevisi']);
         Route::get('/{id}/versions', [ArsipController::class, 'getVersions']);
@@ -60,6 +63,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // C1 (P2H) Module Routes
     Route::prefix('c1')->group(function () {
         Route::get('/', [C1Controller::class, 'index']);
+        Route::post('/scan', [C1Controller::class, 'scanOcr']); // High-level OCR scan
         Route::post('/', [C1Controller::class, 'store']); // Enkripsi AES-256
         Route::put('/{id}', [C1Controller::class, 'update']);
         Route::post('/{id}/approve', [C1Controller::class, 'approve']);
@@ -69,6 +73,23 @@ Route::middleware('auth:sanctum')->group(function () {
     // Report (Eksport BPK)
     Route::get('/reports/export', [ReportController::class, 'exportPdf']);
 
+
+    // Saksi TPS Module Routes
+    Route::prefix('saksi')->group(function () {
+        Route::get('/', [SaksiController::class, 'index']);
+        Route::post('/', [SaksiController::class, 'store']);
+        Route::delete('/{id}', [SaksiController::class, 'destroy']);
+    });
+
+    // WhatsApp (Fonnte) Module Routes
+    Route::prefix('whatsapp')->group(function () {
+        Route::get('/status', [WhatsappController::class, 'status']);
+        Route::get('/device-status', [WhatsappController::class, 'deviceStatus']);
+        Route::post('/send', [WhatsappController::class, 'send']);
+        Route::post('/send-media', [WhatsappController::class, 'sendMedia']);
+        Route::post('/send-bulk', [WhatsappController::class, 'sendBulk']);
+        Route::post('/notify', [WhatsappController::class, 'notify']);
+    });
     // Audit Trail Route
     Route::get('/audit-logs', [AuditLogController::class, 'index']);
 });

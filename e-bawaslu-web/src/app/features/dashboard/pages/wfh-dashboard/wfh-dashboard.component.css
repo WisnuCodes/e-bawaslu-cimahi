@@ -1,0 +1,284 @@
+﻿/* ===================================================
+   WFH & PRESENSI DASHBOARD
+   =================================================== */
+
+/* Page header */
+.wfh-header {
+  margin-bottom: 1.5rem;
+}
+.wfh-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+.wfh-header p {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+/* Top section: Presensi + Worklog Form side by side */
+.wfh-top-grid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+  margin-bottom: 1.5rem;
+}
+
+/* Clean section card */
+.section-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.section-card .card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-card .card-header h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+.section-card .card-header .card-icon {
+  color: #64748b;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+.section-card .card-body {
+  padding: 20px;
+}
+
+/* Clock */
+.clock-box {
+  text-align: center;
+  padding: 20px 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+.clock-time {
+  font-size: 2.2rem;
+  font-weight: 700;
+  font-family: 'Inter', monospace;
+  color: #1e293b;
+  letter-spacing: 2px;
+}
+.clock-date {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+/* Status indicator */
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.status-indicator.hadir {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+.status-indicator.belum {
+  background: #fff7ed;
+  color: #9a3412;
+  border: 1px solid #fed7aa;
+}
+.status-indicator.selesai {
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+/* Action buttons */
+.action-btn {
+  width: 100%;
+  height: 44px;
+  font-size: 0.9rem !important;
+  border-radius: 6px !important;
+}
+
+/* Table section headers */
+.table-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.table-section-header h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.table-section-header .search-field {
+  width: 260px;
+  margin-bottom: -1.25em;
+}
+
+/* Tukin KPI grid */
+.tukin-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.tukin-kpi {
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid;
+}
+.tukin-kpi .kpi-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 4px;
+}
+.tukin-kpi .kpi-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+.tukin-kpi .kpi-sub {
+  font-size: 0.75rem;
+  margin-top: 2px;
+}
+
+/* Tukin filter bar */
+.tukin-filter-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .wfh-top-grid {
+    grid-template-columns: 1fr;
+  }
+  .tukin-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .tukin-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ========== MOBILE RESPONSIVE ========== */
+@media (max-width: 1024px) {
+  .wfh-top-grid {
+    grid-template-columns: 300px 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .wfh-header h2 {
+    font-size: 1.15rem;
+  }
+
+  .wfh-top-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .section-card .card-header {
+    padding: 12px 16px;
+  }
+
+  .section-card .card-body {
+    padding: 16px;
+  }
+
+  .table-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+  }
+
+  .table-section-header .search-field {
+    width: 100%;
+    margin-bottom: 0;
+  }
+
+  .tukin-kpi-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .tukin-kpi {
+    padding: 12px;
+  }
+
+  .tukin-kpi .kpi-value {
+    font-size: 1.1rem;
+  }
+
+  .tukin-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .tukin-filter-bar > * {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .tukin-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.table-responsive-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive-wrapper table {
+  min-width: 800px;
+}
+
+@media (max-width: 768px) {
+  .section-card {
+    max-width: 100%;
+    min-width: 0;
+  }
+  
+  .table-responsive-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    display: block;
+  }
+}

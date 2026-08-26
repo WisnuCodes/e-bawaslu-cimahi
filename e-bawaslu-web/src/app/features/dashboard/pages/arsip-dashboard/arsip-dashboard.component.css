@@ -98,3 +98,27 @@
   flex-direction: column;
   gap: 0.5rem;
 }
+
+/* ========== MOBILE RESPONSIVE ========== */
+@media (max-width: 768px) {
+  .arsip-actions {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .search-bar {
+    width: 100%;
+  }
+
+  .documents-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .doc-card {
+    padding: 1rem;
+  }
+}

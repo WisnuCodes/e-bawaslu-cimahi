@@ -1,186 +1,120 @@
-<div class="page-header animate-fade-in" style="margin-bottom: 2rem; text-align: center;">
-  <span style="background: #eff6ff; color: #1e40af; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: inline-block; margin-bottom: 8px;">
-    Bagan Resmi Kelembagaan
-  </span>
-  <h1 style="margin: 0 0 0.5rem; color: #0f172a; font-weight: 800; font-size: 1.6rem; letter-spacing: -0.5px;">
-    BAGAN STRUKTUR ORGANISASI
-  </h1>
-  <h2 style="margin: 0; color: var(--color-primary); font-weight: 700; font-size: 1.2rem;">
-    BADAN PENGAWAS PEMILIHAN UMUM KOTA CIMAHI
-  </h2>
+<div class="org-page-header animate-fade-in">
+  <div class="badge">Badan Pengawas Pemilihan Umum</div>
+  <h1>STRUKTUR ORGANISASI</h1>
+  <h2>Bawaslu Kota Cimahi</h2>
 </div>
 
-<div class="organisasi-container animate-fade-in" style="display: flex; flex-direction: column; gap: 2rem;">
+<div class="org-container animate-fade-in">
 
-  <!-- LEVEL 1: PLENO PIMPINAN (KETUA & ANGGOTA KOMISIONER) -->
-  <div style="background: white; border: 2px solid #e2e8f0; border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-md);">
-    <div style="text-align: center; margin-bottom: 1.5rem;">
-      <span style="background: #1e293b; color: white; padding: 6px 24px; border-radius: 6px; font-weight: 800; letter-spacing: 2px; font-size: 1.1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        PLENO
-      </span>
+  <!-- LEVEL 1: PLENO PIMPINAN -->
+  <div class="org-level">
+    <div class="level-label" style="background: #1e3a8a;">Pleno Pimpinan</div>
+
+    <!-- Ketua di atas sendiri -->
+    <div style="max-width: 480px; margin: 0 auto 16px;">
+      <div class="person-card ketua">
+        <img [src]="ketua.foto" alt="Foto Ketua">
+        <div class="info">
+          <p class="name">{{ ketua.nama }}</p>
+          <p class="role">{{ ketua.jabatan }}</p>
+        </div>
+      </div>
     </div>
 
-    <!-- Grid 5 Pimpinan: 2 Anggota | KETUA (Tengah) | 2 Anggota -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: start;">
-      
-      <!-- Anggota 1 (SDMOD) -->
-      <div class="card-pimpinan" style="border: 2px solid #3b82f6; border-radius: 8px; overflow: hidden; background: white; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
-        <div style="background: #2563eb; color: white; font-weight: 700; padding: 4px; font-size: 0.85rem; text-transform: uppercase;">
-          ANGGOTA
-        </div>
-        <div style="padding: 1rem;">
-          <img [src]="kordivList[0].foto" alt="Foto" style="width: 80px; height: 80px; border-radius: 8px; border: 2px solid #e2e8f0; margin-bottom: 8px; object-fit: cover;">
-          <h4 style="margin: 0; font-size: 0.85rem; font-weight: 700; color: #0f172a;">{{ kordivList[0].nama }}</h4>
-          <small style="color: #475569; font-size: 0.75rem; display: block; margin-top: 4px;">{{ kordivList[0].jabatan }}</small>
+    <!-- Connector -->
+    <div class="connector"><div class="line"></div></div>
+
+    <!-- 4 Anggota Komisioner -->
+    <div class="people-grid cols-4" style="margin-top: 8px;">
+      <div class="person-card" *ngFor="let k of kordivList">
+        <img [src]="k.foto" alt="Foto">
+        <div class="info">
+          <p class="name">{{ k.nama }}</p>
+          <p class="role">{{ k.jabatan }}</p>
         </div>
       </div>
-
-      <!-- Anggota 2 (HPS) -->
-      <div class="card-pimpinan" style="border: 2px solid #3b82f6; border-radius: 8px; overflow: hidden; background: white; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
-        <div style="background: #2563eb; color: white; font-weight: 700; padding: 4px; font-size: 0.85rem; text-transform: uppercase;">
-          ANGGOTA
-        </div>
-        <div style="padding: 1rem;">
-          <img [src]="kordivList[1].foto" alt="Foto" style="width: 80px; height: 80px; border-radius: 8px; border: 2px solid #e2e8f0; margin-bottom: 8px; object-fit: cover;">
-          <h4 style="margin: 0; font-size: 0.85rem; font-weight: 700; color: #0f172a;">{{ kordivList[1].nama }}</h4>
-          <small style="color: #475569; font-size: 0.75rem; display: block; margin-top: 4px;">{{ kordivList[1].jabatan }}</small>
-        </div>
-      </div>
-
-      <!-- KETUA (Center Hero) -->
-      <div class="card-pimpinan-ketua" style="border: 3px solid #1e3a8a; border-radius: 8px; overflow: hidden; background: #f8fafc; text-align: center; box-shadow: 0 4px 12px rgba(30,58,138,0.15); transform: translateY(-4px);">
-        <div style="background: #1e3a8a; color: white; font-weight: 800; padding: 6px; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px;">
-          ★ KETUA ★
-        </div>
-        <div style="padding: 1.25rem 1rem;">
-          <img [src]="ketua.foto" alt="Foto Ketua" style="width: 90px; height: 90px; border-radius: 8px; border: 3px solid #1e3a8a; margin-bottom: 8px; object-fit: cover;">
-          <h3 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: #1e3a8a;">{{ ketua.nama }}</h3>
-          <span style="color: #1e40af; font-weight: 600; font-size: 0.8rem; display: block; margin-top: 4px;">{{ ketua.jabatan }}</span>
-        </div>
-      </div>
-
-      <!-- Anggota 3 (PP Datin) -->
-      <div class="card-pimpinan" style="border: 2px solid #3b82f6; border-radius: 8px; overflow: hidden; background: white; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
-        <div style="background: #2563eb; color: white; font-weight: 700; padding: 4px; font-size: 0.85rem; text-transform: uppercase;">
-          ANGGOTA
-        </div>
-        <div style="padding: 1rem;">
-          <img [src]="kordivList[2].foto" alt="Foto" style="width: 80px; height: 80px; border-radius: 8px; border: 2px solid #e2e8f0; margin-bottom: 8px; object-fit: cover;">
-          <h4 style="margin: 0; font-size: 0.85rem; font-weight: 700; color: #0f172a;">{{ kordivList[2].nama }}</h4>
-          <small style="color: #475569; font-size: 0.75rem; display: block; margin-top: 4px;">{{ kordivList[2].jabatan }}</small>
-        </div>
-      </div>
-
-      <!-- Anggota 4 (P2H) -->
-      <div class="card-pimpinan" style="border: 2px solid #3b82f6; border-radius: 8px; overflow: hidden; background: white; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
-        <div style="background: #2563eb; color: white; font-weight: 700; padding: 4px; font-size: 0.85rem; text-transform: uppercase;">
-          ANGGOTA
-        </div>
-        <div style="padding: 1rem;">
-          <img [src]="kordivList[3].foto" alt="Foto" style="width: 80px; height: 80px; border-radius: 8px; border: 2px solid #e2e8f0; margin-bottom: 8px; object-fit: cover;">
-          <h4 style="margin: 0; font-size: 0.85rem; font-weight: 700; color: #0f172a;">{{ kordivList[3].nama }}</h4>
-          <small style="color: #475569; font-size: 0.75rem; display: block; margin-top: 4px;">{{ kordivList[3].jabatan }}</small>
-        </div>
-      </div>
-
     </div>
   </div>
 
-  <!-- LEVEL 2: KEPALA SEKRETARIAT & BENDAHARA -->
-  <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;">
-    
-    <!-- Kepala Sekretariat -->
-    <div style="border: 2px solid #16a34a; border-radius: 8px; overflow: hidden; background: white; text-align: center; width: 280px; box-shadow: 0 4px 10px rgba(0,0,0,0.08);">
-      <div style="background: #16a34a; color: white; font-weight: 800; padding: 6px; font-size: 0.9rem; text-transform: uppercase;">
-        KEPALA SEKRETARIAT
+  <!-- LEVEL 2: SEKRETARIAT -->
+  <div class="org-level">
+    <div class="level-label" style="background: #16a34a;">Sekretariat</div>
+
+    <div class="people-grid cols-2">
+      <!-- Kepala Sekretariat -->
+      <div class="person-card" style="border-color: #16a34a; border-width: 2px;">
+        <img [src]="kasek.foto" alt="Kasek" style="border-color: #86efac;">
+        <div class="info">
+          <p class="name">{{ kasek.nama }}</p>
+          <p class="role">{{ kasek.jabatan }}</p>
+          <p class="role" style="font-family: monospace; font-size: 0.7rem; margin-top: 2px;">{{ kasek.nip }}</p>
+        </div>
       </div>
-      <div style="padding: 1.25rem 1rem;">
-        <img [src]="kasek.foto" alt="Kasek" style="width: 80px; height: 80px; border-radius: 8px; border: 2px solid #bbf7d0; margin-bottom: 8px; object-fit: cover;">
-        <h4 style="margin: 0; font-size: 0.9rem; font-weight: 800; color: #065f46;">{{ kasek.nama }}</h4>
-        <span style="font-size: 0.75rem; color: #64748b; font-family: monospace; display: block; margin-top: 2px;">{{ kasek.nip }}</span>
-        <small style="color: #047857; font-weight: 600; font-size: 0.75rem; display: block; margin-top: 4px;">{{ kasek.jabatan }}</small>
+
+      <!-- Bendahara -->
+      <div class="person-card" style="border-color: #ca8a04; border-width: 2px;">
+        <img [src]="bendahara.foto" alt="Bendahara" style="border-color: #fde68a;">
+        <div class="info">
+          <p class="name">{{ bendahara.nama }}</p>
+          <p class="role">{{ bendahara.jabatan }}</p>
+        </div>
       </div>
     </div>
-
-    <!-- Bendahara Pengeluaran Pembantu -->
-    <div style="border: 2px solid #ca8a04; border-radius: 8px; overflow: hidden; background: white; text-align: center; width: 260px; box-shadow: 0 4px 10px rgba(0,0,0,0.08);">
-      <div style="background: #ca8a04; color: white; font-weight: 800; padding: 6px; font-size: 0.85rem; text-transform: uppercase;">
-        BENDAHARA PENGELUARAN PEMBANTU
-      </div>
-      <div style="padding: 1.25rem 1rem;">
-        <img [src]="bendahara.foto" alt="Bendahara" style="width: 80px; height: 80px; border-radius: 8px; border: 2px solid #fef08a; margin-bottom: 8px; object-fit: cover;">
-        <h4 style="margin: 0; font-size: 0.9rem; font-weight: 800; color: #854d0e;">{{ bendahara.nama }}</h4>
-        <small style="color: #a16207; font-weight: 600; font-size: 0.75rem; display: block; margin-top: 4px;">{{ bendahara.jabatan }}</small>
-      </div>
-    </div>
-
   </div>
 
-  <!-- LEVEL 3: 4 DIVISI SUB-BAGIAN (STAF PELAKSANA) -->
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-    <div *ngFor="let div of divisiStaff" style="border: 2px solid #e2e8f0; border-radius: var(--radius-md); overflow: hidden; background: white; box-shadow: var(--shadow-sm);">
-      <div style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1; padding: 10px; text-align: center;">
-        <span style="font-weight: 800; font-size: 0.85rem; color: #1e293b; text-transform: uppercase;">
-          STAFF {{ div.kode }}
-        </span>
-        <small style="display: block; font-size: 0.75rem; color: #64748b;">{{ div.namaDivisi }}</small>
-      </div>
+  <!-- LEVEL 3: SUB-BAGIAN & STAF PELAKSANA -->
+  <div class="org-level">
+    <div class="level-label" style="background: #475569;">Sub-Bagian & Staf Pelaksana</div>
 
-      <div style="padding: 1rem; display: flex; flex-direction: column; gap: 8px;">
-        <div *ngFor="let s of div.staf" style="display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; background: #f8fafc; border: 1px solid #f1f5f9;">
-          <mat-icon style="font-size: 16px; width: 16px; height: 16px; color: var(--color-primary);">person</mat-icon>
-          <span style="font-size: 0.8rem; font-weight: 600; color: #334155;">{{ s.nama }}</span>
+    <div class="people-grid cols-4">
+      <div class="divisi-section" *ngFor="let div of divisiStaff">
+        <div class="divisi-header">
+          <div class="kode">{{ div.kode }}</div>
+          <div class="nama">{{ div.namaDivisi }}</div>
+        </div>
+        <div class="divisi-body">
+          <div class="staf-row" *ngFor="let s of div.staf">
+            <span class="bullet"></span>
+            {{ s.nama }}
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <!-- LEVEL 4: STAF PENDUKUNG -->
-  <div style="background: white; border: 2px solid #e2e8f0; border-radius: var(--radius-md); padding: 1.25rem;">
-    <div style="text-align: center; margin-bottom: 1rem;">
-      <span style="background: #475569; color: white; padding: 4px 16px; border-radius: 4px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase;">
-        STAF PENDUKUNG SEKRETARIAT
-      </span>
-    </div>
-    
-    <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
-      <div *ngFor="let sp of stafPendukung" style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; color: #334155; display: flex; align-items: center; gap: 6px;">
-        <mat-icon style="font-size: 18px; width: 18px; height: 18px; color: #64748b;">support_agent</mat-icon>
+  <div class="org-level" style="background: #fafafa;">
+    <div class="level-label" style="background: #64748b;">Staf Pendukung Sekretariat</div>
+
+    <div class="people-grid cols-3">
+      <div class="staf-row" *ngFor="let sp of stafPendukung" style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;">
+        <mat-icon style="font-size: 16px; width: 16px; height: 16px; color: #64748b;">person</mat-icon>
         {{ sp.nama }}
       </div>
     </div>
   </div>
 
-  <!-- LEVEL 5: PENGAWASAN AD-HOC (PANWASCAM & PKD) -->
-  <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: var(--radius-md); padding: 1.25rem;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 8px;">
-      <span style="font-weight: 700; font-size: 0.9rem; color: #0f172a; text-transform: uppercase;">
-        🏛️ JAJARAN PENGAWAS AD-HOC KECAMATAN & KELURAHAN
-      </span>
-      <span style="font-size: 0.8rem; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 4px; font-weight: 600;">
-        PANWASCAM & PKD
-      </span>
-    </div>
+  <!-- LEVEL 5: AD-HOC -->
+  <div class="org-level" style="background: #f8fafc;">
+    <div class="level-label" style="background: #0369a1;">Pengawas Ad-Hoc Kecamatan & Kelurahan</div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem;">
-      <div *ngFor="let ad of adhoc" style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px;">
-        <strong style="display: block; font-size: 0.85rem; color: var(--color-primary);">{{ ad.nama }}</strong>
-        <small style="color: #64748b; font-size: 0.75rem;">Wilayah: {{ ad.wilayah }}</small>
+    <div class="people-grid cols-3">
+      <div class="adhoc-card" *ngFor="let ad of adhoc">
+        <p class="adhoc-name">{{ ad.nama }}</p>
+        <p class="adhoc-wilayah">Wilayah: {{ ad.wilayah }}</p>
       </div>
     </div>
   </div>
 
-  <!-- FOOTER ALAMAT & SOSIAL MEDIA RESMI -->
-  <div style="background: #0f172a; color: white; border-radius: var(--radius-md); padding: 1.5rem; text-align: center;">
-    <h4 style="margin: 0 0 6px; font-size: 1rem; font-weight: 700; color: #f8fafc;">ALAMAT SEKRETARIAT BAWASLU KOTA CIMAHI</h4>
-    <p style="margin: 0 0 12px; font-size: 0.85rem; color: #94a3b8;">
-      JL. BABAKAN NO. 37 RT 03 RW 04 KEL. CIMAHI, KEC. CIMAHI TENGAH, KOTA CIMAHI, PROV. JAWA BARAT
-    </p>
-    <div style="display: flex; justify-content: center; gap: 1.5rem; font-size: 0.8rem; color: #cbd5e1; flex-wrap: wrap;">
-      <span>📱 &#64;bawaslucimahi</span>
-      <span>📘 Bawaslu Kota Cimahi</span>
-      <span>📸 bawaslu_kotacimahi</span>
-      <span>🌐 https://cimahikota.bawaslu.go.id</span>
+  <!-- FOOTER -->
+  <div class="org-footer">
+    <h4>ALAMAT SEKRETARIAT BAWASLU KOTA CIMAHI</h4>
+    <p>Jl. Babakan No. 37 RT 03 RW 04, Kel. Cimahi, Kec. Cimahi Tengah, Kota Cimahi, Prov. Jawa Barat</p>
+    <div class="socials">
+      <span>&#64;bawaslucimahi</span>
+      <span>Bawaslu Kota Cimahi</span>
+      <span>bawaslu_kotacimahi</span>
+      <span>cimahikota.bawaslu.go.id</span>
     </div>
   </div>
 

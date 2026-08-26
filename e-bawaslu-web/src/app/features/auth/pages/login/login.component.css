@@ -77,3 +77,39 @@ mat-form-field {
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
+
+.login-btn {
+  width: 100%;
+  padding: 24px 0 !important;
+  font-size: 1rem !important;
+  border-radius: 8px !important;
+}
+
+::ng-deep .login-btn .mdc-button__label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .login-btn {
+    padding: 16px 0 !important;
+  }
+  
+  .demo-accounts-panel {
+    padding: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .demo-list {
+    flex-direction: column;
+    max-height: none;
+    overflow-y: visible;
+  }
+  
+  .demo-btn {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 0.8rem;
+  }
+}

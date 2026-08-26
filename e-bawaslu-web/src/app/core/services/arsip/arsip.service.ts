@@ -68,4 +68,8 @@ export class ArsipService {
   deleteArsip(id: string, reason: string): Observable<any> {
     return this.api.delete<any>(`/arsip/${id}`, { alasan_penghapusan: reason });
   }
+
+  getArsipLogs(): Observable<{ success: boolean; data: any[] }> {
+    return this.api.get<{ success: boolean; data: any[] }>('/arsip/logs');
+  }
 }

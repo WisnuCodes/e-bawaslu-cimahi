@@ -125,6 +125,70 @@
   </mat-card-content>
 </mat-card>
 
+<!-- Tabel Audit Log Aktivitas -->
+<mat-card class="animate-fade-in" style="margin-top: 1.5rem;" *ngIf="canViewLogs">
+  <mat-card-header style="margin-bottom: 1rem;">
+    <mat-card-title style="font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+      <mat-icon color="primary">receipt_long</mat-icon> Log Aktivitas E-Arsip
+    </mat-card-title>
+    <mat-card-subtitle>
+      Riwayat unggah, unduh, revisi, dan penghapusan dokumen.
+    </mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <div style="border-radius: var(--radius-md); overflow: auto; border: 1px solid var(--color-border);">
+      <table mat-table [dataSource]="arsipLogs" style="width: 100%;">
+        
+        <ng-container matColumnDef="waktu">
+          <th mat-header-cell *matHeaderCellDef> Waktu </th>
+          <td mat-cell *matCellDef="let log"> {{ log.timestamp | date:'dd MMM yyyy, HH:mm' }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="aksi">
+          <th mat-header-cell *matHeaderCellDef> Aksi </th>
+          <td mat-cell *matCellDef="let log">
+            <span [ngStyle]="{
+              'padding': '4px 8px', 'border-radius': '6px', 'font-size': '0.8rem', 'font-weight': '600',
+              'background-color': log.action === 'DELETE_ARSIP' ? '#fee2e2' : (log.action === 'EDIT_ARSIP' ? '#fef3c7' : '#e0f2fe'),
+              'color': log.action === 'DELETE_ARSIP' ? '#991b1b' : (log.action === 'EDIT_ARSIP' ? '#92400e' : '#0369a1')
+            }">
+              {{ log.action.replace('_ARSIP', '') }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="user">
+          <th mat-header-cell *matHeaderCellDef> User (Nama & Email) </th>
+          <td mat-cell *matCellDef="let log">
+            <div style="font-weight: 500;">{{ log.user?.nama || 'Unknown User' }}</div>
+            <small style="color: var(--color-text-muted);">{{ log.user?.email || '-' }}</small>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="role">
+          <th mat-header-cell *matHeaderCellDef> Role </th>
+          <td mat-cell *matCellDef="let log"> {{ log.user?.role || '-' }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="keterangan">
+          <th mat-header-cell *matHeaderCellDef> Keterangan </th>
+          <td mat-cell *matCellDef="let log" style="font-size: 0.85rem; color: #475569;"> {{ log.reason }} </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="['waktu', 'aksi', 'user', 'role', 'keterangan']"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['waktu', 'aksi', 'user', 'role', 'keterangan'];"></tr>
+        
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" colspan="5" style="text-align: center; padding: 2rem; color: var(--color-text-muted);">
+            Belum ada aktivitas dokumen arsip yang tercatat.
+          </td>
+        </tr>
+      </table>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+
 <!-- Modal: Unggah Arsip Baru -->
 <div *ngIf="showUploadModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; display: flex; align-items: center; justify-content: center; padding: 1rem;">
   <div style="background: white; border-radius: var(--radius-lg); width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; padding: 1.5rem; box-shadow: var(--shadow-xl);">

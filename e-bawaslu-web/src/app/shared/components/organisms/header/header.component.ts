@@ -1,18 +1,22 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, MatIconModule],
   templateUrl: './header.component.html',
   styleUrl: './header.component.css'
 })
 export class HeaderComponent {
   public authService = inject(AuthService);
-  
+
+  @Input() isMobile = false;
+  @Output() toggleMenu = new EventEmitter<void>();
+
   user = this.authService.currentUser;
 
   userName = computed(() => {
@@ -29,6 +33,10 @@ export class HeaderComponent {
     const name = this.userName();
     return name ? name.charAt(0).toUpperCase() : 'B';
   });
+
+  onToggleMenu() {
+    this.toggleMenu.emit();
+  }
 
   onLogout() {
     this.authService.logout().subscribe({

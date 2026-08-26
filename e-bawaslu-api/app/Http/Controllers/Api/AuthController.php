@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
+use Carbon\Carbon;
+use App\Services\FonnteService;
 
 class AuthController extends Controller
 {
@@ -33,9 +36,21 @@ class AuthController extends Controller
             ], 401);
         }
 
-        // Mock: Mengirim OTP ke email/WA pengguna
-        $dummyOtp = '123456';
-        Log::info("OTP untuk user {$user->email} adalah: {$dummyOtp}");
+        // Generate Real OTP
+        $otpCode = (string) rand(100000, 999999);
+        $user->otp_code = $otpCode;
+        $user->otp_expires_at = Carbon::now()->addMinutes(5);
+        $user->save();
+        
+        Log::info("OTP untuk user {$user->email} adalah: {$otpCode}");
+
+        // Send OTP via Fonnte WhatsApp Service
+        if ($user->whatsapp_number) {
+            $fonnte = app(FonnteService::class);
+            if ($fonnte->isConfigured()) {
+                $fonnte->sendOtp($user->whatsapp_number, $otpCode, 5);
+            }
+        }
 
         return response()->json([
             'success' => true,
@@ -57,15 +72,27 @@ class AuthController extends Controller
             'otp' => 'required|digits:6',
         ]);
 
-        // Mock validasi OTP (hanya menerima 123456)
-        if ($request->otp !== '123456') {
+        $user = User::findOrFail($request->user_id);
+        
+        // Validasi OTP
+        if (!$user->otp_code || $request->otp !== $user->otp_code) {
             return response()->json([
                 'success' => false,
                 'message' => 'Kode OTP tidak valid'
             ], 401);
         }
 
-        $user = User::findOrFail($request->user_id);
+        if (Carbon::now()->isAfter($user->otp_expires_at)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kode OTP sudah kadaluarsa (expired)'
+            ], 401);
+        }
+
+        // Hapus OTP setelah berhasil
+        $user->otp_code = null;
+        $user->otp_expires_at = null;
+        $user->save();
         
         // Menerbitkan token Sanctum (mensimulasikan JWT behavior)
         $token = $user->createToken('bawaslu-enterprise-token', ['*'])->plainTextToken;

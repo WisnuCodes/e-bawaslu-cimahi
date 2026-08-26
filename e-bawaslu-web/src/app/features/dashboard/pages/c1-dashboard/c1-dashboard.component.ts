@@ -5,7 +5,6 @@ import { C1Service, C1Item } from '../../../../core/services/c1/c1.service';
 import { MasterDataService, WilayahTps } from '../../../../core/services/master-data.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { Router } from '@angular/router';
-import * as Tesseract from 'tesseract.js';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -340,8 +339,8 @@ export class C1DashboardComponent implements OnInit {
       };
       reader.readAsDataURL(file);
 
-      // Mulai proses OCR otomatis
-      this.runOcrEngine(file);
+      // Mulai proses OCR cerdas di Backend
+      this.runBackendOcr(file);
 
     } else {
       this.imagePreviewUrl = null;
@@ -349,208 +348,58 @@ export class C1DashboardComponent implements OnInit {
     }
   }
 
-  async runOcrEngine(file: File) {
-    if (!file.type.startsWith('image/')) {
+  runBackendOcr(file: File) {
+    // Terima JPG, PNG, PDF
+    if (!file.type.startsWith('image/') && file.type !== 'application/pdf') {
+       this.showNotification('Format tidak didukung OCR. Gunakan gambar atau PDF.', 'error');
        return;
     }
     
     this.isOcrScanning = true;
     this.ocrProgress = 0;
-    this.ocrStatusText = 'Memulai mesin OCR AI...';
+    this.ocrStatusText = 'AI Spatial Scanner sedang menganalisis form...';
 
-    try {
-      const worker = await Tesseract.createWorker('eng+ind', 1, {
-        logger: m => {
-          if (m.status === 'recognizing text') {
-            this.ocrProgress = Math.round(m.progress * 100);
-            this.ocrStatusText = `Mengekstrak data form (${this.ocrProgress}%)...`;
-          } else {
-            this.ocrStatusText = m.status;
-          }
-        }
-      });
-      
-      const { data: { text } } = await worker.recognize(file);
-      await worker.terminate();
-
-      console.log('=== OCR RAW TEXT ===');
-      console.log(text);
-      console.log('===================');
-
-      this.isOcrScanning = false;
-
-      // ==================================================================
-      // ALGORITMA OCR CERDAS UNTUK FORM C1 PEMILU
-      // ==================================================================
-      // Form C1 menulis angka di KOTAK TERPISAH per digit.
-      // Contoh: angka 176 ditulis sebagai |1|7|6| dalam 3 kotak.
-      // Tesseract membaca ini sebagai "1 7 6" atau "1  7  6" (digit terpisah spasi).
-      // Kita perlu merekonstruksi angka-angka multi-digit ini.
-      // ==================================================================
-
-      const allNumbers: number[] = [];
-
-      // TAHAP 1: Ambil angka yang sudah terbaca utuh
-      const directNumbers = text.match(/\b\d{2,4}\b/g)?.map(Number) || [];
-      allNumbers.push(...directNumbers);
-
-      // TAHAP 2: Rekonstruksi angka dari digit terpisah per baris
-      // Mencari pola: satu atau lebih digit yang dipisah oleh spasi/karakter non-digit
-      const lines = text.split('\n');
-      for (const line of lines) {
-        // Cari grup digit yang dipisah spasi (pola kotak C1)
-        // Contoh: "1 7 6" → 176, "0 7 5" → 75, "0 0 3" → 3
-        const matches = line.match(/(?:\d\s+){1,}\d/g);
-        if (matches) {
-          for (const match of matches) {
-            const digits = match.replace(/\s+/g, '');
-            if (digits.length >= 2 && digits.length <= 4) {
-              const num = parseInt(digits, 10);
-              if (num >= 0 && num <= 1000) {
-                allNumbers.push(num);
-              }
-            }
-          }
-        }
-
-        // Juga cari angka individual di akhir baris (sering muncul di kolom JUMLAH)
-        const trailingNum = line.trim().match(/(\d{2,3})\s*$/);
-        if (trailingNum) {
-          allNumbers.push(parseInt(trailingNum[1], 10));
-        }
+    // Fake progress interval for UX
+    const interval = setInterval(() => {
+      if (this.ocrProgress < 90) {
+        this.ocrProgress += 10;
+        if (this.ocrProgress === 30) this.ocrStatusText = 'Mengekstrak layout kiri-kanan...';
+        if (this.ocrProgress === 60) this.ocrStatusText = 'Menghitung turus & rekognisi angka...';
       }
+    }, 200);
 
-      // TAHAP 3: Juga ambil semua angka satu digit (berguna untuk suara tidak sah yang kecil)
-      const singleDigits = text.match(/\b\d\b/g)?.map(Number) || [];
-      allNumbers.push(...singleDigits);
+    const formData = new FormData();
+    formData.append('file_c1', file);
 
-      // Deduplikasi dan filter angka wajar
-      const uniqueNums = [...new Set(allNumbers)].filter(n => n >= 0 && n <= 1000);
-      const numSet = new Set(uniqueNums);
-      const count = this.c1Form.value.jumlah_paslon;
+    this.c1Service.scanC1Ocr(formData).subscribe({
+      next: (res) => {
+        clearInterval(interval);
+        this.ocrProgress = 100;
+        this.ocrStatusText = 'Selesai!';
+        setTimeout(() => this.isOcrScanning = false, 800);
 
-      console.log('OCR Extracted unique numbers:', uniqueNums);
+        const data = res.data;
+        const count = this.c1Form.value.jumlah_paslon;
+        const arr = this.c1Form.get('suara_paslon') as FormArray;
 
-      let foundMatch = false;
-      let bestPaslon: number[] = [];
-      let bestSah = 0;
-      let bestTidakSah = 0;
-      let bestTotal = 0;
-      let bestScore = 0; // Skor prioritas: angka yang lebih besar = lebih mungkin benar
-
-      // TAHAP 4: PENCARIAN CERDAS
-      // Urutkan dari besar ke kecil (angka terbesar biasanya Total Pemilih)
-      const sorted = uniqueNums.sort((a, b) => b - a);
-
-      for (const total of sorted) {
-        if (total < 2) continue; // Total minimal harus > 1
-        
-        for (const sah of sorted) {
-          if (sah >= total || sah < 1) continue;
-          const tidakSah = total - sah;
-          
-          // Cek apakah tidakSah juga ada di daftar angka yang terbaca
-          if (tidakSah >= 0 && numSet.has(tidakSah)) {
-            
-            // Cocok! Sekarang cari paslon
-            if (count === 2) {
-              for (const p1 of sorted) {
-                if (p1 > sah || p1 < 1) continue;
-                const p2 = sah - p1;
-                if (p2 >= 0 && numSet.has(p2) && p2 !== p1) {
-                  // Pastikan ini kombinasi yang masuk akal
-                  const score = total + sah; // Prioritaskan angka besar
-                  if (score > bestScore) {
-                    bestPaslon = [p1, p2];
-                    bestSah = sah;
-                    bestTidakSah = tidakSah;
-                    bestTotal = total;
-                    bestScore = score;
-                    foundMatch = true;
-                  }
-                  break; // Cukup satu match per kombinasi sah/total
-                }
-              }
-            } else if (count === 3) {
-              for (const p1 of sorted) {
-                if (p1 > sah || p1 < 1) continue;
-                for (const p2 of sorted) {
-                  if (p2 > sah - p1) continue;
-                  const p3 = sah - p1 - p2;
-                  if (p3 >= 0 && numSet.has(p3)) {
-                    const score = total + sah;
-                    if (score > bestScore) {
-                      bestPaslon = [p1, p2, p3];
-                      bestSah = sah;
-                      bestTidakSah = tidakSah;
-                      bestTotal = total;
-                      bestScore = score;
-                      foundMatch = true;
-                    }
-                    break;
-                  }
-                }
-                if (foundMatch && bestScore > 100) break; // Cukup yakin
-              }
-            }
-          }
-          if (foundMatch && bestScore > 100) break;
-        }
-        if (foundMatch && bestScore > 100) break;
-      }
-
-      const arr = this.c1Form.get('suara_paslon') as FormArray;
-
-      if (foundMatch) {
-        for (let i = 0; i < count; i++) {
-          arr.at(i).setValue(bestPaslon[i]);
-        }
+        // Memasukkan hasil
+        if (data.paslon_1 !== undefined) arr.at(0)?.setValue(data.paslon_1);
+        if (data.paslon_2 !== undefined && count >= 2) arr.at(1)?.setValue(data.paslon_2);
         
         this.c1Form.patchValue({
-          total_suara_sah: bestSah,
-          total_suara_tidak_sah: bestTidakSah,
-          total_pemilih: bestTotal
+          total_suara_sah: data.suara_sah,
+          total_suara_tidak_sah: data.suara_tidak_sah,
+          total_pemilih: data.total_pemilih
         });
 
-        this.showNotification(
-          `OCR Berhasil! Paslon: ${bestPaslon.join(' + ')} = ${bestSah} (Sah), Tidak Sah: ${bestTidakSah}, Total: ${bestTotal}. Mohon verifikasi.`, 
-          'success'
-        );
-      } else if (sorted.length >= 2) {
-        // Fallback: Gunakan angka-angka terbesar yang ditemukan
-        const approxTotal = sorted[0];
-        const approxSah = sorted[1];
-        const approxTidakSah = Math.max(0, approxTotal - approxSah);
-        
-        let sisa = approxSah;
-        for (let i = 0; i < count; i++) {
-          if (i === count - 1) {
-            arr.at(i).setValue(Math.max(0, sisa));
-          } else {
-            const share = Math.floor(sisa / (count - i));
-            arr.at(i).setValue(share);
-            sisa -= share;
-          }
-        }
-
-        this.c1Form.patchValue({
-          total_suara_sah: approxSah,
-          total_suara_tidak_sah: approxTidakSah,
-          total_pemilih: approxTotal
-        });
-
-        this.showNotification(
-          `OCR Parsial: Angka terbesar terbaca ${approxTotal} dan ${approxSah}. Mohon periksa dan koreksi manual!`, 
-          'error'
-        );
-      } else {
-        this.showNotification('OCR Gagal: Tidak ada angka yang cukup terbaca dari gambar. Silakan input manual.', 'error');
+        this.showNotification(`Tingkat Akurasi AI: ${data.confidence * 100}% - ${res.message}`, 'success');
+      },
+      error: (err) => {
+        clearInterval(interval);
+        this.isOcrScanning = false;
+        this.showNotification('Mesin OCR gagal memproses berkas.', 'error');
       }
-    } catch (err) {
-      console.error(err);
-      this.isOcrScanning = false;
-      this.showNotification('Mesin OCR gagal memproses gambar.', 'error');
-    }
+    });
   }
 
   onSubmit() {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Arsip;
 use App\Http\Controllers\Controller;
 use App\Models\Arsip;
 use App\Models\VersionHistory;
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -79,6 +80,16 @@ class ArsipController extends Controller
             'is_deleted' => false,
         ]);
 
+        AuditLog::create([
+            'log_id' => (string) Str::uuid(),
+            'actor_id' => $userId,
+            'action' => 'UPLOAD_ARSIP',
+            'target_entity' => 'arsip:' . $arsip->id,
+            'ip_address' => $request->ip(),
+            'reason' => 'Upload dokumen baru: ' . $arsip->no_surat,
+            'timestamp' => Carbon::now(),
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => 'Arsip berhasil disimpan (v1.0).',
@@ -123,6 +134,16 @@ class ArsipController extends Controller
             'file_path' => $path
         ]);
 
+        AuditLog::create([
+            'log_id' => (string) Str::uuid(),
+            'actor_id' => $userId,
+            'action' => 'EDIT_ARSIP',
+            'target_entity' => 'arsip:' . $arsip->id,
+            'ip_address' => $request->ip(),
+            'reason' => 'Revisi dokumen (' . $newVersion . '): ' . $arsip->no_surat,
+            'timestamp' => Carbon::now(),
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => "Revisi berhasil diunggah ($newVersion).",
@@ -156,6 +177,16 @@ class ArsipController extends Controller
         // Logika aslinya akan membuka PDF, me-render teks transparan nama pengunduh & IP, lalu mem-buffer ke response.
         Log::info("AUDIT TRAIL: Dokumen {$arsip->no_surat} diunduh oleh {$user->nama} dengan IP {$request->ip()}. Dynamic Watermark diaplikasikan.");
 
+        AuditLog::create([
+            'log_id' => (string) Str::uuid(),
+            'actor_id' => $user->user_id,
+            'action' => 'DOWNLOAD_ARSIP',
+            'target_entity' => 'arsip:' . $arsip->id,
+            'ip_address' => $request->ip(),
+            'reason' => 'Download dokumen: ' . $arsip->no_surat,
+            'timestamp' => Carbon::now(),
+        ]);
+
         if (!Storage::disk('public')->exists($arsip->file_path)) {
             return response()->json(['message' => 'File tidak ditemukan di server.'], 404);
         }
@@ -183,9 +214,33 @@ class ArsipController extends Controller
 
         Log::info("AUDIT TRAIL: Dokumen ID {$id} telah dihapus (Soft Delete) oleh {$request->user()->nama}. Alasan: {$request->alasan_penghapusan}");
 
+        AuditLog::create([
+            'log_id' => (string) Str::uuid(),
+            'actor_id' => $request->user()->user_id,
+            'action' => 'DELETE_ARSIP',
+            'target_entity' => 'arsip:' . $arsip->id,
+            'ip_address' => $request->ip(),
+            'reason' => 'Hapus dokumen: ' . $arsip->no_surat . ' (' . $request->alasan_penghapusan . ')',
+            'timestamp' => Carbon::now(),
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => 'Dokumen berhasil dihapus dari peredaran publik (Soft Delete).'
+        ], 200);
+    }
+
+    public function logs(Request $request)
+    {
+        $logs = AuditLog::with('user')
+            ->whereIn('action', ['UPLOAD_ARSIP', 'DOWNLOAD_ARSIP', 'EDIT_ARSIP', 'DELETE_ARSIP'])
+            ->orderBy('timestamp', 'desc')
+            ->limit(100)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $logs
         ], 200);
     }
 }

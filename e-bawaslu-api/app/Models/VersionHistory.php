@@ -10,23 +10,21 @@ class VersionHistory extends Model
     use HasFactory;
 
     protected $table = 'version_history';
-    protected $primaryKey = 'version_id';
+    protected $primaryKey = 'history_id';
     public $incrementing = false;
     protected $keyType = 'string';
 
     protected $fillable = [
-        'version_id',
-        'dokumen_id',
-        'version_number',
+        'history_id',
+        'arsip_id',
+        'version_name',
         'file_path',
-        'catatan_perubahan',
-        'created_by'
+        'catatan_revisi',
+        'uploaded_by'
     ];
-
-    const UPDATED_AT = null;
 
     public function arsip()
     {
-        return $this->belongsTo(Arsip::class, 'dokumen_id', 'id');
+        return $this->belongsTo(Arsip::class, 'arsip_id', 'id');
     }
 }

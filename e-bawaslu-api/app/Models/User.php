@@ -20,6 +20,7 @@ class User extends Authenticatable
     protected $primaryKey = 'user_id';
     public $incrementing = false;
     protected $keyType = 'string';
+    const UPDATED_AT = null;
 
     /**
      * The attributes that are mass assignable.
@@ -28,9 +29,13 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'user_id',
+        'tps_id',
         'divisi_id',
         'username',
         'email',
+        'whatsapp_number',
+        'otp_code',
+        'otp_expires_at',
         'password_hash',
         'role',
         'mfa_enabled',

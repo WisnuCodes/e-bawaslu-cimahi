@@ -1,4 +1,4 @@
-import { Injectable, signal, inject } from '@angular/core';
+﻿import { Injectable, signal, inject } from '@angular/core';
 import { ApiService } from './api.service';
 import { tap } from 'rxjs';
 import { User } from '../models/user.model';
@@ -148,13 +148,16 @@ export class AuthService {
   // Hak Akses Audit Trail Forensik (Staf DILARANG akses audit log divisi lain/global)
   get canAccessAuditLog(): boolean {
     return this.isSuperAdmin || this.isPimpinan || this.isKepalaDivisi;
+  }  // Saksi TPS
+  get isSaksiTps(): boolean {
+    return this.userRole.toLowerCase().includes('saksi');
   }
 
-  // Hak Akses Ingesti / Approval C1 (Khusus Divisi P2H, Pimpinan, & Super Admin)
+  // Hak Akses Ingesti / Approval C1 (Khusus Divisi P2H, Pimpinan, Super Admin, & Saksi)
   get canAccessC1(): boolean {
     const r = this.userRole.toLowerCase();
     const isP2H = r.includes('p2h');
-    return this.isSuperAdmin || this.isPimpinan || isP2H;
+    return this.isSuperAdmin || this.isPimpinan || isP2H || this.isSaksiTps;
   }
 
   // Hak Ekspor Laporan Resmi BPK

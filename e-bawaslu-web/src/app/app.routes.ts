@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+﻿import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -41,6 +41,9 @@ export const routes: Routes = [
       {
         path: 'c1',
         loadComponent: () => import('./features/dashboard/pages/c1-dashboard/c1-dashboard.component').then(m => m.C1DashboardComponent)
+      },      {
+        path: 'saksi',
+        loadComponent: () => import('./features/dashboard/pages/saksi-dashboard/saksi-dashboard.component').then(m => m.SaksiDashboardComponent)
       },
       {
         path: 'reports',

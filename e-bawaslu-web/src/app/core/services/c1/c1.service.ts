@@ -46,4 +46,8 @@ export class C1Service {
   deleteC1(id: string): Observable<any> {
     return this.api.delete<any>(`/c1/${id}`);
   }
+
+  scanC1Ocr(formData: FormData): Observable<any> {
+    return this.api.post<any>('/c1/scan', formData);
+  }
 }

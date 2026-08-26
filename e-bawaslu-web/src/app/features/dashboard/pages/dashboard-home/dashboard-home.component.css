@@ -207,3 +207,56 @@
   color: #757575;
   line-height: 1.4;
 }
+
+/* ========== MOBILE RESPONSIVE ========== */
+@media (max-width: 1024px) {
+  .welcome-title h1 {
+    font-size: 1.3rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-home {
+    padding-bottom: 1rem;
+  }
+
+  .welcome-header {
+    padding: 1.25rem 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .welcome-title h1 {
+    font-size: 1.2rem;
+  }
+
+  .welcome-title .subtitle {
+    font-size: 0.85rem;
+  }
+
+  .progress-banner {
+    padding: 1.25rem 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .quick-actions-section h3 {
+    font-size: 1.05rem;
+  }
+
+  .quick-actions-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .action-tile-modern {
+    padding: 1rem;
+  }
+}

@@ -14,6 +14,23 @@ use Illuminate\Support\Facades\Storage;
 
 class C1Controller extends Controller
 {
+    public function scanOcr(Request $request, \App\Services\OcrService $ocrService)
+    {
+        $request->validate([
+            'file_c1' => 'required|file|mimes:jpeg,png,jpg,pdf|max:10240',
+        ]);
+
+        $file = $request->file('file_c1');
+        
+        // Memanggil Advanced AI OCR Service
+        $result = $ocrService->scan($file);
+
+        return response()->json([
+            'message' => 'Berkas berhasil dipindai oleh sistem AI (High-Level Spatial OCR).',
+            'data' => $result['data']
+        ], 200);
+    }
+
     public function index(Request $request)
     {
         $query = C1::query();

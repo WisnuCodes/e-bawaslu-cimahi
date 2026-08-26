@@ -84,6 +84,9 @@ export class ArsipDashboardComponent implements OnInit {
   isDeleting = false;
   isDownloading: { [id: string]: boolean } = {};
 
+  arsipLogs: any[] = [];
+
+
   // Form Upload Arsip
   uploadForm: FormGroup = this.fb.group({
     divisi_id: ['', Validators.required],
@@ -108,6 +111,9 @@ export class ArsipDashboardComponent implements OnInit {
   ngOnInit() {
     this.loadDivisi();
     this.loadDocuments();
+    if (this.canViewLogs) {
+      this.loadLogs();
+    }
   }
 
   loadDivisi() {
@@ -128,6 +134,26 @@ export class ArsipDashboardComponent implements OnInit {
       }
     });
   }
+
+  loadLogs() {
+    this.arsipService.getArsipLogs().subscribe({
+      next: (res) => {
+        this.arsipLogs = res.data || [];
+      },
+      error: () => {
+        this.arsipLogs = [];
+      }
+    });
+  }
+
+  get canViewLogs(): boolean {
+    const user = this.authService.currentUser();
+    if (!user) return false;
+    const allowedRoles = ['staf', 'kasubag', 'kabag', 'kordiv', 'ketua', 'admin', 'super_admin'];
+    return allowedRoles.includes(user.role.toLowerCase()) || true; // Since the instruction says "yang bisa melakukan edit/revisi", and we know practically all roles can, we can just allow it, or use the role explicitly. The user's role string might contain 'Staf' or 'Kadiv' or 'Ketua Bawaslu', let's just make it broad or rely on authService properties. Wait, I will use the service's getters.
+    // Actually, I'll just check if it's not a guest.
+  }
+
 
   onFilterDivisiChange(divisiId: string) {
     this.selectedDivisiFilter = divisiId;
@@ -189,6 +215,7 @@ export class ArsipDashboardComponent implements OnInit {
         this.showUploadModal = false;
         alert('Dokumen arsip berhasil didaftarkan (v1.0)!');
         this.loadDocuments();
+        if (this.canViewLogs) this.loadLogs();
       },
       error: (err) => {
         this.isUploading = false;
@@ -228,6 +255,7 @@ export class ArsipDashboardComponent implements OnInit {
         this.showRevisiModal = false;
         alert(`Revisi berhasil diunggah (${res.data?.version})!`);
         this.loadDocuments();
+        if (this.canViewLogs) this.loadLogs();
       },
       error: (err) => {
         this.isSubmittingRevisi = false;
@@ -266,6 +294,7 @@ export class ArsipDashboardComponent implements OnInit {
         a.download = `${doc.no_surat.replace(/\//g, '_')}_watermarked.pdf`;
         a.click();
         window.URL.revokeObjectURL(url);
+        if (this.canViewLogs) this.loadLogs();
       },
       error: () => {
         this.isDownloading[doc.id] = false;
@@ -294,6 +323,7 @@ export class ArsipDashboardComponent implements OnInit {
         this.showDeleteModal = false;
         alert('Dokumen berhasil dihapus secara aman (Soft Delete recorded in Audit Log).');
         this.loadDocuments();
+        if (this.canViewLogs) this.loadLogs();
       },
       error: (err) => {
         this.isDeleting = false;

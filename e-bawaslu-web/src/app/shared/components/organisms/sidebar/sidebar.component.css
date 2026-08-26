@@ -10,14 +10,14 @@
 .sidebar {
   width: 260px;
   height: 100vh;
-  background-color: #ffffff; /* Clean white background */
-  color: #475569; /* Slate 600 */
+  background-color: #ffffff;
+  color: #475569;
   display: flex;
   flex-direction: column;
   transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  border-right: 1px solid #e2e8f0; /* Slate 200 */
-  overscroll-behavior: none; /* Anti-scroll */
+  border-right: 1px solid #e2e8f0;
+  overscroll-behavior: none;
 }
 
 .sidebar.collapsed {
@@ -30,7 +30,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 1.25rem;
-  border-bottom: 1px solid #f1f5f9; /* Slate 100 */
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .brand {
@@ -47,7 +47,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f26522; /* Bawaslu Orange */
+  background-color: #f26522;
   border-radius: 8px;
   color: #ffffff;
   box-shadow: 0 2px 4px rgba(242, 101, 34, 0.2);
@@ -55,7 +55,7 @@
 
 .brand-text {
   font-weight: 700;
-  color: #0f172a; /* Slate 900 */
+  color: #0f172a;
   font-size: 1.1rem;
   white-space: nowrap;
   letter-spacing: -0.02em;
@@ -64,7 +64,7 @@
 .toggle-btn {
   background: transparent;
   border: none;
-  color: #94a3b8; /* Slate 400 */
+  color: #94a3b8;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -86,7 +86,9 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  overflow: hidden; /* No scrolling in nav */
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .nav-item {
@@ -94,7 +96,7 @@
   align-items: center;
   gap: 12px;
   padding: 10px 14px;
-  color: #64748b; /* Slate 500 */
+  color: #64748b;
   font-size: 0.875rem;
   font-weight: 500;
   text-decoration: none;
@@ -107,7 +109,7 @@
 }
 
 .nav-item mat-icon {
-  color: #94a3b8; /* Slate 400 */
+  color: #94a3b8;
   flex-shrink: 0;
   font-size: 20px;
   width: 20px;
@@ -116,7 +118,7 @@
 }
 
 .nav-item:hover {
-  background-color: #f8fafc; /* Slate 50 */
+  background-color: #f8fafc;
   color: #0f172a;
 }
 
@@ -125,14 +127,14 @@
 }
 
 .nav-item.active {
-  background-color: #f1f5f9; /* Slate 100 */
-  color: #f26522; /* Bawaslu Orange Text */
+  background-color: #f1f5f9;
+  color: #f26522;
   font-weight: 600;
   border-color: #e2e8f0;
 }
 
 .nav-item.active mat-icon {
-  color: #f26522; /* Bawaslu Orange Icon */
+  color: #f26522;
 }
 
 .nav-item.active::before {
@@ -226,11 +228,27 @@
 }
 
 .logout-btn:hover {
-  background-color: #fef2f2; /* Red 50 */
-  border-color: #fecaca; /* Red 200 */
-  color: #ef4444; /* Red 500 */
+  background-color: #fef2f2;
+  border-color: #fecaca;
+  color: #ef4444;
 }
 
 .logout-btn:hover mat-icon {
   color: #ef4444;
+}
+
+/* Mobile - sidebar takes full width in overlay mode */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 280px;
+  }
+  .sidebar.collapsed {
+    width: 280px;
+  }
+  .toggle-btn {
+    display: none;
+  }
+  .sidebar-header {
+    height: 56px;
+  }
 }

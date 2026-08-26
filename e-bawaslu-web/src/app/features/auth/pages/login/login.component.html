@@ -1,4 +1,4 @@
-<form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+﻿<form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
   <mat-form-field appearance="outline" class="w-full mb-3">
     <mat-label>Email / Akun SSO Bawaslu</mat-label>
     <input matInput type="email" formControlName="email" placeholder="contoh: ketua@cimahi.bawaslu.go.id">
@@ -18,7 +18,7 @@
   </mat-form-field>
 
   <div class="form-actions" style="margin-top: 8px;">
-    <button mat-flat-button color="primary" type="submit" [disabled]="loginForm.invalid || isLoading" style="width: 100%; padding: 24px 0; font-size: 1rem; border-radius: 8px;">
+    <button mat-flat-button color="primary" type="submit" [disabled]="loginForm.invalid || isLoading" class="login-btn">
       <mat-spinner *ngIf="isLoading" diameter="24" style="margin-right: 8px; display: inline-block; vertical-align: middle;"></mat-spinner>
       <span style="vertical-align: middle;">{{ isLoading ? 'Memverifikasi...' : 'Login SSO Bawaslu' }}</span>
     </button>
