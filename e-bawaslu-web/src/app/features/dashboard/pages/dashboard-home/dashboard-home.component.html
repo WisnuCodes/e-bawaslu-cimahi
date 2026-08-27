@@ -1,15 +1,20 @@
 <div class="dashboard-home animate-fade-in">
   
   <div class="welcome-header">
-    <div class="welcome-title">
-      <h1>Selamat Datang, {{ authService.currentUser()?.username || 'Aparatur Bawaslu' }}</h1>
-      <p class="date">
-        <mat-icon style="font-size: 14px; width: 14px; height: 14px;">calendar_today</mat-icon>
-        {{ today | bawasluDate:'EEEE, dd MMMM yyyy' }}
-      </p>
-      <p class="subtitle">
-        Portal Terpadu Sistem Informasi Manajemen Presensi WFH, E-Arsip Digital, Pengawasan Form C1, dan Audit Trail Bawaslu Kota Cimahi.
-      </p>
+    <div class="welcome-content-wrapper">
+      <div class="welcome-title">
+        <h1>Selamat Datang, {{ authService.currentUser()?.username || 'Aparatur Bawaslu' }}</h1>
+        <p class="date">
+          <mat-icon style="font-size: 14px; width: 14px; height: 14px;">calendar_today</mat-icon>
+          {{ today | bawasluDate:'EEEE, dd MMMM yyyy' }}
+        </p>
+        <p class="subtitle">
+          Portal Terpadu Sistem Informasi Manajemen Presensi WFH, E-Arsip Digital, Pengawasan Form C1, dan Audit Trail Bawaslu Kota Cimahi.
+        </p>
+      </div>
+      <div class="welcome-logo hide-mobile">
+        <img src="assets/icon/icon_bawaslu.jpg" alt="Logo Bawaslu" />
+      </div>
     </div>
   </div>
 
