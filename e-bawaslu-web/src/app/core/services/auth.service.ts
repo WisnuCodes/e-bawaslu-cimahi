@@ -148,9 +148,10 @@ export class AuthService {
   // Hak Akses Audit Trail Forensik (Staf DILARANG akses audit log divisi lain/global)
   get canAccessAuditLog(): boolean {
     return this.isSuperAdmin || this.isPimpinan || this.isKepalaDivisi;
-  }  // Pengawas TPS
+  }  // Pengawas TPS (Tetap pakai isSaksiTps untuk meminimalisir refaktor)
   get isSaksiTps(): boolean {
-    return this.userRole.toLowerCase().includes('pengawas tps');
+    const r = this.userRole.toLowerCase();
+    return r.includes('pengawas tps') || r.includes('saksi');
   }
 
   // Hak Akses Ingesti / Approval C1 (Khusus Divisi P2H, Pimpinan, Super Admin, & Pengawas)
