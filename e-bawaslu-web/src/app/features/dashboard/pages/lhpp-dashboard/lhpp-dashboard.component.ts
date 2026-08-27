@@ -59,7 +59,6 @@ export class LhppDashboardComponent implements OnInit {
 
   documents = new MatTableDataSource<ArsipItem>([]);
   divisiList: Divisi[] = [];
-  selectedDivisiFilter: string = '';
   searchQuery: string = '';
 
   applyFilterArsip = _.debounce((event: Event) => {
@@ -134,7 +133,7 @@ export class LhppDashboardComponent implements OnInit {
   }
 
   loadDocuments() {
-    this.arsipService.getArsip(this.selectedDivisiFilter || undefined).subscribe({
+    this.arsipService.getArsip().subscribe({
       next: (res) => {
         // Hanya tampilkan dokumen dengan kategori LHPP di dashboard ini
         const lhppDocs = (res.data || []).filter((doc: ArsipItem) => doc.kategori === 'LHPP');
@@ -166,10 +165,6 @@ export class LhppDashboardComponent implements OnInit {
   }
 
 
-  onFilterDivisiChange(divisiId: string) {
-    this.selectedDivisiFilter = divisiId;
-    this.loadDocuments();
-  }
 
   onSearch(event: any) {
     const query = event.target.value;

@@ -18,13 +18,6 @@
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" style="min-width: 200px; margin-bottom: -1.25em;">
-        <mat-label>Filter Divisi</mat-label>
-        <mat-select [(ngModel)]="selectedDivisiFilter" (selectionChange)="onFilterDivisiChange($event.value)">
-          <mat-option value="">Semua Divisi</mat-option>
-          <mat-option *ngFor="let div of divisiList" [value]="div.divisi_id">{{ div.nama_divisi }}</mat-option>
-        </mat-select>
-      </mat-form-field>
     </div>
 
     <!-- Tabel Dokumen Arsip -->
