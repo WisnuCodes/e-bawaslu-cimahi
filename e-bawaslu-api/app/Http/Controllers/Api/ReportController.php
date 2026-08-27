@@ -71,7 +71,7 @@ class ReportController extends Controller
         ";
 
         foreach ($data as $item) {
-            $info = $request->tipe_laporan === 'presensi' ? $item->status_kehadiran : $item->rincian_aktivitas;
+            $info = $request->tipe_laporan === 'presensi' ? "CI: {$item->status_ci}, CO: " . ($item->status_co ?: 'Belum CO') : $item->rincian_aktivitas;
             $id = $request->tipe_laporan === 'presensi' ? $item->presensi_id : $item->worklog_id;
             $html .= "<tr><td>{$id}</td><td>{$info}</td></tr>";
         }

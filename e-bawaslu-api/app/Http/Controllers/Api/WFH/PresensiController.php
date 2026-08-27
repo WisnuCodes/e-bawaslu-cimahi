@@ -51,11 +51,15 @@ class PresensiController extends Controller
         $presensi = Presensi::findOrFail($id);
         
         $request->validate([
-            'status_kehadiran' => 'sometimes|string'
+            'status_ci' => 'sometimes|string',
+            'status_co' => 'sometimes|string'
         ]);
 
-        if ($request->has('status_kehadiran')) {
-            $presensi->status_kehadiran = $request->status_kehadiran;
+        if ($request->has('status_ci')) {
+            $presensi->status_ci = $request->status_ci;
+        }
+        if ($request->has('status_co')) {
+            $presensi->status_co = $request->status_co;
         }
 
         // Use mass assignment or individual assignment
@@ -110,11 +114,11 @@ class PresensiController extends Controller
         $path = $request->file('selfie_image')->store('presensi', 'public');
         $now = Carbon::now();
 
-        // Validasi jam kerja
-        $status_kehadiran = 'Hadir';
+        // Validasi jam kerja CI
+        $status_ci = 'Hadir';
         $jamBatas = Carbon::parse($now->format('Y-m-d') . ' 08:00:00');
         if ($now->greaterThan($jamBatas)) {
-            $status_kehadiran = 'Terlambat';
+            $status_ci = 'Terlambat';
         }
 
         $presensi = Presensi::create([
@@ -122,7 +126,7 @@ class PresensiController extends Controller
             'user_id' => $userId,
             'timestamp_checkin' => $now,
             'selfie_masuk_url' => $path,
-            'status_kehadiran' => $status_kehadiran,
+            'status_ci' => $status_ci,
             'gps_koordinat' => $request->gps_koordinat,
             'liveness_score' => $request->liveness_score
         ]);
@@ -159,11 +163,9 @@ class PresensiController extends Controller
         $now = Carbon::now();
         $jamPulang = Carbon::parse($now->format('Y-m-d') . ' 16:30:00');
 
+        $status_co = 'Hadir';
         if ($now->lessThan($jamPulang)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Belum waktunya jam pulang. Anda baru bisa check-out setelah pukul 16:30.'
-            ], 403);
+            $status_co = 'Terlambat';
         }
 
         $path = $request->file('selfie_image')->store('presensi', 'public');
@@ -171,6 +173,7 @@ class PresensiController extends Controller
         $presensi->update([
             'timestamp_checkout' => $now,
             'selfie_keluar_url' => $path,
+            'status_co' => $status_co,
             // Update koordinat checkout
         ]);
 

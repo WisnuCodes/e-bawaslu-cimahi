@@ -17,7 +17,8 @@ interface PresensiItem {
   nama_pegawai?: string;
   timestamp_checkin?: string;
   timestamp_checkout?: string;
-  status_kehadiran?: string;
+  status_ci?: string;
+  status_co?: string;
 }
 
 @Component({

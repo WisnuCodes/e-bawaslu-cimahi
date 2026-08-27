@@ -90,7 +90,7 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
   mediaStream: MediaStream | null = null;
 
   presensiList = new MatTableDataSource<any>([]);
-  presensiDisplayedColumns: string[] = ['nama', 'waktu_masuk', 'foto_masuk', 'waktu_keluar', 'foto_keluar', 'lokasi', 'status', 'aksi'];
+  presensiDisplayedColumns: string[] = ['nama', 'waktu_masuk', 'foto_masuk', 'status_ci', 'waktu_keluar', 'foto_keluar', 'status_co', 'lokasi', 'aksi'];
 
   applyFilterPresensi = _.debounce((event: Event) => {
     const filterValue = (event.target as HTMLInputElement).value;
@@ -102,7 +102,8 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
 
   // Presensi Edit State (Admin only)
   editingPresensiId: string | null = null;
-  editPresensiStatus: string = '';
+  editPresensiStatusCI = '';
+  editPresensiStatusCO = '';
 
   // Worklog Edit State
   isEditMode = false;
@@ -506,17 +507,19 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
 
   editPresensi(presensi: any) {
     this.editingPresensiId = presensi.presensi_id;
-    this.editPresensiStatus = presensi.status_kehadiran || 'Hadir';
+    this.editPresensiStatusCI = presensi.status_ci || 'Hadir';
+    this.editPresensiStatusCO = presensi.status_co || 'Hadir';
   }
 
   cancelEditPresensi() {
     this.editingPresensiId = null;
-    this.editPresensiStatus = '';
+    this.editPresensiStatusCI = '';
+    this.editPresensiStatusCO = '';
   }
 
   savePresensi(id: string) {
-    if (!this.editPresensiStatus) return;
-    this.wfhService.updatePresensi(id, { status_kehadiran: this.editPresensiStatus }).subscribe({
+    if (!this.editPresensiStatusCI) return;
+    this.wfhService.updatePresensi(id, { status_ci: this.editPresensiStatusCI, status_co: this.editPresensiStatusCO }).subscribe({
       next: () => {
         this.editingPresensiId = null;
         this.loadPresensi();

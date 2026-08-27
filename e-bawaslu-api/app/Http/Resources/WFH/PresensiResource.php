@@ -19,7 +19,8 @@ class PresensiResource extends JsonResource
             'user_id' => $this->user_id,
             'timestamp_checkin' => $this->timestamp_checkin,
             'selfie_masuk_url' => url('storage/' . $this->selfie_masuk_url),
-            'status_kehadiran' => $this->status_kehadiran,
+            'status_ci' => $this->status_ci,
+            'status_co' => $this->status_co,
             'timestamp_checkout' => $this->timestamp_checkout,
             'selfie_keluar_url' => $this->selfie_keluar_url ? url('storage/' . $this->selfie_keluar_url) : null,
         ];
