@@ -220,3 +220,32 @@ div, a, button, input, textarea, select,
     margin-bottom: 1rem;
   }
 }
+
+/* =========================================================
+   UI FIXES & ACCESSIBILITY (RAMAH LANSIA)
+   ========================================================= */
+
+/* Fix untuk dropdown mat-select agar text panjang tidak bertumpuk / cramped */
+.mat-mdc-option {
+  height: auto !important;
+  min-height: 56px !important; /* Touch target lebih besar */
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+  margin-bottom: 4px !important;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.mat-mdc-option:last-child {
+  border-bottom: none;
+}
+
+.mat-mdc-option .mdc-list-item__primary-text {
+  white-space: normal !important; /* Allow text to wrap */
+  line-height: 1.5 !important;
+  font-size: 0.95rem !important; /* Sedikit diperbesar agar jelas */
+}
+
+/* Hover state lebih tegas untuk lansia */
+.mat-mdc-option:hover:not(.mdc-list-item--disabled) {
+  background-color: var(--color-primary-light) !important;
+}
