@@ -168,7 +168,7 @@
         <ng-container matColumnDef="user">
           <th mat-header-cell *matHeaderCellDef> User (Nama & Email) </th>
           <td mat-cell *matCellDef="let log">
-            <div style="font-weight: 500;">{{ log.user?.nama || 'Unknown User' }}</div>
+            <div style="font-weight: 500;">{{ log.user?.username || 'Unknown User' }}</div>
             <small style="color: var(--color-text-muted);">{{ log.user?.email || '-' }}</small>
           </td>
         </ng-container>
