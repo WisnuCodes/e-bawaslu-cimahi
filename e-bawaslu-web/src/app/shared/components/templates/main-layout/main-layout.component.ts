@@ -10,65 +10,105 @@ import { HeaderComponent } from '../../organisms/header/header.component';
   standalone: true,
   imports: [CommonModule, RouterModule, MatSidenavModule, SidebarComponent, HeaderComponent],
   template: `
-    <mat-sidenav-container class="sidenav-container">
+    <!-- DESKTOP: Flexbox layout -->
+    <div class="desktop-layout" *ngIf="!isMobile">
+      <app-sidebar #sidebarRef></app-sidebar>
+      <div class="desktop-main">
+        <app-header [isMobile]="false"></app-header>
+        <main class="main-content">
+          <router-outlet></router-outlet>
+        </main>
+        <footer class="app-footer">
+          <div class="footer-left">
+            <span class="footer-brand">SIMBA CIMAHI</span>
+            <span class="footer-version">v2.0.0</span>
+          </div>
+          <div class="footer-right">
+            &copy; 2026 Badan Pengawas Pemilihan Umum Kota Cimahi
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <!-- MOBILE: Angular Material Sidenav overlay -->
+    <mat-sidenav-container class="sidenav-container" *ngIf="isMobile">
       <mat-sidenav
         #sidenav
-        [mode]="isMobile ? 'over' : 'side'"
-        [opened]="!isMobile"
-        [fixedInViewport]="isMobile"
-        class="sidenav"
-        [class.mobile-sidenav]="isMobile">
+        mode="over"
+        [fixedInViewport]="true"
+        class="mobile-sidenav">
         <app-sidebar></app-sidebar>
       </mat-sidenav>
-      <mat-sidenav-content class="sidenav-content">
+      <mat-sidenav-content>
         <app-header
-          [isMobile]="isMobile"
+          [isMobile]="true"
           (toggleMenu)="sidenav.toggle()">
         </app-header>
         <main class="main-content">
           <router-outlet></router-outlet>
         </main>
+        <footer class="app-footer">
+          <div class="footer-left">
+            <span class="footer-brand">SIMBA CIMAHI</span>
+            <span class="footer-version">v2.0.0</span>
+          </div>
+          <div class="footer-right">
+            &copy; 2026 Bawaslu Kota Cimahi
+          </div>
+        </footer>
       </mat-sidenav-content>
     </mat-sidenav-container>
   `,
   styles: [`
-    .sidenav-container {
+    /* === DESKTOP FLEXBOX LAYOUT === */
+    .desktop-layout {
+      display: flex;
       height: 100vh;
+      overflow: hidden;
     }
-    .sidenav {
-      width: auto !important;
+    .desktop-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
       min-width: 0;
-      border-right: none;
-      overflow: visible;
-    }
-    ::ng-deep .sidenav .mat-drawer-inner-container {
-      overflow: visible;
-    }
-    .mobile-sidenav {
-      width: 280px !important;
-      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
-    }
-    ::ng-deep .mat-drawer-content {
-      transition: margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .main-content {
+      flex: 1;
       padding: 24px;
-      min-height: calc(100vh - 72px);
       overflow-y: auto;
       box-sizing: border-box;
       background-color: var(--color-background);
     }
-    .main-content-footer {
-      margin-top: auto;
-      padding: 1.25rem 2rem;
-      background: rgba(255, 255, 255, 0.75);
+
+    /* === MOBILE SIDENAV === */
+    .sidenav-container {
+      height: 100vh;
+    }
+    .mobile-sidenav {
+      width: 280px;
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
+    }
+
+    /* === FOOTER === */
+    .app-footer {
+      padding: 1rem 2rem;
+      background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border-top: 1px solid rgba(226, 232, 240, 0.8);
       color: #64748b;
       font-size: 0.85rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-shrink: 0;
+    }
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
     .footer-brand {
       font-weight: 700;
@@ -82,12 +122,21 @@ import { HeaderComponent } from '../../organisms/header/header.component';
       border-radius: 4px;
       font-size: 0.7rem;
       font-weight: 600;
-      margin-left: 8px;
     }
+    .footer-right {
+      font-weight: 500;
+    }
+
     @media (max-width: 768px) {
       .main-content {
         padding: 16px 12px;
-        min-height: calc(100vh - 56px);
+      }
+      .app-footer {
+        flex-direction: column;
+        gap: 4px;
+        text-align: center;
+        padding: 0.75rem 1rem;
+        font-size: 0.75rem;
       }
     }
   `]
