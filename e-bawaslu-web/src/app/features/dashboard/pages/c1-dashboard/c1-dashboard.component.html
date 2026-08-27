@@ -129,6 +129,19 @@
       </p>
     </div>
 
+    <!-- PANDUAN PENGISIAN & UPLOAD -->
+    <div style="background-color: #e0f2fe; border: 1px solid #bae6fd; border-left: 4px solid #0284c7; border-radius: 6px; padding: 1rem; margin-bottom: 1.5rem;">
+      <h4 style="margin: 0 0 0.5rem 0; color: #0369a1; font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+        <mat-icon style="font-size: 18px; width: 18px; height: 18px;">lightbulb</mat-icon> Panduan Pengisian & Unggah Form C1
+      </h4>
+      <ul style="margin: 0; padding-left: 1.5rem; color: #0c4a6e; font-size: 0.875rem; line-height: 1.6;">
+        <li><strong>Langkah 1:</strong> Ketikkan jumlah Pasangan Calon (Paslon) terlebih dahulu pada kolom <strong>Kustom Jumlah Paslon</strong> di bawah (misal: isi angka 1, 3, atau 5).</li>
+        <li><strong>Langkah 2:</strong> Sistem akan otomatis membuatkan kotak isian Suara Paslon sebanyak angka yang Anda ketikkan.</li>
+        <li><strong>Langkah 3:</strong> Klik tombol <strong>Pilih Berkas</strong> dan unggah foto Form C1 Anda. Mesin AI (OCR) akan mencoba membaca gambar tersebut dan <strong>menyekrupkan angka-angkanya secara otomatis</strong> ke kotak Anda!</li>
+        <li><strong>Langkah 4:</strong> Selalu cek kotak peringatan validasi. Pastikan warnanya <strong style="color: #059669;">HIJAU (Validasi Berhasil)</strong> yang menandakan penjumlahan total paslon sama dengan Suara Sah.</li>
+      </ul>
+    </div>
+
     <form [formGroup]="c1Form" (ngSubmit)="onSubmit()" style="display: flex; flex-direction: column; gap: 1.5rem;">
       
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem;">
