@@ -58,6 +58,8 @@ export class ArsipDashboardComponent implements OnInit {
   documents = new MatTableDataSource<ArsipItem>([]);
   divisiList: Divisi[] = [];
   selectedDivisiFilter: string = '';
+  selectedYearFilter: string = '';
+  availableYears: string[] = [];
   searchQuery: string = '';
 
   applyFilterArsip = _.debounce((event: Event) => {
@@ -129,7 +131,23 @@ export class ArsipDashboardComponent implements OnInit {
   loadDocuments() {
     this.arsipService.getArsip(this.selectedDivisiFilter || undefined).subscribe({
       next: (res) => {
-        this.documents.data = res.data || [];
+        let docs = res.data || [];
+        
+        // Ekstrak tahun unik
+        const years = new Set<string>();
+        docs.forEach((doc: ArsipItem) => {
+          if (doc.tgl_surat) {
+            years.add(doc.tgl_surat.split('-')[0]);
+          }
+        });
+        this.availableYears = Array.from(years).sort().reverse();
+        
+        // Filter berdasarkan tahun jika dipilih
+        if (this.selectedYearFilter) {
+          docs = docs.filter((doc: ArsipItem) => doc.tgl_surat?.startsWith(this.selectedYearFilter));
+        }
+
+        this.documents.data = docs;
         this.documents.paginator = this.paginator;
       },
       error: () => {
@@ -156,9 +174,13 @@ export class ArsipDashboardComponent implements OnInit {
     return allowedRoles.includes(user.role.toLowerCase()) || true; 
   }
 
-
   onFilterDivisiChange(divisiId: string) {
     this.selectedDivisiFilter = divisiId;
+    this.loadDocuments();
+  }
+
+  onFilterYearChange(year: string) {
+    this.selectedYearFilter = year;
     this.loadDocuments();
   }
 
