@@ -47,12 +47,12 @@
         Total Berkas Masuk: <strong>{{ c1List.data.length }}</strong> dari <strong>{{ totalTpsPilot }} TPS</strong> ({{ progressPercentage }}%)
       </div>
     </div>
-    
+
     <mat-progress-bar mode="determinate" [value]="progressPercentage" style="height: 6px; border-radius: 3px;"></mat-progress-bar>
-    
+
     <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #757575; margin-top: 12px;">
       <span style="display: flex; align-items: center; gap: 4px;">
-        <mat-icon style="font-size: 16px; width: 16px; height: 16px;">{{ progressPercentage === 100 ? 'done_all' : 'hourglass_empty' }}</mat-icon> 
+        <mat-icon style="font-size: 16px; width: 16px; height: 16px;">{{ progressPercentage === 100 ? 'done_all' : 'hourglass_empty' }}</mat-icon>
         {{ progressPercentage === 100 ? 'Seluruh TPS Terekapitulasi' : 'Menunggu Unggahan Petugas Lapangan/TPS' }}
       </span>
       <span>Tervalidasi & Approved: <strong>{{ verifiedProgressPercentage }}%</strong></span>
@@ -61,7 +61,7 @@
 
   <!-- KPI GRID -->
   <div class="kpi-grid">
-    
+
     <!-- Total Suara Sah -->
     <div class="kpi-card">
       <div class="kpi-title">TOTAL SUARA SAH (KOTA)</div>
@@ -135,15 +135,16 @@
         <mat-icon style="font-size: 18px; width: 18px; height: 18px;">lightbulb</mat-icon> Panduan Pengisian & Unggah Form C1
       </h4>
       <ul style="margin: 0; padding-left: 1.5rem; color: #0c4a6e; font-size: 0.875rem; line-height: 1.6;">
-        <li><strong>Langkah 1:</strong> Ketikkan jumlah Pasangan Calon (Paslon) terlebih dahulu pada kolom <strong>Kustom Jumlah Paslon</strong> di bawah (misal: isi angka 1, 3, atau 5).</li>
+        <li><strong>Langkah 1:</strong> Ketikkan jumlah Pasangan Calon (Paslon) terlebih dahulu pada kolom <strong>Kustom Jumlah Paslon</strong> di bawah (misal: isi angka 1, 3, 5, atau lebih).</li>
         <li><strong>Langkah 2:</strong> Sistem akan otomatis membuatkan kotak isian Suara Paslon sebanyak angka yang Anda ketikkan.</li>
         <li><strong>Langkah 3:</strong> Klik tombol <strong>Pilih Berkas</strong> dan unggah foto Form C1 Anda. Mesin AI (OCR) akan mencoba membaca gambar tersebut dan <strong>menyekrupkan angka-angkanya secara otomatis</strong> ke kotak Anda!</li>
         <li><strong>Langkah 4:</strong> Selalu cek kotak peringatan validasi. Pastikan warnanya <strong style="color: #059669;">HIJAU (Validasi Berhasil)</strong> yang menandakan penjumlahan total paslon sama dengan Suara Sah.</li>
+        <li><strong>Langkah 5:</strong> Pastikan foto Form C1 yang Anda unggah <strong>terlihat jelas, tidak buram (blur), dan cahayanya cukup</strong> agar tulisan dapat terbaca akurat oleh sistem AI.</li>
       </ul>
     </div>
 
     <form [formGroup]="c1Form" (ngSubmit)="onSubmit()" style="display: flex; flex-direction: column; gap: 1.5rem;">
-      
+
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem;">
         <!-- PILIH TPS -->
         <mat-form-field appearance="outline">
@@ -174,7 +175,7 @@
         <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin-top: 1rem; margin-bottom: 1.5rem;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
             <h3 style="margin: 0; font-size: 1rem; font-weight: 600; color: #334155;">Rincian Suara per Paslon</h3>
-            
+
             <mat-form-field appearance="outline" style="width: 200px;">
               <mat-label>Kustom Jumlah Paslon</mat-label>
               <input matInput type="number" formControlName="jumlah_paslon" min="1" (change)="onJumlahPaslonChange(c1Form.value.jumlah_paslon)">
@@ -190,10 +191,10 @@
           </div>
 
           <!-- Validasi Peringatan Interaktif -->
-          <div *ngIf="c1Form.value.suara_paslon && c1Form.value.total_suara_sah > 0" 
+          <div *ngIf="c1Form.value.suara_paslon && c1Form.value.total_suara_sah > 0"
                style="margin-top: 0.5rem; padding: 0.75rem; border-radius: 6px; display: flex; align-items: center; gap: 8px; font-size: 0.875rem;"
                [ngStyle]="{'background-color': c1Form.value.total_suara_sah == sumSuaraPaslon ? '#ecfdf5' : '#fef2f2', 'border': '1px solid ' + (c1Form.value.total_suara_sah == sumSuaraPaslon ? '#a7f3d0' : '#fecaca'), 'color': c1Form.value.total_suara_sah == sumSuaraPaslon ? '#059669' : '#e11d48'}">
-            
+
             <mat-icon style="font-size: 18px; width: 18px; height: 18px;">
               {{ c1Form.value.total_suara_sah == sumSuaraPaslon ? 'check_circle' : 'error' }}
             </mat-icon>
@@ -230,7 +231,7 @@
       <div style="display: flex; gap: 1.5rem; align-items: flex-start; flex-wrap: wrap;">
         <div style="flex: 1; min-width: 250px;">
           <div style="font-size: 0.85rem; font-weight: 500; color: #424242; margin-bottom: 8px;">Berkas Scan Form C1 (PDF/JPG/PNG)</div>
-          
+
           <div style="display: flex; gap: 12px; align-items: center;">
             <div class="file-upload-wrapper">
               <button mat-stroked-button color="primary" type="button" style="pointer-events: none;">
@@ -280,7 +281,7 @@
         Total: {{ c1List.data.length }} Berkas
       </span>
     </div>
-    
+
     <div style="padding: 1rem 1.5rem 0;">
       <mat-form-field appearance="outline" style="width: 100%; margin-bottom: -1.25em;">
         <mat-label>Pencarian Form C1...</mat-label>
@@ -291,7 +292,7 @@
 
     <div class="table-responsive" style="overflow-x: auto;">
       <table mat-table [dataSource]="c1List" style="width: 100%;">
-        
+
         <!-- TPS Column -->
         <ng-container matColumnDef="tps">
           <th mat-header-cell *matHeaderCellDef> Wilayah TPS </th>
@@ -379,7 +380,7 @@
           <th mat-header-cell *matHeaderCellDef> Tindakan </th>
           <td mat-cell *matCellDef="let element">
             <div style="display: flex; gap: 8px; align-items: center;">
-              
+
               <!-- Pimpinan Approval Buttons -->
               <ng-container *ngIf="canApprove && element.status_c1 === 'Draft'">
                 <button mat-stroked-button (click)="onApprove(element, 'Approved')" style="height: 32px; line-height: 30px; padding: 0 12px; font-size: 0.75rem; border-color: #10b981; color: #047857; font-weight: 600; border-radius: 6px; background-color: #ecfdf5;">
