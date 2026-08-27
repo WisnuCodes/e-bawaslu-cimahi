@@ -165,6 +165,16 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
     return `http://localhost:8000/storage/${path}`;
   }
 
+  get isCheckoutDisabled(): boolean {
+    const hours = this.currentTime.getHours();
+    const minutes = this.currentTime.getMinutes();
+    const timeInMinutes = hours * 60 + minutes;
+    
+    // 08:00 is 8 * 60 = 480
+    // 15:30 is 15 * 60 + 30 = 930
+    return timeInMinutes >= 480 && timeInMinutes < 930;
+  }
+
   ngOnInit() {
     this.timerId = setInterval(() => {
       this.currentTime = new Date();

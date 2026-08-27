@@ -35,9 +35,12 @@
         <button mat-flat-button color="primary" class="action-btn" [disabled]="isCheckedIn || isCheckingIn" (click)="openCamera('checkin')">
           <mat-icon>photo_camera</mat-icon>&nbsp; Check In
         </button>
-        <button mat-stroked-button color="warn" class="action-btn" [disabled]="!isCheckedIn || isCheckedOut || isCheckingOut" (click)="openCamera('checkout')">
+        <button mat-stroked-button color="warn" class="action-btn" [disabled]="!isCheckedIn || isCheckedOut || isCheckingOut || isCheckoutDisabled" (click)="openCamera('checkout')">
           <mat-icon>logout</mat-icon>&nbsp; Check Out
         </button>
+        <div *ngIf="isCheckedIn && !isCheckedOut && isCheckoutDisabled" style="font-size: 0.8rem; color: #dc2626; text-align: center; background-color: #fee2e2; padding: 6px; border-radius: 4px;">
+          Sistem Check-Out ditutup dari pukul 08:00 s.d 15:30.
+        </div>
       </div>
 
       <!-- Camera Modal -->

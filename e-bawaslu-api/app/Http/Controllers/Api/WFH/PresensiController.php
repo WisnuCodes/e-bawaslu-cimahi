@@ -116,7 +116,7 @@ class PresensiController extends Controller
 
         // Validasi jam kerja CI
         $status_ci = 'Hadir';
-        $jamBatas = Carbon::parse($now->format('Y-m-d') . ' 08:00:00');
+        $jamBatas = Carbon::parse($now->format('Y-m-d') . ' 08:30:00');
         if ($now->greaterThan($jamBatas)) {
             $status_ci = 'Terlambat';
         }
@@ -161,11 +161,19 @@ class PresensiController extends Controller
         }
 
         $now = Carbon::now();
+        $jamBukaCheckout = Carbon::parse($now->format('Y-m-d') . ' 15:30:00');
         $jamPulang = Carbon::parse($now->format('Y-m-d') . ' 16:30:00');
+
+        if ($now->lessThan($jamBukaCheckout)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sistem check-out belum dibuka. Anda baru bisa check-out mulai pukul 15:30.'
+            ], 403);
+        }
 
         $status_co = 'Hadir';
         if ($now->lessThan($jamPulang)) {
-            $status_co = 'Terlambat';
+            $status_co = 'Terlambat'; // Pulang sebelum 16:30
         }
 
         $path = $request->file('selfie_image')->store('presensi', 'public');
