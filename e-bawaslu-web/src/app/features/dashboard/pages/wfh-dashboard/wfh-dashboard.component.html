@@ -135,7 +135,7 @@
           <a *ngIf="log.attachment_url" [href]="getAttachmentUrl(log.attachment_url)" target="_blank" style="color: #3b82f6; text-decoration: none; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 4px;">
             <mat-icon style="font-size: 16px; width: 16px; height: 16px;">attachment</mat-icon> Lihat
           </a>
-          <span *ngIf="!log.attachment_url" style="color: #94a3b8; font-size: 0.85rem;">â€”</span>
+          <span *ngIf="!log.attachment_url" style="color: #94a3b8; font-size: 0.85rem;">-</span>
         </td>
       </ng-container>
 
@@ -219,13 +219,13 @@
           <a *ngIf="p.selfie_masuk_url" [href]="getAttachmentUrl(p.selfie_masuk_url)" target="_blank">
             <img [src]="getAttachmentUrl(p.selfie_masuk_url)" alt="Check In" style="width: 36px; height: 36px; border-radius: 4px; object-fit: cover; border: 1px solid #e2e8f0;">
           </a>
-          <span *ngIf="!p.selfie_masuk_url" style="color: #94a3b8;">â€”</span>
+          <span *ngIf="!p.selfie_masuk_url" style="color: #94a3b8;">-</span>
         </td>
       </ng-container>
 
       <ng-container matColumnDef="waktu_keluar">
         <th mat-header-cell *matHeaderCellDef> Waktu Check-Out </th>
-        <td mat-cell *matCellDef="let p"> {{ p.timestamp_checkout ? (p.timestamp_checkout | date:'dd MMM yyyy, HH:mm') : 'â€”' }} </td>
+        <td mat-cell *matCellDef="let p"> {{ p.timestamp_checkout ? (p.timestamp_checkout | date:'dd MMM yyyy, HH:mm') : '-' }} </td>
       </ng-container>
 
       <ng-container matColumnDef="foto_keluar">
@@ -234,7 +234,7 @@
           <a *ngIf="p.selfie_keluar_url" [href]="getAttachmentUrl(p.selfie_keluar_url)" target="_blank">
             <img [src]="getAttachmentUrl(p.selfie_keluar_url)" alt="Check Out" style="width: 36px; height: 36px; border-radius: 4px; object-fit: cover; border: 1px solid #e2e8f0;">
           </a>
-          <span *ngIf="!p.selfie_keluar_url" style="color: #94a3b8;">â€”</span>
+          <span *ngIf="!p.selfie_keluar_url" style="color: #94a3b8;">-</span>
         </td>
       </ng-container>
 
