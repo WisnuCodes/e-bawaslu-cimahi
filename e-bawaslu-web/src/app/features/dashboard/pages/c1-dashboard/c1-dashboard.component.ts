@@ -360,8 +360,11 @@ export class C1DashboardComponent implements OnInit {
         const arr = this.c1Form.get('suara_paslon') as FormArray;
 
         // Memasukkan hasil
-        if (data.paslon_1 !== undefined) arr.at(0)?.setValue(data.paslon_1);
+        if (data.paslon_1 !== undefined && count >= 1) arr.at(0)?.setValue(data.paslon_1);
         if (data.paslon_2 !== undefined && count >= 2) arr.at(1)?.setValue(data.paslon_2);
+        if (data.paslon_3 !== undefined && count >= 3) arr.at(2)?.setValue(data.paslon_3);
+        if (data.paslon_4 !== undefined && count >= 4) arr.at(3)?.setValue(data.paslon_4);
+        if (data.paslon_5 !== undefined && count >= 5) arr.at(4)?.setValue(data.paslon_5);
         
         this.c1Form.patchValue({
           total_suara_sah: data.suara_sah,
