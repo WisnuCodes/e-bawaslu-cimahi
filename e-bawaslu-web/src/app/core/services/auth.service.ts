@@ -87,7 +87,12 @@ export class AuthService {
   // ==========================================
 
   get userRole(): string {
-    return this.currentUser()?.role || '';
+    let role = this.currentUser()?.role || '';
+    // Backward compatibility untuk session lama yang masih menyimpan role 'Saksi TPS'
+    if (role === 'Saksi TPS') {
+      role = 'Pengawas TPS';
+    }
+    return role;
   }
 
   // Kelas 4: Super Administrator (IT & Security Master)
