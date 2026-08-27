@@ -10,14 +10,15 @@
 .sidebar {
   width: 260px;
   height: 100vh;
-  background-color: #ffffff;
-  color: #475569;
+  background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+  color: #cbd5e1;
   display: flex;
   flex-direction: column;
   transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  border-right: 1px solid #e2e8f0;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
   overscroll-behavior: none;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
 }
 
 .sidebar.collapsed {
@@ -30,7 +31,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 1.25rem;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .brand {
@@ -52,10 +53,10 @@
 .brand-text {
   font-family: 'Poppins', sans-serif;
   font-weight: 700;
-  color: #0f172a;
+  color: #ffffff;
   font-size: 1.15rem;
   white-space: nowrap;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.02em;
 }
 
 .toggle-btn {
@@ -73,8 +74,8 @@
 }
 
 .toggle-btn:hover {
-  background-color: #f1f5f9;
-  color: #0f172a;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
 }
 
 .sidebar-nav {
@@ -93,7 +94,7 @@
   align-items: center;
   gap: 12px;
   padding: 10px 14px;
-  color: #64748b;
+  color: #94a3b8;
   font-size: 0.875rem;
   font-weight: 500;
   text-decoration: none;
@@ -106,7 +107,7 @@
 }
 
 .nav-item mat-icon {
-  color: #94a3b8;
+  color: #64748b;
   flex-shrink: 0;
   font-size: 20px;
   width: 20px;
@@ -115,40 +116,30 @@
 }
 
 .nav-item:hover {
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
 }
 
 .nav-item:hover mat-icon {
-  color: #475569;
+  color: #cbd5e1;
 }
 
 .nav-item.active {
-  background-color: #f1f5f9;
-  color: #f26522;
+  background: linear-gradient(90deg, rgba(249, 115, 22, 0.15) 0%, transparent 100%);
+  color: #f97316;
   font-weight: 600;
-  border-color: #e2e8f0;
+  border-left: 3px solid #f97316;
+  border-radius: 0 8px 8px 0;
 }
 
 .nav-item.active mat-icon {
-  color: #f26522;
-}
-
-.nav-item.active::before {
-  content: '';
-  position: absolute;
-  left: -1px;
-  top: 15%;
-  bottom: 15%;
-  width: 4px;
-  background-color: #f26522;
-  border-radius: 0 4px 4px 0;
+  color: #f97316;
 }
 
 .sidebar-footer {
   padding: 1rem 1.25rem;
-  border-top: 1px solid #f1f5f9;
-  background-color: #ffffff;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: transparent;
 }
 
 .user-info {
@@ -165,15 +156,15 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: #f1f5f9;
-  color: #0f172a;
+  background: #334155;
+  color: #f8fafc;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
   font-size: 1rem;
   flex-shrink: 0;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #475569;
 }
 
 .user-details {
@@ -183,7 +174,7 @@
 
 .user-role {
   font-size: 0.7rem;
-  color: #64748b;
+  color: #94a3b8;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -191,7 +182,7 @@
 
 .user-name {
   font-size: 0.9rem;
-  color: #0f172a;
+  color: #ffffff;
   font-weight: 600;
   margin-top: 2px;
 }
@@ -199,20 +190,23 @@
 .logout-btn {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  gap: 8px;
   width: 100%;
-  padding: 10px 14px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  color: #64748b;
-  cursor: pointer;
+  padding: 10px;
+  background-color: rgba(248, 113, 113, 0.1);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.2);
   border-radius: 8px;
-  transition: all 0.2s;
-  font-family: inherit;
-  font-size: 0.85rem;
-  font-weight: 500;
-  text-align: left;
-  overflow: hidden;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+  background-color: #ef4444;
+  color: #ffffff;
 }
 
 .logout-btn mat-icon {
