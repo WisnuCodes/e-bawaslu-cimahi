@@ -110,6 +110,12 @@ export class C1DashboardComponent implements OnInit {
     }
   }
 
+  get sumSuaraPaslon(): number {
+    const suara = this.c1Form.value.suara_paslon;
+    if (!suara || !Array.isArray(suara)) return 0;
+    return suara.reduce((acc, val) => acc + (Number(val) || 0), 0);
+  }
+
   get isStaf(): boolean {
     return this.authService.isStaf;
   }

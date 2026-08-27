@@ -167,6 +167,8 @@
               <mat-select formControlName="jumlah_paslon" (selectionChange)="onJumlahPaslonChange($event.value)">
                 <mat-option [value]="2">2 Paslon</mat-option>
                 <mat-option [value]="3">3 Paslon</mat-option>
+                <mat-option [value]="4">4 Paslon</mat-option>
+                <mat-option [value]="5">5 Paslon</mat-option>
               </mat-select>
             </mat-form-field>
           </div>
@@ -182,16 +184,16 @@
           <!-- Validasi Peringatan Interaktif -->
           <div *ngIf="c1Form.value.suara_paslon && c1Form.value.total_suara_sah > 0" 
                style="margin-top: 0.5rem; padding: 0.75rem; border-radius: 6px; display: flex; align-items: center; gap: 8px; font-size: 0.875rem;"
-               [ngStyle]="{'background-color': c1Form.value.total_suara_sah == (c1Form.value.suara_paslon[0] + c1Form.value.suara_paslon[1] + (c1Form.value.suara_paslon[2] || 0)) ? '#ecfdf5' : '#fef2f2', 'border': '1px solid ' + (c1Form.value.total_suara_sah == (c1Form.value.suara_paslon[0] + c1Form.value.suara_paslon[1] + (c1Form.value.suara_paslon[2] || 0)) ? '#a7f3d0' : '#fecaca'), 'color': c1Form.value.total_suara_sah == (c1Form.value.suara_paslon[0] + c1Form.value.suara_paslon[1] + (c1Form.value.suara_paslon[2] || 0)) ? '#059669' : '#e11d48'}">
+               [ngStyle]="{'background-color': c1Form.value.total_suara_sah == sumSuaraPaslon ? '#ecfdf5' : '#fef2f2', 'border': '1px solid ' + (c1Form.value.total_suara_sah == sumSuaraPaslon ? '#a7f3d0' : '#fecaca'), 'color': c1Form.value.total_suara_sah == sumSuaraPaslon ? '#059669' : '#e11d48'}">
             
             <mat-icon style="font-size: 18px; width: 18px; height: 18px;">
-              {{ c1Form.value.total_suara_sah == (c1Form.value.suara_paslon[0] + c1Form.value.suara_paslon[1] + (c1Form.value.suara_paslon[2] || 0)) ? 'check_circle' : 'error' }}
+              {{ c1Form.value.total_suara_sah == sumSuaraPaslon ? 'check_circle' : 'error' }}
             </mat-icon>
-            <span *ngIf="c1Form.value.total_suara_sah == (c1Form.value.suara_paslon[0] + c1Form.value.suara_paslon[1] + (c1Form.value.suara_paslon[2] || 0))">
+            <span *ngIf="c1Form.value.total_suara_sah == sumSuaraPaslon">
               Validasi Berhasil: Total Suara Paslon persis sama dengan Total Suara Sah ({{ c1Form.value.total_suara_sah }}).
             </span>
-            <span *ngIf="c1Form.value.total_suara_sah != (c1Form.value.suara_paslon[0] + c1Form.value.suara_paslon[1] + (c1Form.value.suara_paslon[2] || 0))">
-              Validasi Gagal: Penjumlahan suara paslon ({{ (c1Form.value.suara_paslon[0] + c1Form.value.suara_paslon[1] + (c1Form.value.suara_paslon[2] || 0)) }}) tidak sama dengan Total Suara Sah ({{ c1Form.value.total_suara_sah }}).
+            <span *ngIf="c1Form.value.total_suara_sah != sumSuaraPaslon">
+              Validasi Gagal: Penjumlahan suara paslon ({{ sumSuaraPaslon }}) tidak sama dengan Total Suara Sah ({{ c1Form.value.total_suara_sah }}).
             </span>
           </div>
         </div>
