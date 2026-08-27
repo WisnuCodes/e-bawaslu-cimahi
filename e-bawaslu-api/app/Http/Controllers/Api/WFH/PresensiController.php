@@ -17,12 +17,12 @@ class PresensiController extends Controller
             ->join('users', 'presensi_wfh.user_id', '=', 'users.user_id')
             ->select('presensi_wfh.*', 'users.username as nama_pegawai')
             ->orderBy('timestamp_checkin', 'desc');
-            
+
         $role = strtolower($user->role);
         $isAdmin = str_contains($role, 'admin') || str_contains($role, 'superadmin');
         $isPimpinan = str_contains($role, 'ketua') || str_contains($role, 'pimpinan') || str_contains($role, 'koordinator sekretariat');
         $isKadiv = str_contains($role, 'kordiv') || str_contains($role, 'kepala divisi') || str_contains($role, 'kasubag') || str_contains($role, 'kabag');
-        
+
         $canManageOther = $isAdmin || $isPimpinan || $isKadiv;
 
         // Tampilkan semua untuk admin, pimpinan, kadiv. Jika staf, hanya miliknya sendiri.
@@ -49,7 +49,7 @@ class PresensiController extends Controller
         }
 
         $presensi = Presensi::findOrFail($id);
-        
+
         $request->validate([
             'status_ci' => 'sometimes|string',
             'status_co' => 'sometimes|string'
@@ -161,20 +161,16 @@ class PresensiController extends Controller
         }
 
         $now = Carbon::now();
-        $jamBukaCheckout = Carbon::parse($now->format('Y-m-d') . ' 15:30:00');
-        $jamPulang = Carbon::parse($now->format('Y-m-d') . ' 16:30:00');
+        $jamBukaCheckout = Carbon::parse($now->format('Y-m-d') . ' 16:00:00');
 
         if ($now->lessThan($jamBukaCheckout)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Sistem check-out belum dibuka. Anda baru bisa check-out mulai pukul 15:30.'
+                'message' => 'Sistem check-out belum dibuka. Anda baru bisa check-out mulai pukul 16:00.'
             ], 403);
         }
 
         $status_co = 'Hadir';
-        if ($now->lessThan($jamPulang)) {
-            $status_co = 'Terlambat'; // Pulang sebelum 16:30
-        }
 
         $path = $request->file('selfie_image')->store('presensi', 'public');
 

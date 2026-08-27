@@ -171,8 +171,8 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
     const timeInMinutes = hours * 60 + minutes;
     
     // 08:00 is 8 * 60 = 480
-    // 15:30 is 15 * 60 + 30 = 930
-    return timeInMinutes >= 480 && timeInMinutes < 930;
+    // 16:00 is 16 * 60 = 960
+    return timeInMinutes >= 480 && timeInMinutes < 960;
   }
 
   ngOnInit() {
