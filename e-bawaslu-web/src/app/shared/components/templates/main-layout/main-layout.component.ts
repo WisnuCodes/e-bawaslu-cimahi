@@ -36,24 +36,58 @@ import { HeaderComponent } from '../../organisms/header/header.component';
       height: 100vh;
     }
     .sidenav {
-      width: 250px;
-      border-right: 1px solid var(--color-border);
+      width: auto !important;
+      min-width: 0;
+      border-right: none;
+      overflow: visible;
+    }
+    ::ng-deep .sidenav .mat-drawer-inner-container {
+      overflow: visible;
     }
     .mobile-sidenav {
-      width: 280px;
+      width: 280px !important;
       box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
+    }
+    ::ng-deep .mat-drawer-content {
+      transition: margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
     .main-content {
       padding: 24px;
-      height: calc(100vh - 64px);
+      min-height: calc(100vh - 72px);
       overflow-y: auto;
       box-sizing: border-box;
       background-color: var(--color-background);
     }
+    .main-content-footer {
+      margin-top: auto;
+      padding: 1.25rem 2rem;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(226, 232, 240, 0.8);
+      color: #64748b;
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-brand {
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: 0.5px;
+    }
+    .footer-version {
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      margin-left: 8px;
+    }
     @media (max-width: 768px) {
       .main-content {
         padding: 16px 12px;
-        height: calc(100vh - 56px);
+        min-height: calc(100vh - 56px);
       }
     }
   `]
