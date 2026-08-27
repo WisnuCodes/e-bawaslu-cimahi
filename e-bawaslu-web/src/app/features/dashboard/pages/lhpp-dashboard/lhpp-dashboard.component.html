@@ -18,6 +18,14 @@
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
 
+      <mat-form-field appearance="outline" style="min-width: 150px; margin-bottom: -1.25em;">
+        <mat-label>Filter Tahun</mat-label>
+        <mat-select [(ngModel)]="selectedYearFilter" (selectionChange)="onFilterYearChange($event.value)">
+          <mat-option value="">Semua Tahun</mat-option>
+          <mat-option *ngFor="let year of availableYears" [value]="year">{{ year }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
     </div>
 
     <!-- Tabel Dokumen Arsip -->

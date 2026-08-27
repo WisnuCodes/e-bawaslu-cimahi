@@ -60,6 +60,9 @@ export class LhppDashboardComponent implements OnInit {
   documents = new MatTableDataSource<ArsipItem>([]);
   divisiList: Divisi[] = [];
   searchQuery: string = '';
+  
+  availableYears: string[] = [];
+  selectedYearFilter: string = '';
 
   applyFilterArsip = _.debounce((event: Event) => {
     const filterValue = (event.target as HTMLInputElement).value;
@@ -135,8 +138,22 @@ export class LhppDashboardComponent implements OnInit {
   loadDocuments() {
     this.arsipService.getArsip().subscribe({
       next: (res) => {
-        // Hanya tampilkan dokumen dengan kategori LHPP di dashboard ini
-        const lhppDocs = (res.data || []).filter((doc: ArsipItem) => doc.kategori === 'LHPP');
+        let lhppDocs = (res.data || []).filter((doc: ArsipItem) => doc.kategori === 'LHPP');
+        
+        // Ekstrak tahun unik
+        const years = new Set<string>();
+        lhppDocs.forEach((doc: ArsipItem) => {
+          if (doc.tgl_surat) {
+            years.add(doc.tgl_surat.split('-')[0]);
+          }
+        });
+        this.availableYears = Array.from(years).sort().reverse();
+        
+        // Filter berdasarkan tahun jika dipilih
+        if (this.selectedYearFilter) {
+          lhppDocs = lhppDocs.filter((doc: ArsipItem) => doc.tgl_surat?.startsWith(this.selectedYearFilter));
+        }
+
         this.documents.data = lhppDocs;
         this.documents.paginator = this.paginator;
       },
@@ -164,7 +181,10 @@ export class LhppDashboardComponent implements OnInit {
     return allowedRoles.includes(user.role.toLowerCase()) || true; 
   }
 
-
+  onFilterYearChange(year: string) {
+    this.selectedYearFilter = year;
+    this.loadDocuments();
+  }
 
   onSearch(event: any) {
     const query = event.target.value;
