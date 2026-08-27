@@ -15,7 +15,7 @@
     </div>
 
     <!-- FILTER TPS -->
-    <div style="display: flex; align-items: center;">
+    <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
       <mat-form-field appearance="outline" style="width: 300px; margin-bottom: -1.25rem;">
         <mat-label>Filter Berdasarkan TPS</mat-label>
         <mat-select [(value)]="selectedFilterTps" (selectionChange)="onFilterTpsChange($event.value)">
@@ -23,6 +23,14 @@
           <mat-option *ngFor="let t of tpsList" [value]="t.tps_id">
             TPS {{ t.no_tps }} - {{ t.kelurahan }} (Kec. {{ t.kecamatan }})
           </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" style="min-width: 150px; margin-bottom: -1.25rem;">
+        <mat-label>Filter Tahun</mat-label>
+        <mat-select [(ngModel)]="selectedFilterYear" (selectionChange)="onFilterYearChange($event.value)">
+          <mat-option value="">Semua Tahun</mat-option>
+          <mat-option *ngFor="let year of availableYears" [value]="year">{{ year }}</mat-option>
         </mat-select>
       </mat-form-field>
     </div>

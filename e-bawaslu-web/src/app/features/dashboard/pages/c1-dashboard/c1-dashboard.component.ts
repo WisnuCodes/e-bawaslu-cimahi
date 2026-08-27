@@ -62,6 +62,8 @@ export class C1DashboardComponent implements OnInit {
   
   tpsList: WilayahTps[] = [];
   selectedFilterTps: string = '';
+  selectedFilterYear: string = '';
+  availableYears: string[] = [];
   c1List = new MatTableDataSource<C1Item>([]);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -261,7 +263,23 @@ export class C1DashboardComponent implements OnInit {
   loadC1List() {
     this.c1Service.getC1List(this.selectedFilterTps).subscribe({
       next: (res) => {
-        this.c1List.data = res.data || [];
+        let docs = res.data || [];
+        
+        // Ekstrak tahun unik
+        const years = new Set<string>();
+        docs.forEach((doc: C1Item) => {
+          if (doc.created_at) {
+            years.add(doc.created_at.split('-')[0]);
+          }
+        });
+        this.availableYears = Array.from(years).sort().reverse();
+        
+        // Filter berdasarkan tahun jika dipilih
+        if (this.selectedFilterYear) {
+          docs = docs.filter((doc: C1Item) => doc.created_at?.startsWith(this.selectedFilterYear));
+        }
+
+        this.c1List.data = docs;
         this.c1List.paginator = this.paginator;
       },
       error: (err) => {
@@ -273,6 +291,11 @@ export class C1DashboardComponent implements OnInit {
 
   onFilterTpsChange(tpsId: string) {
     this.selectedFilterTps = tpsId;
+    this.loadC1List();
+  }
+
+  onFilterYearChange(year: string) {
+    this.selectedFilterYear = year;
     this.loadC1List();
   }
 
