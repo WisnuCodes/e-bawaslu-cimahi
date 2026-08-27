@@ -1,21 +1,21 @@
-﻿<div class="saksi-dashboard-container animate-fade-in">
+<div class="saksi-dashboard-container animate-fade-in">
 
   <div class="page-header">
     <div>
-      <h1 class="page-title">Manajemen Saksi TPS</h1>
-      <p class="page-subtitle">Kelola akun Saksi TPS yang bertugas di lapangan. Hak akses eksklusif Ketua Bawaslu.</p>
+      <h1 class="page-title">Manajemen Pengawas TPS</h1>
+      <p class="page-subtitle">Kelola akun Pengawas TPS yang bertugas di lapangan. Hak akses eksklusif Ketua Bawaslu.</p>
     </div>
   </div>
 
   <div class="saksi-grid">
     <!-- FORM TAMBAH SAKSI -->
     <div class="clean-card form-card">
-      <h3 class="card-title"><mat-icon>person_add</mat-icon> Tambah Saksi Baru</h3>
+      <h3 class="card-title"><mat-icon>person_add</mat-icon> Tambah Pengawas TPS Baru</h3>
       
       <form [formGroup]="saksiForm" (ngSubmit)="onSubmit()" class="saksi-form">
         <mat-form-field appearance="outline" class="w-full">
           <mat-label>Nama Lengkap / Username</mat-label>
-          <input matInput formControlName="username" placeholder="Masukkan nama saksi">
+          <input matInput formControlName="username" placeholder="Masukkan nama Pengawas TPS">
           <mat-error *ngIf="saksiForm.get('username')?.invalid">Nama wajib diisi</mat-error>
         </mat-form-field>
 
@@ -47,14 +47,14 @@
         </mat-form-field>
 
         <button mat-flat-button color="primary" type="submit" [disabled]="saksiForm.invalid || isSubmitting" class="w-full submit-btn">
-          Buat Akun Saksi
+          Buat Akun Pengawas TPS
         </button>
       </form>
     </div>
 
     <!-- TABEL DAFTAR SAKSI -->
     <div class="clean-card table-card">
-      <h3 class="card-title"><mat-icon>people</mat-icon> Daftar Akun Saksi Aktif</h3>
+      <h3 class="card-title"><mat-icon>people</mat-icon> Daftar Akun Pengawas TPS Aktif</h3>
       
       <div class="table-responsive-wrapper">
         <table mat-table [dataSource]="saksiList" class="w-full">
@@ -96,7 +96,7 @@
           <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
           <tr class="mat-row" *matNoDataRow>
             <td class="mat-cell" colspan="5" style="text-align: center; padding: 2rem; color: #94a3b8;">
-              Belum ada akun Saksi yang didaftarkan.
+              Belum ada akun Pengawas TPS yang didaftarkan.
             </td>
           </tr>
         </table>

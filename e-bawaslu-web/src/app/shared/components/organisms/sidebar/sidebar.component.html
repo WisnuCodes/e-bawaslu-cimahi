@@ -22,12 +22,12 @@
       <span class="nav-text" *ngIf="!isCollapsed">Struktur Organisasi</span>
     </a>
     
-    <a routerLink="/dashboard/wfh" routerLinkActive="active" class="nav-item" *ngIf="userRole !== 'Saksi TPS'" matRipple matRippleColor="rgba(255,255,255,0.1)">
+    <a routerLink="/dashboard/wfh" routerLinkActive="active" class="nav-item" *ngIf="userRole !== 'Pengawas TPS'" matRipple matRippleColor="rgba(255,255,255,0.1)">
       <mat-icon>fingerprint</mat-icon>
       <span class="nav-text" *ngIf="!isCollapsed">WFH & Presensi</span>
     </a>
 
-    <a routerLink="/dashboard/arsip" routerLinkActive="active" class="nav-item" *ngIf="userRole !== 'Saksi TPS'" matRipple matRippleColor="rgba(255,255,255,0.1)">
+    <a routerLink="/dashboard/arsip" routerLinkActive="active" class="nav-item" *ngIf="userRole !== 'Pengawas TPS'" matRipple matRippleColor="rgba(255,255,255,0.1)">
       <mat-icon>snippet_folder</mat-icon>
       <span class="nav-text" *ngIf="!isCollapsed">E-Arsip</span>
     </a>
@@ -38,10 +38,10 @@
       <span class="nav-text" *ngIf="!isCollapsed">Form C1</span>
     </a>
 
-    <!-- Khusus Manajemen Saksi (Ketua) -->
+    <!-- Khusus Manajemen Pengawas TPS (Ketua) -->
     <a routerLink="/dashboard/saksi" routerLinkActive="active" class="nav-item" *ngIf="isPimpinan" matRipple matRippleColor="rgba(255,255,255,0.1)">
       <mat-icon>manage_accounts</mat-icon>
-      <span class="nav-text" *ngIf="!isCollapsed">Manajemen Saksi</span>
+      <span class="nav-text" *ngIf="!isCollapsed">Manajemen Pengawas TPS</span>
     </a>
 
     <!-- Khusus Ekspor Laporan (RBAC) -->

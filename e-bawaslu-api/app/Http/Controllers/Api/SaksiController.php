@@ -16,7 +16,7 @@ class SaksiController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        $saksi = User::where('role', 'Saksi TPS')
+        $saksi = User::where('role', 'Pengawas TPS')
                      ->leftJoin('wilayah_tps', 'users.tps_id', '=', 'wilayah_tps.tps_id')
                      ->select('users.user_id', 'users.username', 'users.email', 'users.whatsapp_number', 'users.tps_id', 'wilayah_tps.no_tps', 'wilayah_tps.kelurahan', 'wilayah_tps.kecamatan')
                      ->orderBy('users.created_at', 'desc')
@@ -49,7 +49,7 @@ class SaksiController extends Controller
             'email' => $request->email,
             'password_hash' => Hash::make($request->password),
             'whatsapp_number' => $request->whatsapp_number,
-            'role' => 'Saksi TPS',
+            'role' => 'Pengawas TPS',
             'mfa_enabled' => false,
             'status_aktif' => true,
         ]);
@@ -67,7 +67,7 @@ class SaksiController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        $user = User::where('user_id', $id)->where('role', 'Saksi TPS')->firstOrFail();
+        $user = User::where('user_id', $id)->where('role', 'Pengawas TPS')->firstOrFail();
         $user->delete();
 
         return response()->json([

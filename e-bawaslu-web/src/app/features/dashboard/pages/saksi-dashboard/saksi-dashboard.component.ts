@@ -72,7 +72,7 @@ export class SaksiDashboardComponent implements OnInit {
     this.saksiService.createSaksi(this.saksiForm.value).subscribe({
       next: (res) => {
         if (res.success) {
-          this.snackBar.open('Akun Saksi berhasil dibuat!', 'Tutup', { duration: 3000 });
+          this.snackBar.open('Akun Pengawas TPS berhasil dibuat!', 'Tutup', { duration: 3000 });
           this.saksiForm.reset();
           Object.keys(this.saksiForm.controls).forEach(key => {
             this.saksiForm.get(key)?.setErrors(null);
@@ -82,7 +82,7 @@ export class SaksiDashboardComponent implements OnInit {
         this.isSubmitting = false;
       },
       error: (err) => {
-        this.snackBar.open(err.error?.message || 'Gagal membuat akun Saksi', 'Tutup', { duration: 3000 });
+        this.snackBar.open(err.error?.message || 'Gagal membuat akun Pengawas TPS', 'Tutup', { duration: 3000 });
         this.isSubmitting = false;
       }
     });
@@ -92,8 +92,8 @@ export class SaksiDashboardComponent implements OnInit {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Hapus Akun Saksi',
-        message: 'Apakah Anda yakin ingin menghapus akun Saksi ini?',
+        title: 'Hapus Akun Pengawas TPS',
+        message: 'Apakah Anda yakin ingin menghapus akun Pengawas TPS ini?',
         confirmText: 'Ya, Hapus'
       }
     });
@@ -103,7 +103,7 @@ export class SaksiDashboardComponent implements OnInit {
         this.saksiService.deleteSaksi(id).subscribe({
           next: (res) => {
             if (res.success) {
-              this.snackBar.open('Akun Saksi berhasil dihapus', 'Tutup', { duration: 3000 });
+              this.snackBar.open('Akun Pengawas TPS berhasil dihapus', 'Tutup', { duration: 3000 });
               this.loadSaksi();
             }
           },
