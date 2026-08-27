@@ -156,10 +156,20 @@ class PresensiController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
+        $now = Carbon::now();
+        $jamPulang = Carbon::parse($now->format('Y-m-d') . ' 16:30:00');
+
+        if ($now->lessThan($jamPulang)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Belum waktunya jam pulang. Anda baru bisa check-out setelah pukul 16:30.'
+            ], 403);
+        }
+
         $path = $request->file('selfie_image')->store('presensi', 'public');
 
         $presensi->update([
-            'timestamp_checkout' => Carbon::now(),
+            'timestamp_checkout' => $now,
             'selfie_keluar_url' => $path,
             // Update koordinat checkout
         ]);

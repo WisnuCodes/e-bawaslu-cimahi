@@ -8,15 +8,17 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { SaksiService, Saksi } from '../../../../core/services/saksi.service';
 import { MasterDataService, WilayahTps } from '../../../../core/services/master-data.service';
+import { ConfirmDialogComponent } from '../../../../shared/components/molecules/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-saksi-dashboard',
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, MatTableModule, MatButtonModule, 
-    MatIconModule, MatInputModule, MatSelectModule, MatSnackBarModule, MatPaginatorModule
+    MatIconModule, MatInputModule, MatSelectModule, MatSnackBarModule, MatPaginatorModule, MatDialogModule
   ],
   templateUrl: './saksi-dashboard.component.html',
   styleUrl: './saksi-dashboard.component.css'
@@ -26,6 +28,7 @@ export class SaksiDashboardComponent implements OnInit {
   private masterDataService = inject(MasterDataService);
   private fb = inject(FormBuilder);
   private snackBar = inject(MatSnackBar);
+  private dialog = inject(MatDialog);
 
   saksiList: Saksi[] = [];
   tpsList: WilayahTps[] = [];
@@ -86,19 +89,30 @@ export class SaksiDashboardComponent implements OnInit {
   }
 
   onDelete(id: string): void {
-    if (confirm('Apakah Anda yakin ingin menghapus akun Saksi ini?')) {
-      this.saksiService.deleteSaksi(id).subscribe({
-        next: (res) => {
-          if (res.success) {
-            this.snackBar.open('Akun Saksi berhasil dihapus', 'Tutup', { duration: 3000 });
-            this.loadSaksi();
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Hapus Akun Saksi',
+        message: 'Apakah Anda yakin ingin menghapus akun Saksi ini?',
+        confirmText: 'Ya, Hapus'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.saksiService.deleteSaksi(id).subscribe({
+          next: (res) => {
+            if (res.success) {
+              this.snackBar.open('Akun Saksi berhasil dihapus', 'Tutup', { duration: 3000 });
+              this.loadSaksi();
+            }
+          },
+          error: (err) => {
+            this.snackBar.open('Gagal menghapus akun', 'Tutup', { duration: 3000 });
           }
-        },
-        error: (err) => {
-          this.snackBar.open('Gagal menghapus akun', 'Tutup', { duration: 3000 });
-        }
-      });
-    }
+        });
+      }
+    });
   }
 
   getTpsInfo(tpsId: string): string {

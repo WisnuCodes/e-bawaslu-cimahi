@@ -16,6 +16,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../../../../shared/components/molecules/confirm-dialog/confirm-dialog.component';
 import * as _ from 'lodash';
 
 @Component({
@@ -36,7 +39,9 @@ import * as _ from 'lodash';
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatSelectModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    MatSnackBarModule,
+    MatDialogModule
   ],
   templateUrl: './wfh-dashboard.component.html',
   styleUrl: './wfh-dashboard.component.css'
@@ -45,6 +50,16 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
   private wfhService = inject(WfhService);
   private authService = inject(AuthService);
   private fb = inject(FormBuilder);
+  private snackBar = inject(MatSnackBar);
+  private dialog = inject(MatDialog);
+
+  private showMessage(message: string) {
+    this.snackBar.open(message, 'Tutup', {
+      duration: 4000,
+      horizontalPosition: 'end',
+      verticalPosition: 'bottom'
+    });
+  }
 
   @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
   @ViewChild('canvasElement') canvasElement!: ElementRef<HTMLCanvasElement>;
@@ -75,7 +90,7 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
   mediaStream: MediaStream | null = null;
 
   presensiList = new MatTableDataSource<any>([]);
-  presensiDisplayedColumns: string[] = ['nama', 'waktu_masuk', 'foto_masuk', 'waktu_keluar', 'foto_keluar', 'status', 'aksi'];
+  presensiDisplayedColumns: string[] = ['nama', 'waktu_masuk', 'foto_masuk', 'waktu_keluar', 'foto_keluar', 'lokasi', 'status', 'aksi'];
 
   applyFilterPresensi = _.debounce((event: Event) => {
     const filterValue = (event.target as HTMLInputElement).value;
@@ -155,9 +170,9 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
     }, 1000);
 
     if (!this.canViewOthersPresensi) {
-      this.presensiDisplayedColumns = ['waktu_masuk', 'foto_masuk', 'waktu_keluar', 'foto_keluar', 'status'];
+      this.presensiDisplayedColumns = ['waktu_masuk', 'foto_masuk', 'waktu_keluar', 'foto_keluar', 'lokasi', 'status'];
     } else {
-      this.presensiDisplayedColumns = ['nama', 'waktu_masuk', 'foto_masuk', 'waktu_keluar', 'foto_keluar', 'status'];
+      this.presensiDisplayedColumns = ['nama', 'waktu_masuk', 'foto_masuk', 'waktu_keluar', 'foto_keluar', 'lokasi', 'status'];
       if (this.isAdmin) {
         this.presensiDisplayedColumns.push('aksi');
       }
@@ -242,26 +257,37 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
       next: (res) => {
         this.isCalculatingTukin = false;
         this.latestTukin = res.data;
-        alert('Kalkulasi Tukin berhasil diperbarui!');
+        this.showMessage('Kalkulasi Tukin berhasil diperbarui!');
         this.loadTukin();
       },
       error: (err) => {
         this.isCalculatingTukin = false;
-        alert(err.error?.message || 'Gagal menghitung Tunjangan Kinerja.');
+        this.showMessage(err.error?.message || 'Gagal menghitung Tunjangan Kinerja.');
       }
     });
   }
 
   approveWorklog(id: string, status: 'Approved' | 'Revised') {
-    if (!confirm(`Anda yakin ingin memberikan status "${status}" pada laporan ini?`)) return;
-    
-    this.wfhService.approveWorklog(id, status).subscribe({
-      next: () => {
-        alert(`Worklog berhasil di-${status.toLowerCase()}!`);
-        this.loadWorklogs();
-      },
-      error: (err) => {
-        alert(err.error?.message || 'Gagal mengubah status worklog.');
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Konfirmasi Persetujuan',
+        message: `Anda yakin ingin memberikan status "${status}" pada laporan ini?`,
+        confirmText: 'Ya, Lanjutkan'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.wfhService.approveWorklog(id, status).subscribe({
+          next: () => {
+            this.showMessage(`Worklog berhasil di-${status.toLowerCase()}!`);
+            this.loadWorklogs();
+          },
+          error: (err) => {
+            this.showMessage(err.error?.message || 'Gagal mengubah status worklog.');
+          }
+        });
       }
     });
   }
@@ -283,11 +309,11 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
         })
         .catch(err => {
           this.isCameraOpen = false;
-          alert('Gagal mengakses kamera: ' + err.message);
+          this.showMessage('Gagal mengakses kamera: ' + err.message);
         });
     } else {
       this.isCameraOpen = false;
-      alert('Browser Anda tidak mendukung akses kamera (Webcam).');
+      this.showMessage('Browser Anda tidak mendukung akses kamera (Webcam).');
     }
   }
 
@@ -341,7 +367,7 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
           this.isGettingLocation = false;
           this.isCheckingIn = false;
           this.isCheckingOut = false;
-          alert('Gagal mendapatkan lokasi GPS. Mohon izinkan akses lokasi (Location) pada browser Anda.');
+          this.showMessage('Gagal mendapatkan lokasi GPS. Mohon izinkan akses lokasi (Location) pada browser Anda.');
         },
         { enableHighAccuracy: true, timeout: 10000 }
       );
@@ -349,7 +375,7 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
       this.isGettingLocation = false;
       this.isCheckingIn = false;
       this.isCheckingOut = false;
-      alert('Browser Anda tidak mendukung Geolocation.');
+      this.showMessage('Browser Anda tidak mendukung Geolocation.');
     }
   }
 
@@ -363,12 +389,12 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
       this.wfhService.checkIn(formData).subscribe({
         next: (res) => {
           this.isCheckingIn = false;
-          alert('Berhasil Check In pada lokasi: ' + coords);
+          this.showMessage('Berhasil Check In pada lokasi: ' + coords);
           this.loadPresensi();
         },
         error: (err) => {
           this.isCheckingIn = false;
-          alert(err.error?.message || 'Gagal mengirim data Check In. Pastikan server API berjalan.');
+          this.showMessage(err.error?.message || 'Gagal mengirim data Check In. Pastikan server API berjalan.');
         }
       });
     } else if (this.captureMode === 'checkout') {
@@ -376,12 +402,12 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
       this.wfhService.checkOut(formData).subscribe({
         next: (res) => {
           this.isCheckingOut = false;
-          alert('Berhasil Check Out pada lokasi: ' + coords);
+          this.showMessage('Berhasil Check Out pada lokasi: ' + coords);
           this.loadPresensi();
         },
         error: (err) => {
           this.isCheckingOut = false;
-          alert(err.error?.message || 'Gagal mengirim data Check Out. Pastikan server API berjalan.');
+          this.showMessage(err.error?.message || 'Gagal mengirim data Check Out. Pastikan server API berjalan.');
         }
       });
     }
@@ -403,13 +429,13 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
       this.wfhService.updateWorklog(this.editWorklogId, formData).subscribe({
         next: () => {
           this.isSubmittingLog = false;
-          alert('Worklog berhasil diperbarui!');
+          this.showMessage('Worklog berhasil diperbarui!');
           this.cancelEdit();
           this.loadWorklogs();
         },
         error: (err) => {
           this.isSubmittingLog = false;
-          alert(err.error?.message || 'Gagal memperbarui worklog.');
+          this.showMessage(err.error?.message || 'Gagal memperbarui worklog.');
         }
       });
     } else {
@@ -419,12 +445,12 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
           this.worklogForm.reset();
           if (this.fileInput) this.fileInput.nativeElement.value = '';
           this.selectedFile = null;
-          alert('Worklog berhasil disimpan!');
+          this.showMessage('Worklog berhasil disimpan!');
           this.loadWorklogs();
         },
         error: (err) => {
           this.isSubmittingLog = false;
-          alert(err.error?.message || 'Gagal mengirim worklog. Pastikan server API berjalan.');
+          this.showMessage(err.error?.message || 'Gagal mengirim worklog. Pastikan server API berjalan.');
         }
       });
     }
@@ -448,15 +474,26 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
   }
 
   deleteWorklog(id: string) {
-    if (!confirm('Apakah Anda yakin ingin menghapus laporan ini? Tindakan ini tidak dapat dibatalkan.')) return;
-    
-    this.wfhService.deleteWorklog(id).subscribe({
-      next: () => {
-        alert('Worklog berhasil dihapus.');
-        this.loadWorklogs();
-      },
-      error: (err) => {
-        alert(err.error?.message || 'Gagal menghapus worklog.');
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Hapus Laporan',
+        message: 'Apakah Anda yakin ingin menghapus laporan ini? Tindakan ini tidak dapat dibatalkan.',
+        confirmText: 'Ya, Hapus'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.wfhService.deleteWorklog(id).subscribe({
+          next: () => {
+            this.showMessage('Worklog berhasil dihapus.');
+            this.loadWorklogs();
+          },
+          error: (err) => {
+            this.showMessage(err.error?.message || 'Gagal menghapus worklog.');
+          }
+        });
       }
     });
   }
@@ -485,21 +522,32 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
         this.loadPresensi();
       },
       error: (err) => {
-        alert(err.error?.message || 'Gagal mengubah presensi');
+        this.showMessage(err.error?.message || 'Gagal mengubah presensi');
       }
     });
   }
 
   deletePresensi(id: string) {
-    if (!confirm('Apakah Anda yakin ingin menghapus presensi ini? Tindakan ini tidak dapat dibatalkan.')) return;
-    
-    this.wfhService.deletePresensi(id).subscribe({
-      next: () => {
-        alert('Presensi berhasil dihapus.');
-        this.loadPresensi();
-      },
-      error: (err) => {
-        alert(err.error?.message || 'Gagal menghapus presensi.');
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Hapus Presensi',
+        message: 'Apakah Anda yakin ingin menghapus presensi ini? Tindakan ini tidak dapat dibatalkan.',
+        confirmText: 'Ya, Hapus'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.wfhService.deletePresensi(id).subscribe({
+          next: () => {
+            this.showMessage('Presensi berhasil dihapus.');
+            this.loadPresensi();
+          },
+          error: (err) => {
+            this.showMessage(err.error?.message || 'Gagal menghapus presensi.');
+          }
+        });
       }
     });
   }

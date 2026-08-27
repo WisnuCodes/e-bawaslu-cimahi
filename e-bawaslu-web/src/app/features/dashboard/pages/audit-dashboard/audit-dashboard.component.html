@@ -1,89 +1,79 @@
 <div class="page-header animate-fade-in" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
   <div>
-    <span style="background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">
-      MODUL 4: KEAMANAN & OBSERVABILITAS
-    </span>
-    <h1 style="margin: 6px 0 0; color: #0f172a; font-weight: 800; font-size: 1.5rem;">Audit Trail & Log Forensik Sistem</h1>
-    <p style="margin: 4px 0 0; color: #64748b; font-size: 0.85rem;">
-      Buku Besar Kekal (Immutable Ledger) yang merekam seluruh mutasi data, akses berkas sensitif, dan deteksi anomali.
+    <h1 style="margin: 0; color: #1e293b; font-weight: 700; font-size: 1.5rem; display: flex; align-items: center; gap: 8px;">
+      <mat-icon style="color: #64748b;">manage_history</mat-icon>
+      Audit Trail & Log Aktivitas
+    </h1>
+    <p style="margin: 4px 0 0 32px; color: #64748b; font-size: 0.9rem;">
+      Memantau seluruh aktivitas pengguna dan perubahan data dalam sistem
     </p>
   </div>
-  <button mat-stroked-button color="primary" (click)="loadLogs(currentPage)" [disabled]="isLoading" style="height: 40px;">
+  <button mat-stroked-button color="primary" (click)="loadLogs(currentPage)" [disabled]="isLoading" style="height: 40px; border-radius: 8px;">
     <mat-icon *ngIf="!isLoading">refresh</mat-icon>
     <mat-progress-spinner *ngIf="isLoading" diameter="16" mode="indeterminate" style="display: inline-block; margin-right: 6px;"></mat-progress-spinner>
-    Muat Ulang Log
+    Muat Ulang
   </button>
 </div>
 
-<!-- FR-AUD-03: SECURITY ANOMALY & HEALTH MONITORING BANNER -->
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+<!-- Summary Cards -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
   
-  <div style="background: white; border: 1px solid #e2e8f0; border-left: 4px solid #16a34a; border-radius: 8px; padding: 1rem; box-shadow: var(--shadow-sm);">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <span style="font-size: 0.8rem; font-weight: 700; color: #166534;">STATUS KEAMANAN SISTEM</span>
-      <mat-icon style="color: #16a34a; font-size: 18px; width: 18px; height: 18px;">verified_user</mat-icon>
+  <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+      <h3 style="margin: 0; font-size: 0.875rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Status Keamanan</h3>
+      <mat-icon style="color: #cbd5e1; font-size: 24px; width: 24px; height: 24px;">verified_user</mat-icon>
     </div>
-    <div style="font-size: 1.25rem; font-weight: 800; color: #16a34a; margin-top: 4px;">
-      Normal & Terlindungi
-    </div>
-    <small style="color: #64748b; font-size: 0.75rem;">Enkripsi AES-256 Storage & SSL/TLS 1.3 Aktif</small>
+    <div style="font-size: 1.5rem; font-weight: 700; color: #0f172a;">Terlindungi</div>
   </div>
 
-  <div style="background: white; border: 1px solid #e2e8f0; border-left: 4px solid #2563eb; border-radius: 8px; padding: 1rem; box-shadow: var(--shadow-sm);">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <span style="font-size: 0.8rem; font-weight: 700; color: #1e40af;">FR-AUD-01: TOTAL LOG RECORD</span>
-      <mat-icon style="color: #2563eb; font-size: 18px; width: 18px; height: 18px;">receipt_long</mat-icon>
+  <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+      <h3 style="margin: 0; font-size: 0.875rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Total Log Aktivitas</h3>
+      <mat-icon style="color: #cbd5e1; font-size: 24px; width: 24px; height: 24px;">receipt_long</mat-icon>
     </div>
-    <div style="font-size: 1.25rem; font-weight: 800; color: #1e40af; margin-top: 4px;">
-      {{ logs.length }} Aktivitas
-    </div>
-    <small style="color: #64748b; font-size: 0.75rem;">Pencatatan Read-Only Tanpa Penyangkalan</small>
+    <div style="font-size: 1.5rem; font-weight: 700; color: #0f172a;">{{ logs.length }} <span style="font-size: 0.875rem; font-weight: 500; color: #94a3b8; text-transform: none; letter-spacing: normal;">Aktivitas</span></div>
   </div>
 
-  <div style="background: white; border: 1px solid #e2e8f0; border-left: 4px solid #9333ea; border-radius: 8px; padding: 1rem; box-shadow: var(--shadow-sm);">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <span style="font-size: 0.8rem; font-weight: 700; color: #7e22ce;">FR-AUD-03: DETEKSI ANOMALI</span>
-      <mat-icon style="color: #9333ea; font-size: 18px; width: 18px; height: 18px;">security</mat-icon>
+  <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+      <h3 style="margin: 0; font-size: 0.875rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Deteksi Anomali</h3>
+      <mat-icon style="color: #cbd5e1; font-size: 24px; width: 24px; height: 24px;">policy</mat-icon>
     </div>
-    <div style="font-size: 1.25rem; font-weight: 800; color: #7e22ce; margin-top: 4px;">
-      0 Ancaman Terdeteksi
-    </div>
-    <small style="color: #64748b; font-size: 0.75rem;">Ambang Batas Trafik Akses Wajar</small>
+    <div style="font-size: 1.5rem; font-weight: 700; color: #0f172a;">0 <span style="font-size: 0.875rem; font-weight: 500; color: #94a3b8; text-transform: none; letter-spacing: normal;">Ancaman</span></div>
   </div>
 
 </div>
 
-<!-- FR-AUD-01: IMMUTABLE AUDIT TRAIL TABLE -->
-<mat-card class="animate-fade-in" style="background: white; border: 1px solid #e2e8f0; border-radius: var(--radius-lg); padding: 1.25rem;">
-  <div style="border-radius: var(--radius-md); overflow: auto; border: 1px solid var(--color-border);">
+<!-- Table -->
+<mat-card class="animate-fade-in" style="background: white; border: 1px solid #f1f5f9; border-radius: 12px; padding: 1.25rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);">
+  <div style="border-radius: 8px; overflow: auto; border: 1px solid #e2e8f0;">
     <table mat-table [dataSource]="logs" style="width: 100%;">
       
       <!-- Waktu -->
       <ng-container matColumnDef="timestamp">
-        <th mat-header-cell *matHeaderCellDef> Waktu & Tanggal </th>
-        <td mat-cell *matCellDef="let log" style="font-family: monospace; font-size: 0.85rem; color: #475569;">
-          {{ log.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}
+        <th mat-header-cell *matHeaderCellDef> Waktu </th>
+        <td mat-cell *matCellDef="let log" style="font-size: 0.85rem; color: #475569;">
+          {{ log.timestamp | date:'dd/MM/yyyy HH:mm' }}
         </td>
       </ng-container>
 
       <!-- Aktor -->
       <ng-container matColumnDef="actor">
-        <th mat-header-cell *matHeaderCellDef> Aktor (User ID / Subjek) </th>
-        <td mat-cell *matCellDef="let log" style="font-weight: 600; color: var(--color-primary);">
-          {{ log.actor_id ? log.actor_id.substring(0, 13) + '...' : 'Sistem / Anonim' }}
+        <th mat-header-cell *matHeaderCellDef> Pengguna </th>
+        <td mat-cell *matCellDef="let log" style="font-weight: 600; color: #334155;">
+          {{ log.actor_id ? log.actor_id.substring(0, 8) + '...' : 'Sistem' }}
         </td>
       </ng-container>
 
       <!-- Aksi -->
       <ng-container matColumnDef="action">
-        <th mat-header-cell *matHeaderCellDef> Aksi / Mutasi </th>
+        <th mat-header-cell *matHeaderCellDef> Aksi </th>
         <td mat-cell *matCellDef="let log">
           <span [ngStyle]="{
             'padding': '4px 10px',
             'border-radius': '6px',
             'font-size': '0.75rem',
-            'font-weight': '700',
-            'font-family': 'monospace',
+            'font-weight': '600',
             'background-color': getActionBadgeColor(log.action).bg,
             'color': getActionBadgeColor(log.action).text
           }">
@@ -94,8 +84,8 @@
 
       <!-- Target Entity -->
       <ng-container matColumnDef="target">
-        <th mat-header-cell *matHeaderCellDef> Entitas Target </th>
-        <td mat-cell *matCellDef="let log" style="font-size: 0.9rem; font-weight: 500;">
+        <th mat-header-cell *matHeaderCellDef> Target Data </th>
+        <td mat-cell *matCellDef="let log" style="font-size: 0.85rem; color: #475569;">
           {{ log.target_entity }}
         </td>
       </ng-container>
@@ -110,8 +100,8 @@
 
       <!-- Alasan / Payload Snippet -->
       <ng-container matColumnDef="reason">
-        <th mat-header-cell *matHeaderCellDef> Keterangan / Alasan Resmi </th>
-        <td mat-cell *matCellDef="let log" style="font-size: 0.85rem; color: #334155;">
+        <th mat-header-cell *matHeaderCellDef> Keterangan </th>
+        <td mat-cell *matCellDef="let log" style="font-size: 0.85rem; color: #64748b; max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" [matTooltip]="log.reason || '-'">
           {{ log.reason || '-' }}
         </td>
       </ng-container>
@@ -120,8 +110,9 @@
       <tr mat-row *matRowDef="let row; columns: displayedColumns;" style="transition: background 0.2s;"></tr>
 
       <tr class="mat-row" *matNoDataRow>
-        <td class="mat-cell" colspan="6" style="text-align: center; padding: 2rem; color: var(--color-text-muted);">
-          Belum ada catatan log audit yang terekam.
+        <td class="mat-cell" colspan="6" style="text-align: center; padding: 4rem 2rem; color: #94a3b8;">
+          <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #cbd5e1; margin-bottom: 12px; display: block; margin-left: auto; margin-right: auto;">inbox</mat-icon>
+          <div style="font-size: 0.95rem;">Belum ada catatan log aktivitas yang terekam.</div>
         </td>
       </tr>
     </table>

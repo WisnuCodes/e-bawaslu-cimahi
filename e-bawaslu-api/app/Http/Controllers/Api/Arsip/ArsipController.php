@@ -168,14 +168,14 @@ class ArsipController extends Controller
     /**
      * Download dengan Dynamic Watermark & Audit
      */
-    public function download(Request $request, $id)
+    public function download(Request $request, string $id)
     {
         $arsip = Arsip::findOrFail($id);
         $user = $request->user();
 
         // MOCK: Proses injeksi watermark (menggunakan library PDF)
         // Logika aslinya akan membuka PDF, me-render teks transparan nama pengunduh & IP, lalu mem-buffer ke response.
-        Log::info("AUDIT TRAIL: Dokumen {$arsip->no_surat} diunduh oleh {$user->nama} dengan IP {$request->ip()}. Dynamic Watermark diaplikasikan.");
+        Log::info("AUDIT TRAIL: Dokumen {$arsip->no_surat} diunduh oleh {$user->username} dengan IP {$request->ip()}. Dynamic Watermark diaplikasikan.");
 
         AuditLog::create([
             'log_id' => (string) Str::uuid(),
@@ -191,13 +191,13 @@ class ArsipController extends Controller
             return response()->json(['message' => 'File tidak ditemukan di server.'], 404);
         }
 
-        return Storage::disk('public')->download($arsip->file_path);
+        return response()->download(Storage::disk('public')->path($arsip->file_path));
     }
 
     /**
      * Eksekusi Soft Delete Berkas Arsip
      */
-    public function destroy(Request $request, $id)
+    public function destroy(Request $request, string $id)
     {
         $request->validate([
             'alasan_penghapusan' => 'required|string|min:10'
@@ -212,7 +212,7 @@ class ArsipController extends Controller
 
         $arsip->delete(); // Soft delete eksekusi
 
-        Log::info("AUDIT TRAIL: Dokumen ID {$id} telah dihapus (Soft Delete) oleh {$request->user()->nama}. Alasan: {$request->alasan_penghapusan}");
+        Log::info("AUDIT TRAIL: Dokumen ID {$id} telah dihapus (Soft Delete) oleh {$request->user()->username}. Alasan: {$request->alasan_penghapusan}");
 
         AuditLog::create([
             'log_id' => (string) Str::uuid(),

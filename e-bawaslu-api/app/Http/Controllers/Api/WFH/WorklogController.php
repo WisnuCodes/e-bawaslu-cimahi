@@ -64,7 +64,7 @@ class WorklogController extends Controller
         ]);
 
         // MOCK: Event listener/Notification trigger to Kepala Divisi
-        Log::info("Notifikasi Waktu Nyata (Real-time): Worklog baru diajukan oleh {$request->user()->nama} dan menunggu persetujuan.");
+        Log::info("Notifikasi Waktu Nyata (Real-time): Worklog baru diajukan oleh {$request->user()->username} dan menunggu persetujuan.");
 
         return response()->json([
             'success' => true,

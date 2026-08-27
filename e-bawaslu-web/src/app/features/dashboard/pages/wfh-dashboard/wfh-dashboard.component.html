@@ -1,4 +1,4 @@
-﻿<!-- Page Header -->
+<!-- Page Header -->
 <div class="wfh-header animate-fade-in">
   <h2>WFH & Presensi</h2>
   <p>Catat kehadiran, kelola log kerja, dan pantau kalkulasi Tunjangan Kinerja (Tukin).</p>
@@ -235,6 +235,16 @@
             <img [src]="getAttachmentUrl(p.selfie_keluar_url)" alt="Check Out" style="width: 36px; height: 36px; border-radius: 4px; object-fit: cover; border: 1px solid #e2e8f0;">
           </a>
           <span *ngIf="!p.selfie_keluar_url" style="color: #94a3b8;">â€”</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="lokasi">
+        <th mat-header-cell *matHeaderCellDef> Koordinat </th>
+        <td mat-cell *matCellDef="let p">
+          <a *ngIf="p.gps_koordinat" [href]="'https://www.google.com/maps/search/?api=1&query=' + p.gps_koordinat" target="_blank" style="color: #3b82f6; text-decoration: none; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 4px;">
+            <mat-icon style="font-size: 16px; width: 16px; height: 16px;">location_on</mat-icon> Peta
+          </a>
+          <span *ngIf="!p.gps_koordinat" style="color: #94a3b8;">—</span>
         </td>
       </ng-container>
 

@@ -57,7 +57,7 @@ class ReportController extends Controller
                     </style>
                 </head>
                 <body>
-                    <div class='watermark'>DOKUMEN RAHASIA BAWASLU<br>DIUNDUH OLEH: {$request->user()->nama}</div>
+                    <div class='watermark'>DOKUMEN RAHASIA BAWASLU<br>DIUNDUH OLEH: {$request->user()->username}</div>
                     <h2>{$title}</h2>
                     <p>Periode: {$request->bulan} - {$request->tahun}</p>
                     <table>

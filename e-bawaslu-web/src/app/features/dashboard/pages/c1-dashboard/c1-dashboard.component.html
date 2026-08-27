@@ -329,8 +329,8 @@
               <code style="font-size: 0.75rem; background: #f5f5f5; color: #424242; padding: 2px 6px; border-radius: 4px; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border: 1px solid #e0e0e0;">
                 {{ element.sha256_hash }}
               </code>
-              <button mat-icon-button (click)="copyHash(element.sha256_hash)" matTooltip="Salin Hash" style="width: 32px; height: 32px; line-height: 32px;">
-                <mat-icon style="font-size: 16px; width: 16px; height: 16px;">content_copy</mat-icon>
+              <button mat-icon-button color="primary" (click)="copyHash(element.sha256_hash)" matTooltip="Salin Hash">
+                <mat-icon>content_copy</mat-icon>
               </button>
             </div>
           </td>
@@ -374,15 +374,15 @@
 
               <!-- Tombol Edit (Tampil untuk Staf, Pimpinan & Kadiv jika perlu direvisi) -->
               <ng-container *ngIf="(isStaf || isPimpinan || isKepalaDivisi) && element.status_c1 !== 'Approved'">
-                <button mat-icon-button (click)="onEdit(element)" matTooltip="Edit & Koreksi Data" style="background-color: #eff6ff; color: #3b82f6; width: 32px; height: 32px; line-height: 32px; border-radius: 8px; transition: all 0.2s;">
-                  <mat-icon style="font-size: 16px; width: 16px; height: 16px; line-height: 16px;">edit_square</mat-icon>
+                <button mat-icon-button color="primary" (click)="onEdit(element)" matTooltip="Edit & Koreksi Data">
+                  <mat-icon>edit_square</mat-icon>
                 </button>
               </ng-container>
 
               <!-- Tombol Hapus (Hanya Kadiv P2H & Admin) -->
               <ng-container *ngIf="canDeleteC1">
-                <button mat-icon-button (click)="onDelete(element)" matTooltip="Hapus Permanen" style="background-color: #fef2f2; color: #ef4444; width: 32px; height: 32px; line-height: 32px; border-radius: 8px; transition: all 0.2s;">
-                  <mat-icon style="font-size: 18px; width: 18px; height: 18px; line-height: 18px;">delete_outline</mat-icon>
+                <button mat-icon-button color="warn" (click)="onDelete(element)" matTooltip="Hapus Permanen">
+                  <mat-icon>delete_outline</mat-icon>
                 </button>
               </ng-container>
 

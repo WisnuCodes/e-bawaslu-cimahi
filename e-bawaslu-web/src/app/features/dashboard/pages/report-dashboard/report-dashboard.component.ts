@@ -11,6 +11,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-report-dashboard',
@@ -25,13 +27,16 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatIconModule,
     MatSelectModule,
     MatRadioModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatDividerModule,
+    MatSnackBarModule
   ],
   templateUrl: './report-dashboard.component.html',
   styleUrl: './report-dashboard.component.css'
 })
 export class ReportDashboardComponent {
   private reportService = inject(ReportService);
+  private snackBar = inject(MatSnackBar);
 
   tipeLaporan: 'presensi' | 'worklog' = 'presensi';
   bulan: number = new Date().getMonth() + 1;
@@ -64,11 +69,11 @@ export class ReportDashboardComponent {
         a.download = `laporan_${this.tipeLaporan}_${this.bulan}_${this.tahun}.pdf`;
         a.click();
         window.URL.revokeObjectURL(url);
-        alert('Laporan PDF resmi berhasil diunduh dengan Dynamic Watermark!');
+        this.snackBar.open('Laporan PDF berhasil diunduh!', 'Tutup', { duration: 3000 });
       },
       error: () => {
         this.isExporting = false;
-        alert('Gagal mengekspor laporan PDF.');
+        this.snackBar.open('Gagal mengekspor laporan PDF.', 'Tutup', { duration: 3000 });
       }
     });
   }

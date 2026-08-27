@@ -1,5 +1,5 @@
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap');
 
 :root {
   /* Colors - Enterprise Theme */
@@ -23,7 +23,7 @@
   --color-warning: #F59E0B;
 
   /* Typography */
-  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-family: 'Poppins', 'Inter', system-ui, -apple-system, sans-serif;
   
   /* Shadows - Minimalist */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -60,6 +60,19 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Enforce Poppins font across all elements including Angular Material */
+body, p, h1, h2, h3, h4, h5, h6, 
+span:not(.mat-icon):not(.material-icons), 
+div, a, button, input, textarea, select,
+.mat-card, .mat-card-title, .mat-card-subtitle, .mat-card-content, 
+.mat-button, .mat-flat-button, .mat-stroked-button,
+.mat-header-cell, .mat-cell,
+.mat-form-field, .mat-input-element, .mat-select, .mat-option,
+.mat-dialog-title, .mat-dialog-content, .mat-dialog-actions,
+.mat-snack-bar-container, .mat-simple-snackbar, .mat-tab-label {
+  font-family: var(--font-family) !important;
 }
 
 /* Base Component Panel (replaces glass-panel) */

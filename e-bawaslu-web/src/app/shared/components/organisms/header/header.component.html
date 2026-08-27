@@ -3,15 +3,15 @@
     <button *ngIf="isMobile" class="hamburger-btn" (click)="onToggleMenu()">
       <mat-icon>menu</mat-icon>
     </button>
-    <div class="brand-group">
-      <span class="brand-badge">SIM BAWASLU</span>
-      <h2 class="page-title">Bawaslu Kota Cimahi</h2>
+    <div class="brand-group hide-mobile">
+      <h2 class="page-title">Sistem Informasi Manajemen Bawaslu</h2>
     </div>
   </div>
   
   <div class="header-right">
     <a routerLink="/dashboard/struktur-organisasi" class="struktur-link hide-mobile">
-      &#x1F3DB;&#xFE0F; Lihat Bagan Struktur
+      <mat-icon style="font-size: 18px; width: 18px; height: 18px;">account_tree</mat-icon> 
+      Bagan Struktur
     </a>
     
     <div class="user-profile">
