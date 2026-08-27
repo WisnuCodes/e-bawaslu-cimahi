@@ -200,12 +200,7 @@
     </div>
 
     <form [formGroup]="uploadForm" (ngSubmit)="submitUpload()" style="display: flex; flex-direction: column; gap: 1rem;">
-      <mat-form-field appearance="outline">
-        <mat-label>Divisi Pemilik</mat-label>
-        <mat-select formControlName="divisi_id">
-          <mat-option *ngFor="let div of divisiList" [value]="div.divisi_id">{{ div.nama_divisi }}</mat-option>
-        </mat-select>
-      </mat-form-field>
+      <input type="hidden" formControlName="divisi_id">
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
         <mat-form-field appearance="outline">

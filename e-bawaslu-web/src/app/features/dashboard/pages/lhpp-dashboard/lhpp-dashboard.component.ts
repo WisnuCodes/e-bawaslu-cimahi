@@ -186,13 +186,19 @@ export class LhppDashboardComponent implements OnInit {
 
   // Upload Arsip Baru
   openUploadModal() {
+    // Cari divisi P2H atau Penanganan Pelanggaran
+    const p2hDiv = this.divisiList.find(d => 
+      d.nama_divisi.toLowerCase().includes('p2h') || 
+      d.nama_divisi.toLowerCase().includes('penanganan pelanggaran')
+    );
+
     this.uploadForm.reset({
-      divisi_id: this.divisiList.length > 0 ? this.divisiList[0].divisi_id : '',
+      divisi_id: p2hDiv ? p2hDiv.divisi_id : (this.divisiList.length > 0 ? this.divisiList[0].divisi_id : ''),
       no_surat: '',
       tgl_surat: new Date().toISOString().split('T')[0],
       perihal: '',
-      kategori: 'Surat Keputusan',
-      klasifikasi: 'Biasa'
+      kategori: 'LHPP',
+      klasifikasi: 'Rahasia'
     });
     this.uploadFile = null;
     this.showUploadModal = true;
