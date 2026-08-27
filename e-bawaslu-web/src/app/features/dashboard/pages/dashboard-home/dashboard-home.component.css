@@ -8,12 +8,12 @@
 .welcome-header {
   margin-bottom: 2rem;
   padding: 2.5rem 3rem;
-  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   border-radius: 16px;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.25);
   color: white;
   position: relative;
   overflow: hidden;
@@ -46,23 +46,24 @@
 .welcome-title .date {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #93c5fd;
+  color: #94a3b8;
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
   padding: 6px 12px;
   border-radius: 20px;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .welcome-title .subtitle {
   font-size: 1rem;
-  color: #e0f2fe;
+  color: #cbd5e1;
   margin: 1.25rem 0 0 0;
   line-height: 1.6;
   max-width: 800px;
