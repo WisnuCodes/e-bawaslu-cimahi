@@ -17,6 +17,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import * as _ from 'lodash';
 
 @Component({
@@ -36,7 +37,8 @@ import * as _ from 'lodash';
     MatSelectModule,
     MatDialogModule,
     MatProgressSpinnerModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    MatSnackBarModule
   ],
   templateUrl: './arsip-dashboard.component.html',
   styleUrl: './arsip-dashboard.component.css'
@@ -46,6 +48,7 @@ export class ArsipDashboardComponent implements OnInit {
   private masterDataService = inject(MasterDataService);
   public authService = inject(AuthService);
   private fb = inject(FormBuilder);
+  private snackBar = inject(MatSnackBar);
   
   @ViewChild('uploadFileInput') uploadFileInput!: ElementRef<HTMLInputElement>;
   @ViewChild('revisiFileInput') revisiFileInput!: ElementRef<HTMLInputElement>;
@@ -150,8 +153,7 @@ export class ArsipDashboardComponent implements OnInit {
     const user = this.authService.currentUser();
     if (!user) return false;
     const allowedRoles = ['staf', 'kasubag', 'kabag', 'kordiv', 'ketua', 'admin', 'super_admin'];
-    return allowedRoles.includes(user.role.toLowerCase()) || true; // Since the instruction says "yang bisa melakukan edit/revisi", and we know practically all roles can, we can just allow it, or use the role explicitly. The user's role string might contain 'Staf' or 'Kadiv' or 'Ketua Bawaslu', let's just make it broad or rely on authService properties. Wait, I will use the service's getters.
-    // Actually, I'll just check if it's not a guest.
+    return allowedRoles.includes(user.role.toLowerCase()) || true; 
   }
 
 
@@ -195,7 +197,7 @@ export class ArsipDashboardComponent implements OnInit {
 
   submitUpload() {
     if (this.uploadForm.invalid || !this.uploadFile) {
-      alert('Mohon lengkapi semua field dan sertakan file dokumen.');
+      this.showNotification('Mohon lengkapi semua field dan sertakan file dokumen.', 'error');
       return;
     }
 
@@ -213,13 +215,13 @@ export class ArsipDashboardComponent implements OnInit {
       next: () => {
         this.isUploading = false;
         this.showUploadModal = false;
-        alert('Dokumen arsip berhasil didaftarkan (v1.0)!');
+        this.showNotification('Dokumen arsip berhasil didaftarkan (v1.0)!', 'success');
         this.loadDocuments();
         if (this.canViewLogs) this.loadLogs();
       },
       error: (err) => {
         this.isUploading = false;
-        alert(err.error?.message || 'Gagal mengunggah arsip.');
+        this.showNotification(err.error?.message || 'Gagal mengunggah arsip.', 'error');
       }
     });
   }
@@ -240,7 +242,7 @@ export class ArsipDashboardComponent implements OnInit {
 
   submitRevisi() {
     if (!this.selectedArsip || !this.revisiFile || !this.revisiCatatan.trim()) {
-      alert('Mohon pilih berkas revisi dan berikan catatan alasan revisi.');
+      this.showNotification('Mohon pilih berkas revisi dan berikan catatan alasan revisi.', 'error');
       return;
     }
 
@@ -253,13 +255,13 @@ export class ArsipDashboardComponent implements OnInit {
       next: (res) => {
         this.isSubmittingRevisi = false;
         this.showRevisiModal = false;
-        alert(`Revisi berhasil diunggah (${res.data?.version})!`);
+        this.showNotification(`Revisi berhasil diunggah (${res.data?.version})!`, 'success');
         this.loadDocuments();
         if (this.canViewLogs) this.loadLogs();
       },
       error: (err) => {
         this.isSubmittingRevisi = false;
-        alert(err.error?.message || 'Gagal mengunggah revisi.');
+        this.showNotification(err.error?.message || 'Gagal mengunggah revisi.', 'error');
       }
     });
   }
@@ -278,6 +280,7 @@ export class ArsipDashboardComponent implements OnInit {
       },
       error: () => {
         this.isLoadingVersions = false;
+        this.showNotification('Gagal mengambil riwayat revisi.', 'error');
       }
     });
   }
@@ -298,7 +301,7 @@ export class ArsipDashboardComponent implements OnInit {
       },
       error: () => {
         this.isDownloading[doc.id] = false;
-        alert('Gagal mengunduh berkas dengan dynamic watermark.');
+        this.showNotification('Gagal mengunduh berkas dengan dynamic watermark.', 'error');
       }
     });
   }
@@ -312,7 +315,7 @@ export class ArsipDashboardComponent implements OnInit {
 
   submitDelete() {
     if (!this.selectedArsip || this.deleteReason.trim().length < 10) {
-      alert('Alasan penghapusan wajib diisi minimal 10 karakter untuk keperluan audit trail.');
+      this.showNotification('Alasan wajib diisi minimal 10 karakter untuk Audit Trail.', 'error');
       return;
     }
 
@@ -321,13 +324,13 @@ export class ArsipDashboardComponent implements OnInit {
       next: () => {
         this.isDeleting = false;
         this.showDeleteModal = false;
-        alert('Dokumen berhasil dihapus secara aman (Soft Delete recorded in Audit Log).');
+        this.showNotification('✅ Dokumen telah berhasil dihapus secara aman. (Jejak digital tersimpan di Audit Log).', 'success');
         this.loadDocuments();
         if (this.canViewLogs) this.loadLogs();
       },
       error: (err) => {
         this.isDeleting = false;
-        alert(err.error?.message || 'Gagal menghapus dokumen.');
+        this.showNotification(err.error?.message || 'Gagal menghapus dokumen.', 'error');
       }
     });
   }
@@ -335,5 +338,14 @@ export class ArsipDashboardComponent implements OnInit {
   getDivisiName(divisiId: string): string {
     const found = this.divisiList.find(d => d.divisi_id === divisiId);
     return found ? found.nama_divisi : '-';
+  }
+
+  showNotification(message: string, type: 'success' | 'error' | 'info' = 'info') {
+    this.snackBar.open(message, 'Tutup', {
+      duration: 5000,
+      horizontalPosition: 'right',
+      verticalPosition: 'bottom',
+      panelClass: type === 'error' ? ['bg-red-600', 'text-white'] : (type === 'success' ? ['bg-green-600', 'text-white'] : [])
+    });
   }
 }
