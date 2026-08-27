@@ -97,6 +97,25 @@
       </div>
     </div>
 
+    <!-- Manajemen LHPP Khusus P2H -->
+    <div class="stat-card-modern" *ngIf="authService.isP2H">
+      <div class="stat-card-header">
+        <h3 class="stat-title">Manajemen<br>LHPP</h3>
+        <div class="stat-icon-wrapper">
+          <mat-icon>assignment</mat-icon>
+        </div>
+      </div>
+      <div class="stat-value" style="color: var(--color-primary);">
+        P2H
+      </div>
+      <div class="stat-action">
+        <span class="stat-subtitle">Akses Eksklusif Divisi</span>
+        <a routerLink="/dashboard/lhpp" class="stat-link">
+          Kelola LHPP <mat-icon style="font-size: 16px; width: 16px; height: 16px; margin-top: 2px;">chevron_right</mat-icon>
+        </a>
+      </div>
+    </div>
+
     <!-- Pending Approval Counter (Untuk Pimpinan & Kordiv) -->
     <div class="stat-card-modern" *ngIf="authService.canApprove">
       <div class="stat-card-header">

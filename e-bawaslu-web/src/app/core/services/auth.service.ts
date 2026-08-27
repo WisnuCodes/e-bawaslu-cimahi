@@ -159,11 +159,16 @@ export class AuthService {
     return r.includes('pengawas tps') || r.includes('saksi');
   }
 
-  // Hak Akses Ingesti / Approval C1 (Khusus Divisi P2H, Pimpinan, Super Admin, & Pengawas)
+  // Divisi P2H Khusus
+  get isP2H(): boolean {
+    return this.userRole.toLowerCase().includes('p2h');
+  }
+
+  // Hak Akses Ingesti / Approval C1 (Khusus Divisi P2H dan Pengawas TPS)
   get canAccessC1(): boolean {
     const r = this.userRole.toLowerCase();
-    const isP2H = r.includes('p2h');
-    return this.isSuperAdmin || this.isPimpinan || isP2H || this.isSaksiTps;
+    const isP2H = r.includes('p2h'); // Mencakup Kordiv P2H & Staf P2H
+    return isP2H || this.isSaksiTps || this.isSuperAdmin; // Super Admin tetap diizinkan untuk keperluan teknis/maintenance
   }
 
   // Hak Ekspor Laporan Resmi BPK

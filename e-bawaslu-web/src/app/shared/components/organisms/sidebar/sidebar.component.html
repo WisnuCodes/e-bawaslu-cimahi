@@ -38,6 +38,12 @@
       <span class="nav-text" *ngIf="!isCollapsed">Form C1</span>
     </a>
 
+    <!-- Khusus Laporan LHPP (Hanya P2H) -->
+    <a routerLink="/dashboard/lhpp" routerLinkActive="active" class="nav-item" *ngIf="authService.isP2H" matRipple matRippleColor="rgba(255,255,255,0.1)">
+      <mat-icon>assignment</mat-icon>
+      <span class="nav-text" *ngIf="!isCollapsed">Laporan LHPP</span>
+    </a>
+
     <!-- Khusus Manajemen Pengawas TPS (Ketua) -->
     <a routerLink="/dashboard/saksi" routerLinkActive="active" class="nav-item" *ngIf="isPimpinan" matRipple matRippleColor="rgba(255,255,255,0.1)">
       <mat-icon>manage_accounts</mat-icon>

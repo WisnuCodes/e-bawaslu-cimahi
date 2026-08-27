@@ -62,7 +62,17 @@ class ArsipController extends Controller
             'file_dokumen' => 'required|file|mimes:pdf,doc,docx'
         ]);
 
-        $userId = $request->user()->user_id;
+        $user = $request->user();
+        $userId = $user->user_id;
+
+        // Validasi Role Khusus LHPP
+        if (strtoupper($request->kategori) === 'LHPP' && !str_contains(strtolower($user->role), 'p2h')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akses Ditolak: Hanya Divisi P2H yang berwenang mengunggah Laporan Hasil Pengawasan Pemilu (LHPP).'
+            ], 403);
+        }
+
         $path = $request->file('file_dokumen')->store('arsip', 'public');
 
         $arsip = Arsip::create([
