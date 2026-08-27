@@ -171,9 +171,9 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
     }, 1000);
 
     if (!this.canViewOthersPresensi) {
-      this.presensiDisplayedColumns = ['waktu_masuk', 'foto_masuk', 'waktu_keluar', 'foto_keluar', 'lokasi', 'status'];
+      this.presensiDisplayedColumns = ['waktu_masuk', 'foto_masuk', 'status_ci', 'waktu_keluar', 'foto_keluar', 'status_co', 'lokasi'];
     } else {
-      this.presensiDisplayedColumns = ['nama', 'waktu_masuk', 'foto_masuk', 'waktu_keluar', 'foto_keluar', 'lokasi', 'status'];
+      this.presensiDisplayedColumns = ['nama', 'waktu_masuk', 'foto_masuk', 'status_ci', 'waktu_keluar', 'foto_keluar', 'status_co', 'lokasi'];
       if (this.isAdmin) {
         this.presensiDisplayedColumns.push('aksi');
       }
