@@ -103,10 +103,18 @@ export class C1DashboardComponent implements OnInit {
   }
 
   onJumlahPaslonChange(jumlah: number) {
+    if (!jumlah || jumlah < 1) return;
     const arr = this.c1Form.get('suara_paslon') as FormArray;
-    arr.clear();
-    for (let i = 0; i < jumlah; i++) {
-      arr.push(this.fb.control(0, [Validators.required, Validators.min(0)]));
+    const currentLength = arr.length;
+    
+    if (jumlah > currentLength) {
+      for (let i = currentLength; i < jumlah; i++) {
+        arr.push(this.fb.control(0, [Validators.required, Validators.min(0)]));
+      }
+    } else if (jumlah < currentLength) {
+      for (let i = currentLength - 1; i >= jumlah; i--) {
+        arr.removeAt(i);
+      }
     }
   }
 
@@ -359,12 +367,12 @@ export class C1DashboardComponent implements OnInit {
         const count = this.c1Form.value.jumlah_paslon;
         const arr = this.c1Form.get('suara_paslon') as FormArray;
 
-        // Memasukkan hasil
-        if (data.paslon_1 !== undefined && count >= 1) arr.at(0)?.setValue(data.paslon_1);
-        if (data.paslon_2 !== undefined && count >= 2) arr.at(1)?.setValue(data.paslon_2);
-        if (data.paslon_3 !== undefined && count >= 3) arr.at(2)?.setValue(data.paslon_3);
-        if (data.paslon_4 !== undefined && count >= 4) arr.at(3)?.setValue(data.paslon_4);
-        if (data.paslon_5 !== undefined && count >= 5) arr.at(4)?.setValue(data.paslon_5);
+        // Memasukkan hasil secara dinamis
+        for (let i = 1; i <= count; i++) {
+          if (data[`paslon_${i}`] !== undefined) {
+            arr.at(i - 1)?.setValue(data[`paslon_${i}`]);
+          }
+        }
         
         this.c1Form.patchValue({
           total_suara_sah: data.suara_sah,

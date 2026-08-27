@@ -163,13 +163,8 @@
             <h3 style="margin: 0; font-size: 1rem; font-weight: 600; color: #334155;">Rincian Suara per Paslon</h3>
             
             <mat-form-field appearance="outline" style="width: 200px;">
-              <mat-label>Jumlah Paslon</mat-label>
-              <mat-select formControlName="jumlah_paslon" (selectionChange)="onJumlahPaslonChange($event.value)">
-                <mat-option [value]="2">2 Paslon</mat-option>
-                <mat-option [value]="3">3 Paslon</mat-option>
-                <mat-option [value]="4">4 Paslon</mat-option>
-                <mat-option [value]="5">5 Paslon</mat-option>
-              </mat-select>
+              <mat-label>Kustom Jumlah Paslon</mat-label>
+              <input matInput type="number" formControlName="jumlah_paslon" min="1" (change)="onJumlahPaslonChange(c1Form.value.jumlah_paslon)">
             </mat-form-field>
           </div>
 
