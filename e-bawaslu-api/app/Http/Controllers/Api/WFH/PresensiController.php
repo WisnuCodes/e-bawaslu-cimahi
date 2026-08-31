@@ -7,9 +7,26 @@ use App\Models\Presensi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class PresensiController extends Controller
 {
+    private function calculateDistance($lat1, $lon1, $lat2, $lon2) {
+        $earthRadius = 6371; // km
+        
+        $lat1 = deg2rad((float)$lat1);
+        $lon1 = deg2rad((float)$lon1);
+        $lat2 = deg2rad((float)$lat2);
+        $lon2 = deg2rad((float)$lon2);
+        
+        $latDelta = $lat2 - $lat1;
+        $lonDelta = $lon2 - $lon1;
+        
+        $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
+            cos($lat1) * cos($lat2) * pow(sin($lonDelta / 2), 2)));
+            
+        return $angle * $earthRadius;
+    }
     public function index(Request $request)
     {
         $user = $request->user();
@@ -41,11 +58,11 @@ class PresensiController extends Controller
 
         $user = $request->user();
         $role = strtolower($user->role);
-        $isAdmin = str_contains($role, 'admin') || str_contains($role, 'superadmin');
+        $isAdmin = str_contains($role, 'admin') || str_contains($role, 'superadmin') || str_contains($role, 'ketua');
 
-        // Yang bisa edit: user itu sendiri (untuk absennya) ATAU Admin (untuk semua orang)
+        // Yang bisa edit: user itu sendiri (untuk absennya) ATAU Admin/Ketua (untuk semua orang)
         if ($presensi->user_id !== $user->user_id && !$isAdmin) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized. Hanya Admin yang dapat mengedit presensi user lain.'], 403);
+            return response()->json(['success' => false, 'message' => 'Unauthorized. Hanya Admin/Ketua yang dapat mengedit presensi user lain.'], 403);
         }
 
         $presensi = Presensi::findOrFail($id);
@@ -110,7 +127,25 @@ class PresensiController extends Controller
             ], 403);
         }
 
-        $userId = $request->user()->user_id;
+        $user = $request->user();
+        $userId = $user->user_id;
+        
+        // Cek Radius jika koordinat acuan diset
+        if ($user->koordinat_acuan) {
+            $acuan = explode(',', $user->koordinat_acuan);
+            $current = explode(',', $request->gps_koordinat);
+            
+            if (count($acuan) == 2 && count($current) == 2) {
+                $distance = $this->calculateDistance($acuan[0], $acuan[1], $current[0], $current[1]);
+                if ($distance > 1.0) { // 1 km radius
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Presensi ditolak. Lokasi Anda berada di luar radius 1 KM dari titik acuan.'
+                    ], 403);
+                }
+            }
+        }
+
         $path = $request->file('selfie_image')->store('presensi', 'public');
         $now = Carbon::now();
 
@@ -130,6 +165,9 @@ class PresensiController extends Controller
             'gps_koordinat' => $request->gps_koordinat,
             'liveness_score' => $request->liveness_score
         ]);
+
+        // Mock send notification
+        Log::info("NOTIFIKASI: Foto presensi check-in berhasil diunggah oleh user: " . $user->username);
 
         return response()->json([
             'success' => true,
@@ -156,8 +194,26 @@ class PresensiController extends Controller
 
         $presensi = Presensi::findOrFail($request->presensi_id);
 
-        if ($presensi->user_id !== $request->user()->user_id) {
+        $user = $request->user();
+
+        if ($presensi->user_id !== $user->user_id) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        // Cek Radius jika koordinat acuan diset
+        if ($user->koordinat_acuan) {
+            $acuan = explode(',', $user->koordinat_acuan);
+            $current = explode(',', $request->gps_koordinat);
+            
+            if (count($acuan) == 2 && count($current) == 2) {
+                $distance = $this->calculateDistance($acuan[0], $acuan[1], $current[0], $current[1]);
+                if ($distance > 1.0) { // 1 km radius
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Presensi ditolak. Lokasi Anda berada di luar radius 1 KM dari titik acuan.'
+                    ], 403);
+                }
+            }
         }
 
         $now = Carbon::now();
@@ -180,6 +236,9 @@ class PresensiController extends Controller
             'status_co' => $status_co,
             // Update koordinat checkout
         ]);
+
+        // Mock send notification
+        Log::info("NOTIFIKASI: Foto presensi check-out berhasil diunggah oleh user: " . $user->username);
 
         return response()->json([
             'success' => true,

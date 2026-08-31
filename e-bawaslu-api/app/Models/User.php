@@ -34,6 +34,8 @@ class User extends Authenticatable
         'username',
         'email',
         'whatsapp_number',
+        'ppid_url',
+        'koordinat_acuan',
         'otp_code',
         'otp_expires_at',
         'password_hash',

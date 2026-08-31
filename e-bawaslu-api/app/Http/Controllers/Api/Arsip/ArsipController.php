@@ -65,11 +65,32 @@ class ArsipController extends Controller
         $user = $request->user();
         $userId = $user->user_id;
 
-        // Validasi Role Khusus LHPP
-        if (strtoupper($request->kategori) === 'LHPP' && !str_contains(strtolower($user->role), 'p2h')) {
+        // Validasi Role Khusus LHPP / LHP / MHP
+        $allowedRoles = ['p2h', 'panwascam', 'pkd', 'ptps', 'ketua', 'admin'];
+        $userRoleLower = strtolower($user->role);
+        
+        $isKetuaOrAdmin = str_contains($userRoleLower, 'ketua') || str_contains($userRoleLower, 'admin');
+
+        // Panwascam (tamu) viewer only (unless they are also somehow admin/ketua which is unlikely)
+        if (str_contains($userRoleLower, 'panwascam (tamu)') && !$isKetuaOrAdmin) {
             return response()->json([
                 'success' => false,
-                'message' => 'Akses Ditolak: Hanya Divisi P2H yang berwenang mengunggah Laporan Hasil Pengawasan Pemilu (LHPP).'
+                'message' => 'Akses Ditolak: Role Tamu hanya dapat melihat data (viewer).'
+            ], 403);
+        }
+
+        $isAllowedLhp = false;
+        foreach ($allowedRoles as $role) {
+            if (str_contains($userRoleLower, $role) && !str_contains($userRoleLower, 'tamu')) {
+                $isAllowedLhp = true;
+                break;
+            }
+        }
+
+        if (in_array(strtoupper($request->kategori), ['LHPP', 'LHP', 'MHP']) && !$isAllowedLhp) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akses Ditolak: Role Anda tidak berwenang mengunggah Laporan Hasil Pengawasan (LHP/MHP).'
             ], 403);
         }
 

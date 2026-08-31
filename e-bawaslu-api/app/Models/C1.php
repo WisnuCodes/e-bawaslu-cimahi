@@ -15,6 +15,7 @@ class C1 extends Model
     protected $fillable = [
         'c1_id',
         'tps_id',
+        'approval_divisi_id',
         'uploaded_by',
         'total_suara_sah',
         'total_suara_tidak_sah',
@@ -22,6 +23,8 @@ class C1 extends Model
         'sha256_hash',
         'file_url',
         'status_c1',
+        'jenis_pemilihan',
+        'sub_jenis_pemilihan',
         'created_at'
     ];
 }

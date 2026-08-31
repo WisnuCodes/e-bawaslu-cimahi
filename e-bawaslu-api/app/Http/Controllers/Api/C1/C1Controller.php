@@ -33,12 +33,21 @@ class C1Controller extends Controller
 
     public function index(Request $request)
     {
-        $query = C1::query();
+        $query = C1::query()
+            ->join('wilayah_tps', 'berkas_c1.tps_id', '=', 'wilayah_tps.tps_id')
+            ->select('berkas_c1.*', 'wilayah_tps.kecamatan', 'wilayah_tps.kelurahan');
+
         if ($request->has('tps_id')) {
-            $query->where('tps_id', $request->tps_id);
+            $query->where('berkas_c1.tps_id', $request->tps_id);
+        }
+        if ($request->has('kecamatan')) {
+            $query->where('wilayah_tps.kecamatan', $request->kecamatan);
+        }
+        if ($request->has('kelurahan')) {
+            $query->where('wilayah_tps.kelurahan', $request->kelurahan);
         }
         
-        return C1Resource::collection($query->orderBy('created_at', 'desc')->get());
+        return C1Resource::collection($query->orderBy('berkas_c1.created_at', 'desc')->get());
     }
 
     public function store(StoreC1Request $request)
@@ -112,6 +121,19 @@ class C1Controller extends Controller
         ]);
 
         $c1 = C1::findOrFail($id);
+        
+        // Cek custom approval divisi if set by admin
+        $user = $request->user();
+        if ($c1->approval_divisi_id && $user->divisi_id !== $c1->approval_divisi_id) {
+            // Admin or Ketua can override this restriction
+            $role = strtolower($user->role);
+            if (!str_contains($role, 'admin') && !str_contains($role, 'ketua')) {
+                return response()->json([
+                    'message' => 'Anda tidak berada pada divisi yang diberi wewenang untuk menyetujui form C1 ini.'
+                ], 403);
+            }
+        }
+
         $c1->update([
             'status_c1' => $request->status
         ]);

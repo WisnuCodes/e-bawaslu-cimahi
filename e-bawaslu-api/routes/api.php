@@ -13,6 +13,9 @@ use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SaksiController;
 use App\Http\Controllers\Api\Whatsapp\WhatsappController;
+use App\Http\Controllers\Api\TahapanController;
+use App\Http\Controllers\Api\LhpController;
+use App\Http\Controllers\Api\UserController;
 
 // Auth Routes (MOCK SSO Keycloak)
 Route::post('/login', [AuthController::class, 'login']);
@@ -25,7 +28,19 @@ Route::middleware('auth:sanctum')->group(function () {
     // Master Data Routes
     Route::prefix('master')->group(function () {
         Route::get('/divisi', [MasterDataController::class, 'getDivisi']);
+        Route::post('/divisi', [MasterDataController::class, 'storeDivisi']);
+        Route::put('/divisi/{id}', [MasterDataController::class, 'updateDivisi']);
+        Route::delete('/divisi/{id}', [MasterDataController::class, 'destroyDivisi']);
         Route::get('/tps', [MasterDataController::class, 'getTps']);
+    });
+
+    // User Management Routes
+    Route::prefix('users')->group(function () {
+        Route::get('/', [UserController::class, 'index']);
+        Route::post('/', [UserController::class, 'store']);
+        Route::get('/{id}', [UserController::class, 'show']);
+        Route::put('/{id}', [UserController::class, 'update']);
+        Route::delete('/{id}', [UserController::class, 'destroy']);
     });
 
     // WFH Module Routes
@@ -68,6 +83,18 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}', [C1Controller::class, 'update']);
         Route::post('/{id}/approve', [C1Controller::class, 'approve']);
         Route::delete('/{id}', [C1Controller::class, 'destroy']);
+    });
+
+    // Tahapan Module Routes
+    Route::prefix('tahapan')->group(function () {
+        Route::get('/', [TahapanController::class, 'index']);
+        Route::post('/', [TahapanController::class, 'store']);
+    });
+
+    // LHP Module Routes
+    Route::prefix('lhp')->group(function () {
+        Route::get('/', [LhpController::class, 'index']);
+        Route::post('/', [LhpController::class, 'store']);
     });
 
     // Report (Eksport BPK)
