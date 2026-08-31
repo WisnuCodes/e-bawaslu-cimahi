@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { UserService } from '../../../../core/services/user/user.service';
 
 @Component({
   selector: 'app-struktur-organisasi',
@@ -18,7 +19,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   templateUrl: './struktur-organisasi.component.html',
   styleUrl: './struktur-organisasi.component.css'
 })
-export class StrukturOrganisasiComponent {
+export class StrukturOrganisasiComponent implements OnInit {
+  private userService = inject(UserService);
   // Pimpinan Pleno
   ketua = {
     nama: 'FATHIR RIZKIA LATIF, S.H.',
@@ -65,7 +67,7 @@ export class StrukturOrganisasiComponent {
 
   // Sekretariat
   kasek = {
-    nama: 'SITA DEWA NUGROHO, S.STP., M.Si.',
+    nama: 'SETA DEWA NUGROHO, S.STP., M.Si.',
     nip: 'NIP. 19890919 200804 1 001',
     jabatan: 'Kepala Sekretariat Bawaslu Kota Cimahi',
     foto: 'https://ui-avatars.com/api/?name=Sita+Dewanur+Nugroho&background=15803d&color=fff&size=150'
@@ -121,8 +123,8 @@ export class StrukturOrganisasiComponent {
   ];
 
   stafPendukung = [
-    { nama: 'MUHAMMAD MUSLIM, S.Pd.', role: 'Staf Pendukung' },
-    { nama: 'DIAN NUGRAHA', role: 'Staf Pendukung' },
+    { nama: 'MUHAMMAD MUSLIM, M.Pd.', role: 'Staf Pendukung' },
+    { nama: 'DIKA NUGRAHA, S.H.', role: 'Staf Pendukung' },
     { nama: 'ADE HAYATI', role: 'Staf Pendukung' }
   ];
 
@@ -131,4 +133,42 @@ export class StrukturOrganisasiComponent {
     { nama: 'Panwaslu Kecamatan Cimahi Selatan', wilayah: 'Cibeber, Cibeureum, Leuwigajah, Melong, Utama' },
     { nama: 'Panwaslu Kecamatan Cimahi Utara', wilayah: 'Cipageran, Citeureup, Pasirkaliki' }
   ];
+
+  ngOnInit() {
+    this.syncWithUserConfig();
+  }
+
+  syncWithUserConfig() {
+    this.userService.getUsers().subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          const users = res.data;
+          
+          // Sinkronisasi Ketua Bawaslu
+          const ketuaUser = users.find(u => u.role?.toUpperCase().includes('KETUA'));
+          if (ketuaUser) {
+            this.ketua.nama = ketuaUser.username.toUpperCase();
+            this.ketua.foto = `https://ui-avatars.com/api/?name=${encodeURIComponent(ketuaUser.username)}&background=1e3a8a&color=fff&size=150`;
+          }
+
+          // Sinkronisasi Kordiv / Anggota
+          this.kordivList.forEach(kordiv => {
+             const match = users.find(u => 
+               u.nama_divisi?.toUpperCase().includes(kordiv.divisi.toUpperCase()) && 
+               (u.role?.toUpperCase().includes('KORDIV') || u.role?.toUpperCase().includes('ANGGOTA') || u.role?.toUpperCase().includes('KOMISIONER'))
+             );
+             
+             if (match) {
+               kordiv.nama = match.username.toUpperCase();
+               const bgWarna = kordiv.warnaHeader.replace('#', '');
+               kordiv.foto = `https://ui-avatars.com/api/?name=${encodeURIComponent(match.username)}&background=${bgWarna}&color=fff&size=150`;
+             }
+          });
+        }
+      },
+      error: (err) => {
+        console.error('Gagal mengambil data user untuk sinkronisasi struktur organisasi', err);
+      }
+    });
+  }
 }

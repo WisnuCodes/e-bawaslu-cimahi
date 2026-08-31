@@ -135,14 +135,14 @@ export class AuthService {
     return this.isSuperAdmin || this.isPimpinan || this.isKepalaDivisi;
   }
 
-  // Hak Hapus Log C1 (HANYA Kadiv P2H dan Super Admin)
+  // Hak Hapus Log C1 (HANYA Kadiv P2H, Super Admin, dan Pimpinan)
   get canDeleteC1(): boolean {
-    return this.isSuperAdmin || this.isKadivP2H;
+    return this.isSuperAdmin || this.isKadivP2H || this.isPimpinan;
   }
 
-  // Hak Edit Presensi/Absensi User Lain (HANYA Super Admin)
+  // Hak Edit Presensi/Absensi User Lain (HANYA Super Admin dan Pimpinan)
   get canEditPresensi(): boolean {
-    return this.isSuperAdmin;
+    return this.isSuperAdmin || this.isPimpinan;
   }
 
   // Hak Akses Soft Delete / Delete Arsip (Staf DILARANG delete, Kepala Divisi & Super Admin BISA)
@@ -161,14 +161,20 @@ export class AuthService {
 
   // Divisi P2H Khusus
   get isP2H(): boolean {
-    return this.userRole.toLowerCase().includes('p2h');
+    return this.userRole.toLowerCase().includes('p2h') || this.isPimpinan || this.isSuperAdmin;
   }
 
-  // Hak Akses Ingesti / Approval C1 (Khusus Divisi P2H dan Pengawas TPS)
+  // Hak Akses Ingesti / Approval C1
   get canAccessC1(): boolean {
     const r = this.userRole.toLowerCase();
-    const isP2H = r.includes('p2h'); // Mencakup Kordiv P2H & Staf P2H
-    return isP2H || this.isSaksiTps || this.isSuperAdmin; // Super Admin tetap diizinkan untuk keperluan teknis/maintenance
+    const isP2H = r.includes('p2h');
+    return isP2H || this.isSaksiTps || this.isSuperAdmin || this.isPimpinan; 
+  }
+
+  // Hak Akses LHP
+  get canAccessLhp(): boolean {
+    const r = this.userRole.toLowerCase();
+    return this.isP2H || r.includes('panwascam') || r.includes('pkd') || r.includes('ptps') || this.isPimpinan || this.isSuperAdmin;
   }
 
   // Hak Ekspor Laporan Resmi BPK

@@ -1,9 +1,11 @@
+/* Clean, Professional Enterprise Auth Layout */
 .auth-wrapper {
   display: flex;
   min-height: 100vh;
   width: 100%;
-  background-color: #f8fafc; /* light modern background for the right side */
+  background-color: #f8fafc;
   overflow: hidden;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 /* LEFT SIDE - VISUAL / BRANDING */
@@ -11,32 +13,13 @@
   flex: 1;
   display: none; /* hidden on mobile */
   position: relative;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  background-color: #0f172a; /* Solid professional slate/navy */
+  /* Subtle pattern overlay instead of glowing gradients */
+  background-image: radial-gradient(#1e293b 1px, transparent 1px);
+  background-size: 24px 24px;
   color: white;
-  padding: 4rem;
+  padding: 4rem 5rem;
   overflow: hidden;
-}
-
-/* Geometric shapes for premium feel */
-.auth-visual-side::before {
-  content: '';
-  position: absolute;
-  top: -10%;
-  left: -10%;
-  width: 50%;
-  height: 50%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
-}
-.auth-visual-side::after {
-  content: '';
-  position: absolute;
-  bottom: -20%;
-  right: -10%;
-  width: 70%;
-  height: 70%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
 }
 
 .visual-content {
@@ -53,52 +36,50 @@
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.1);
   padding: 8px 16px;
-  border-radius: 50px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   margin-bottom: 2rem;
   width: max-content;
 }
 
 .badge-logo {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
   object-fit: contain;
-  background: white; /* in case logo has transparency */
+  background: white;
   padding: 2px;
 }
 
 .brand-badge span {
-  font-weight: 600;
-  letter-spacing: 1px;
-  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: #f1f5f9;
 }
 
 .visual-heading {
   font-size: 3rem;
   font-weight: 700;
   line-height: 1.2;
-  margin: 0 0 1.5rem 0;
-  letter-spacing: -0.025em;
-  text-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  margin: 0 0 1rem 0;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+
+.visual-heading span {
+  color: #38bdf8; /* Soft professional blue accent, not neon */
 }
 
 .visual-subheading {
   font-size: 1.1rem;
   line-height: 1.6;
-  opacity: 0.9;
-  font-weight: 300;
-  max-width: 85%;
-}
-
-.visual-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.2) 100%);
-  z-index: 1;
+  color: #cbd5e1;
+  font-weight: 400;
+  max-width: 90%;
 }
 
 /* RIGHT SIDE - FORM */
@@ -109,12 +90,12 @@
   justify-content: center;
   align-items: center;
   padding: 2rem;
-  position: relative;
+  background-color: #ffffff;
 }
 
 .auth-container {
   width: 100%;
-  max-width: 440px;
+  max-width: 400px;
 }
 
 .auth-header-mobile {
@@ -126,27 +107,27 @@
 }
 
 .mobile-logo {
-  width: 64px;
-  height: 64px;
-  border-radius: 12px;
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
   object-fit: contain;
   margin-bottom: 1rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
 }
 
 .auth-header-mobile h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.25rem;
+  font-weight: 600;
   color: #0f172a;
   margin: 0;
 }
 
 .auth-card {
-  background: #ffffff;
-  border-radius: 16px !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01) !important;
-  padding: 2.5rem;
-  border: 1px solid #f1f5f9;
+  background: transparent;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0;
+  border: none;
 }
 
 .auth-header {
@@ -156,10 +137,10 @@
 
 .auth-title h1 {
   font-size: 1.75rem;
-  font-weight: 700;
+  font-weight: 600;
   color: #0f172a;
   margin: 0 0 0.5rem 0;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.02em;
 }
 
 .auth-title p {
@@ -169,36 +150,28 @@
 }
 
 .auth-body {
-  padding: 0; /* Internal components handle layout */
+  padding: 0;
 }
 
 .auth-footer {
-  margin-top: 2.5rem;
+  margin-top: 3rem;
   text-align: center;
-  color: #94a3b8;
-  font-size: 0.75rem;
-  line-height: 1.6;
+  color: #64748b;
+  font-size: 0.8rem;
+  line-height: 1.5;
 }
 .auth-footer p {
   margin: 0;
 }
 
-/* Animations */
+/* Subtle standard animations */
 .animate-fade-in {
-  animation: fadeIn 0.6s ease-out forwards;
-}
-.animate-fade-in-up {
-  animation: fadeInUp 0.8s ease-out forwards;
+  animation: fadeIn 0.4s ease-out forwards;
 }
 
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
-}
-
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 /* RESPONSIVE */
@@ -213,11 +186,16 @@
 
 @media (max-width: 768px) {
   .auth-form-side {
-    padding: 1rem;
+    padding: 1.5rem;
+    background-color: #f8fafc;
   }
 
   .auth-card {
-    padding: 1.5rem;
+    background: #ffffff;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+    padding: 2rem;
+    border: 1px solid #e2e8f0;
   }
 
   .auth-title h1 {

@@ -82,7 +82,7 @@
     <!-- Berkas C1 Terenkripsi -->
     <div class="stat-card-modern" *ngIf="authService.canAccessC1">
       <div class="stat-card-header">
-        <h3 class="stat-title">Form C1<br>Terenkripsi (P2H)</h3>
+        <h3 class="stat-title">Form C1<br>(Kamar Pemilu)</h3>
         <div class="stat-icon-wrapper">
           <mat-icon>fact_check</mat-icon>
         </div>
@@ -108,7 +108,7 @@
     <!-- Manajemen LHPP Khusus P2H -->
     <div class="stat-card-modern" *ngIf="authService.isP2H">
       <div class="stat-card-header">
-        <h3 class="stat-title">Manajemen<br>LHPP</h3>
+        <h3 class="stat-title">Manajemen LHPP<br>(Kamar Pemilu)</h3>
         <div class="stat-icon-wrapper">
           <mat-icon>assignment</mat-icon>
         </div>
@@ -143,6 +143,24 @@
       </div>
     </div>
 
+    <!-- Placeholder C1 Pilkada -->
+    <div class="stat-card-modern" *ngIf="authService.canAccessC1" style="opacity: 0.7;">
+      <div class="stat-card-header">
+        <h3 class="stat-title">Form C1<br>(Kamar Pilkada)</h3>
+        <div class="stat-icon-wrapper">
+          <mat-icon>how_to_vote</mat-icon>
+        </div>
+      </div>
+      <div class="stat-value">
+        -
+      </div>
+      <div class="stat-action">
+        <span class="stat-subtitle">Coming Soon</span>
+        <span class="stat-link" style="color: #9e9e9e; cursor: not-allowed;">
+          Pantau Form <mat-icon style="font-size: 16px; width: 16px; height: 16px; margin-top: 2px;">chevron_right</mat-icon>
+        </span>
+      </div>
+    </div>
   </div>
 
   <!-- AKSI CEPAT LAYANAN INTEGRASI -->
@@ -181,8 +199,19 @@
           <mat-icon>admin_panel_settings</mat-icon>
         </div>
         <div class="action-tile-content">
-          <span class="action-tile-title">Ingesti Form C1-Hasil</span>
+          <span class="action-tile-title">Ingesti Form C1 (Pemilu)</span>
           <span class="action-tile-desc">Enkripsi AES-256 & Validasi Integritas SHA-256</span>
+        </div>
+      </a>
+
+      <!-- Ingesti C1 Pilkada Placeholder -->
+      <a class="action-tile-modern" *ngIf="authService.canAccessC1" style="opacity: 0.6; cursor: not-allowed; border: 1px dashed #ccc; box-shadow: none;" (click)="$event.preventDefault()">
+        <div class="action-tile-icon" style="background-color: #e0e0e0; color: #757575;">
+          <mat-icon>how_to_vote</mat-icon>
+        </div>
+        <div class="action-tile-content">
+          <span class="action-tile-title" style="color: #757575;">Ingesti Form C1 (Pilkada)</span>
+          <span class="action-tile-desc">Segera Hadir untuk Pemilihan Kepala Daerah</span>
         </div>
       </a>
 

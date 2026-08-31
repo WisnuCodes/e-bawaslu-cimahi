@@ -7,11 +7,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatRippleModule } from '@angular/material/core';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatIconModule, MatListModule, MatRippleModule, MatDividerModule],
+  imports: [CommonModule, RouterModule, MatIconModule, MatListModule, MatRippleModule, MatDividerModule, MatExpansionModule, MatButtonModule],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.css'
 })
@@ -20,9 +22,23 @@ export class SidebarComponent {
   private router = inject(Router);
 
   isCollapsed = false;
+  isPemiluOpen = true;
+  isPilkadaOpen = true;
 
   toggleSidebar() {
     this.isCollapsed = !this.isCollapsed;
+  }
+
+  togglePemilu() {
+    if (!this.isCollapsed) {
+      this.isPemiluOpen = !this.isPemiluOpen;
+    }
+  }
+
+  togglePilkada() {
+    if (!this.isCollapsed) {
+      this.isPilkadaOpen = !this.isPilkadaOpen;
+    }
   }
 
   get userRole(): string {

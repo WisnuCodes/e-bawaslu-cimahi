@@ -9,47 +9,61 @@
 }
 
 .mb-3 {
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 mat-form-field {
   width: 100%;
 }
 
-/* Make outline form fields look cleaner */
+/* Make outline form fields look standard corporate */
 ::ng-deep .mat-mdc-text-field-wrapper {
-  background-color: #f8fafc !important;
+  background-color: #ffffff !important;
+  border-radius: 6px !important;
+}
+
+::ng-deep .mdc-notched-outline__leading,
+::ng-deep .mdc-notched-outline__notch,
+::ng-deep .mdc-notched-outline__trailing {
+  border-color: #cbd5e1 !important;
+}
+
+::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
+  border-color: #2563eb !important;
+  border-width: 2px !important;
 }
 
 .demo-accounts-panel {
   margin-top: 2rem;
   padding: 1.25rem;
   background-color: #f8fafc;
-  border-radius: 12px;
+  border-radius: 8px;
   border: 1px solid #e2e8f0;
 }
 
 .demo-panel-header {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  color: #475569;
+  color: #334155;
   margin-bottom: 12px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .demo-list {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  max-height: 160px;
+  max-height: 180px;
   overflow-y: auto;
   padding-right: 4px;
 }
 
 .demo-list::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 .demo-list::-webkit-scrollbar-thumb {
   background-color: #cbd5e1;
@@ -60,29 +74,36 @@ mat-form-field {
   background: #ffffff;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 0.75rem;
+  padding: 8px 12px;
+  font-size: 0.8rem;
   color: #334155;
   cursor: pointer;
   text-align: left;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease-in-out;
   display: flex;
   align-items: center;
+  font-weight: 500;
 }
 
 .demo-btn:hover {
-  background: #eff6ff;
-  border-color: #3b82f6;
-  color: #1e3a8a;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  background: #f1f5f9;
+  border-color: #94a3b8;
 }
 
 .login-btn {
   width: 100%;
-  padding: 24px 0 !important;
-  font-size: 1rem !important;
-  border-radius: 8px !important;
+  padding: 22px 0 !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  border-radius: 6px !important;
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  transition: background-color 0.15s ease !important;
+}
+
+.login-btn:hover:not([disabled]) {
+  background-color: #1d4ed8 !important;
 }
 
 ::ng-deep .login-btn .mdc-button__label {
@@ -93,7 +114,7 @@ mat-form-field {
 
 @media (max-width: 768px) {
   .login-btn {
-    padding: 16px 0 !important;
+    padding: 20px 0 !important;
   }
   
   .demo-accounts-panel {
@@ -110,6 +131,5 @@ mat-form-field {
   .demo-btn {
     width: 100%;
     padding: 10px 12px;
-    font-size: 0.8rem;
   }
 }

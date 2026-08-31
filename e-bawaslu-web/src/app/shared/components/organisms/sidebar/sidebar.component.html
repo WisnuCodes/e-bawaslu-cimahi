@@ -1,84 +1,109 @@
-<aside class="sidebar" [class.collapsed]="isCollapsed">
+<aside class="sidebar-container" [class.collapsed]="isCollapsed">
   <div class="sidebar-header">
-    <div class="brand">
-      <div class="logo">
-        <img src="assets/icon/icon_bawaslu.jpg" alt="Logo" style="width: 32px; height: 32px; object-fit: contain;">
-      </div>
-      <span class="brand-text" *ngIf="!isCollapsed">SIMBA CIMAHI</span>
+    <div class="logo-container" [class.hidden]="isCollapsed">
+      <img src="assets/icon/icon_bawaslu.jpg" alt="Logo" class="logo">
+      <span class="app-title">SIMBA CIMAHI</span>
     </div>
-    <button class="toggle-btn" (click)="toggleSidebar()" matRipple matRippleColor="rgba(255,255,255,0.1)">
+    <button mat-icon-button (click)="toggleSidebar()" class="toggle-btn" [class.centered]="isCollapsed">
       <mat-icon>{{ isCollapsed ? 'menu' : 'menu_open' }}</mat-icon>
     </button>
   </div>
 
-  <nav class="sidebar-nav">
-    <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item" matRipple matRippleColor="rgba(255,255,255,0.1)">
-      <mat-icon>dashboard</mat-icon>
-      <span class="nav-text" *ngIf="!isCollapsed">Dashboard</span>
-    </a>
+  <div class="sidebar-content custom-scrollbar">
+    <mat-accordion displayMode="flat" multi="false" class="premium-accordion">
+      
+      <!-- MENU UTAMA -->
+      <mat-expansion-panel [expanded]="true">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>widgets</mat-icon>
+            <span *ngIf="!isCollapsed">Menu Utama</span>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <mat-nav-list>
+          <a mat-list-item routerLink="/dashboard" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}">
+            <span class="nav-item-content">Dashboard</span>
+          </a>
+          <a mat-list-item routerLink="/dashboard/struktur-organisasi" routerLinkActive="active-link">
+            <span class="nav-item-content">Struktur Organisasi</span>
+          </a>
+        </mat-nav-list>
+      </mat-expansion-panel>
 
-    <a routerLink="/dashboard/struktur-organisasi" routerLinkActive="active" class="nav-item" matRipple matRippleColor="rgba(255,255,255,0.1)">
-      <mat-icon>corporate_fare</mat-icon>
-      <span class="nav-text" *ngIf="!isCollapsed">Struktur Organisasi</span>
-    </a>
-    
-    <a routerLink="/dashboard/wfh" routerLinkActive="active" class="nav-item" *ngIf="!authService.isSaksiTps" matRipple matRippleColor="rgba(255,255,255,0.1)">
-      <mat-icon>fingerprint</mat-icon>
-      <span class="nav-text" *ngIf="!isCollapsed">WFH & Presensi</span>
-    </a>
+      <!-- OPERASIONAL -->
+      <mat-expansion-panel *ngIf="!authService.isSaksiTps" [expanded]="true">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>work</mat-icon>
+            <span *ngIf="!isCollapsed">Operasional</span>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <mat-nav-list>
+          <a mat-list-item routerLink="/dashboard/wfh" routerLinkActive="active-link">
+            <span class="nav-item-content">WFH & Presensi</span>
+          </a>
+          <a mat-list-item routerLink="/dashboard/arsip" routerLinkActive="active-link">
+            <span class="nav-item-content">E-Arsip</span>
+          </a>
+        </mat-nav-list>
+      </mat-expansion-panel>
 
-    <a routerLink="/dashboard/arsip" routerLinkActive="active" class="nav-item" *ngIf="!authService.isSaksiTps" matRipple matRippleColor="rgba(255,255,255,0.1)">
-      <mat-icon>snippet_folder</mat-icon>
-      <span class="nav-text" *ngIf="!isCollapsed">E-Arsip</span>
-    </a>
+      <!-- KAMAR PEMILU -->
+      <mat-expansion-panel *ngIf="authService.canAccessC1 || authService.canAccessLhp" [expanded]="true">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>how_to_vote</mat-icon>
+            <span *ngIf="!isCollapsed">Kamar Pemilu</span>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <mat-nav-list>
+          <a mat-list-item routerLink="/dashboard/c1" *ngIf="authService.canAccessC1" routerLinkActive="active-link">
+            <span class="nav-item-content">Form C1</span>
+          </a>
+          <a mat-list-item routerLink="/dashboard/lhpp" *ngIf="authService.canAccessLhp" routerLinkActive="active-link">
+            <span class="nav-item-content">Laporan LHP</span>
+          </a>
+        </mat-nav-list>
+      </mat-expansion-panel>
 
-    <!-- Khusus Modul C1 (RBAC/ABAC) -->
-    <a routerLink="/dashboard/c1" routerLinkActive="active" class="nav-item" *ngIf="authService.canAccessC1" matRipple matRippleColor="rgba(255,255,255,0.1)">
-      <mat-icon>fact_check</mat-icon>
-      <span class="nav-text" *ngIf="!isCollapsed">Form C1</span>
-    </a>
-
-    <!-- Khusus Laporan LHPP (Hanya P2H) -->
-    <a routerLink="/dashboard/lhpp" routerLinkActive="active" class="nav-item" *ngIf="authService.isP2H" matRipple matRippleColor="rgba(255,255,255,0.1)">
-      <mat-icon>assignment</mat-icon>
-      <span class="nav-text" *ngIf="!isCollapsed">Laporan LHPP</span>
-    </a>
-
-    <!-- Khusus Manajemen Pengawas TPS (Ketua) -->
-    <a routerLink="/dashboard/saksi" routerLinkActive="active" class="nav-item" *ngIf="isPimpinan" matRipple matRippleColor="rgba(255,255,255,0.1)">
-      <mat-icon>manage_accounts</mat-icon>
-      <span class="nav-text" *ngIf="!isCollapsed">Manajemen Pengawas TPS</span>
-    </a>
-
-    <!-- Khusus Ekspor Laporan (RBAC) -->
-    <a routerLink="/dashboard/reports" routerLinkActive="active" class="nav-item" *ngIf="authService.canExportReport" matRipple matRippleColor="rgba(255,255,255,0.1)">
-      <mat-icon>file_download</mat-icon>
-      <span class="nav-text" *ngIf="!isCollapsed">Ekspor Laporan</span>
-    </a>
-
-    <!-- Khusus Audit Trail (RBAC) -->
-    <a routerLink="/dashboard/audit-logs" routerLinkActive="active" class="nav-item" *ngIf="authService.canAccessAuditLog" matRipple matRippleColor="rgba(255,255,255,0.1)">
-      <mat-icon>history_edu</mat-icon>
-      <span class="nav-text" *ngIf="!isCollapsed">Audit Trail</span>
-    </a>
-  </nav>
+      <!-- PENGATURAN -->
+      <mat-expansion-panel *ngIf="isPimpinan || authService.canExportReport || authService.canAccessAuditLog || isSuperAdmin || userRole === 'Admin' || userRole === 'Superadmin'">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>settings</mat-icon>
+            <span *ngIf="!isCollapsed">Pengaturan</span>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <mat-nav-list>
+          <a mat-list-item routerLink="/dashboard/saksi" *ngIf="isPimpinan" routerLinkActive="active-link">
+            <span class="nav-item-content">Pengawas TPS</span>
+          </a>
+          <a mat-list-item routerLink="/dashboard/reports" *ngIf="authService.canExportReport" routerLinkActive="active-link">
+            <span class="nav-item-content">Ekspor Laporan</span>
+          </a>
+          <a mat-list-item routerLink="/dashboard/audit-logs" *ngIf="authService.canAccessAuditLog" routerLinkActive="active-link">
+            <span class="nav-item-content">Audit Trail</span>
+          </a>
+          <a mat-list-item routerLink="/dashboard/users" *ngIf="isSuperAdmin || userRole === 'Admin' || userRole === 'Superadmin'" routerLinkActive="active-link">
+            <span class="nav-item-content">Konfigurasi User</span>
+          </a>
+        </mat-nav-list>
+      </mat-expansion-panel>
+      
+    </mat-accordion>
+  </div>
 
   <div class="sidebar-footer">
     <div class="user-info" *ngIf="!isCollapsed">
-      <div class="user-avatar">
-        {{ (authService.currentUser()?.username || 'A')[0] | uppercase }}
-      </div>
+      <div class="avatar">{{ (authService.currentUser()?.username || 'A')[0] | uppercase }}</div>
       <div class="user-details">
-        <span class="user-role">{{ userRole }}</span>
-        <span class="user-name" [title]="authService.currentUser()?.username">
-          {{ (authService.currentUser()?.username || 'User') | slice:0:16 }}{{ (authService.currentUser()?.username?.length || 0) > 16 ? '...' : '' }}
-        </span>
+        <span class="role">{{ userRole }}</span>
+        <span class="name">{{ authService.currentUser()?.username || 'User' }}</span>
       </div>
     </div>
-    
-    <button class="logout-btn" (click)="onLogout()" matRipple matRippleColor="rgba(220, 38, 38, 0.2)">
+    <button class="logout-btn" (click)="onLogout()">
       <mat-icon>logout</mat-icon>
-      <span class="nav-text" *ngIf="!isCollapsed">Logout</span>
+      <span *ngIf="!isCollapsed">Logout</span>
     </button>
   </div>
 </aside>

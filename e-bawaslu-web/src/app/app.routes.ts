@@ -57,6 +57,10 @@ export const routes: Routes = [
       {
         path: 'audit-logs',
         loadComponent: () => import('./features/dashboard/pages/audit-dashboard/audit-dashboard.component').then(m => m.AuditDashboardComponent)
+      },
+      {
+        path: 'users',
+        loadComponent: () => import('./features/dashboard/pages/user-management/user-management.component').then(m => m.UserManagementComponent)
       }
     ]
   },

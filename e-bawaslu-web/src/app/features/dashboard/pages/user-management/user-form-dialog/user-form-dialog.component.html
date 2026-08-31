@@ -1,0 +1,81 @@
+<h2 mat-dialog-title style="color: #0f172a; font-weight: 600;">
+  {{ isEditMode ? 'Edit User' : 'Tambah User Baru' }}
+</h2>
+<mat-dialog-content>
+  <form [formGroup]="userForm" style="display: flex; flex-direction: column; gap: 16px; margin-top: 8px;">
+    
+    <mat-form-field appearance="outline">
+      <mat-label>Username</mat-label>
+      <input matInput formControlName="username" placeholder="Masukkan username">
+      <mat-error *ngIf="userForm.get('username')?.hasError('required')">
+        Username wajib diisi
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Email</mat-label>
+      <input matInput formControlName="email" type="email" placeholder="Masukkan email aktif">
+      <mat-error *ngIf="userForm.get('email')?.hasError('required')">
+        Email wajib diisi
+      </mat-error>
+      <mat-error *ngIf="userForm.get('email')?.hasError('email')">
+        Format email tidak valid
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Nomor WhatsApp</mat-label>
+      <input matInput formControlName="whatsapp_number" placeholder="Contoh: 08123456789">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Role</mat-label>
+      <mat-select formControlName="role">
+        <mat-option *ngFor="let role of roles" [value]="role.value">
+          {{ role.label }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="userForm.get('role')?.hasError('required')">
+        Role wajib dipilih
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Divisi: Hanya muncul jika bukan Saksi TPS -->
+    <mat-form-field appearance="outline" *ngIf="userForm.get('role')?.value !== 'Saksi TPS'">
+      <mat-label>Divisi (Opsional)</mat-label>
+      <mat-select formControlName="divisi_id">
+        <mat-option value="">Pilih Divisi</mat-option>
+        <mat-option *ngFor="let div of divisiList" [value]="div.divisi_id">
+          {{ div.nama_divisi }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- TPS: Hanya muncul jika Saksi TPS -->
+    <mat-form-field appearance="outline" *ngIf="userForm.get('role')?.value === 'Saksi TPS'">
+      <mat-label>Wilayah TPS (Opsional)</mat-label>
+      <mat-select formControlName="tps_id">
+        <mat-option value="">Pilih TPS</mat-option>
+        <mat-option *ngFor="let tps of tpsList" [value]="tps.tps_id">
+          TPS {{ tps.no_tps }} - {{ tps.kelurahan }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Password {{ isEditMode ? '(Kosongkan jika tidak ingin mengubah)' : '' }}</mat-label>
+      <input matInput type="password" formControlName="password" placeholder="Masukkan password">
+    </mat-form-field>
+
+    <mat-slide-toggle formControlName="status_aktif" color="primary">
+      Status Aktif
+    </mat-slide-toggle>
+
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end" style="padding: 16px 24px; border-top: 1px solid #e2e8f0; margin-top: 16px;">
+  <button mat-button (click)="onCancel()" style="margin-right: 8px;">Batal</button>
+  <button mat-flat-button color="primary" [disabled]="!userForm.valid" (click)="onSubmit()">
+    Simpan
+  </button>
+</mat-dialog-actions>
