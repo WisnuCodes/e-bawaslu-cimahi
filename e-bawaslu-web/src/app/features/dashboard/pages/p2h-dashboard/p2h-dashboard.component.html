@@ -1,0 +1,381 @@
+<div class="p2h-container">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="badge-tag">
+        <mat-icon style="font-size: 16px; width: 16px; height: 16px;">verified_user</mat-icon>
+        Divisi P2H (Pencegahan, Parmas & Humas)
+      </div>
+      <h1 class="page-title">Dokumen Pengawasan Pemilu (LHPP)</h1>
+      <p class="page-subtitle">
+        Pusat pengelolaan dan digitalisasi Laporan Hasil Pengawasan Pemilu Kota Cimahi berbasis form Model A Pengawasan.
+      </p>
+    </div>
+    <div class="header-right">
+      <div class="role-badge">
+        <mat-icon>badge</mat-icon>
+        <span>Role: <strong>{{ authService.userRole }}</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUMMARY STATS CARDS -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon icon-primary">
+        <mat-icon>assignment</mat-icon>
+      </div>
+      <div class="stat-details">
+        <span class="stat-label">Total Dokumen LHPP</span>
+        <span class="stat-value">{{ totalLhppCount }}</span>
+        <span class="stat-hint">Laporan terdaftar di sistem</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon icon-success">
+        <mat-icon>verified</mat-icon>
+      </div>
+      <div class="stat-details">
+        <span class="stat-label">Terverifikasi (Valid)</span>
+        <span class="stat-value text-success">{{ verifiedCount }}</span>
+        <span class="stat-hint">Disetujui pimpinan / kordiv</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon icon-warning">
+        <mat-icon>hourglass_top</mat-icon>
+      </div>
+      <div class="stat-details">
+        <span class="stat-label">Menunggu Verifikasi</span>
+        <span class="stat-value text-warning">{{ pendingCount }}</span>
+        <span class="stat-hint">Perlu peninjauan</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon icon-danger">
+        <mat-icon>rate_review</mat-icon>
+      </div>
+      <div class="stat-details">
+        <span class="stat-label">Draf / Revisi</span>
+        <span class="stat-value text-danger">{{ draftOrRevisionCount }}</span>
+        <span class="stat-hint">Draf atau catatan perbaikan</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORM UNGGAH DOKUMEN LHPP -->
+  <div class="main-card form-card">
+    <div class="card-header">
+      <div class="card-title-group">
+        <div class="card-icon">
+          <mat-icon>{{ editingLhppId ? 'edit_document' : 'cloud_upload' }}</mat-icon>
+        </div>
+        <div>
+          <h2 class="card-title">{{ editingLhppId ? 'Edit / Perbarui Dokumen LHPP' : 'Form Unggah Dokumen LHPP' }}</h2>
+          <p class="card-subtitle">
+            {{ editingLhppId ? 'Sesuaikan informasi atau ganti berkas lampiran laporan pengawasan' : 'Unggah berkas resmi Model A Pengawasan (Format PDF, JPG, PNG maksimal 15MB)' }}
+          </p>
+        </div>
+      </div>
+      <div *ngIf="isPengawasTps" class="pengawas-notice">
+        <mat-icon>info</mat-icon>
+        <span>Mode Entri Pengawas TPS (Data Terkunci di TPS Anda)</span>
+      </div>
+    </div>
+
+    <form [formGroup]="lhppForm" (ngSubmit)="onSubmit()" class="form-content">
+      
+      <div class="form-row-grid">
+        <!-- Nomor LHPP (Optional/Auto) -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Nomor Dokumen LHPP</mat-label>
+          <input matInput formControlName="nomor_lhpp" placeholder="Otomatis digenerate (contoh: LHPP/2026/08/0001)">
+          <mat-hint>Dapat dikosongkan untuk penomoran otomatis</mat-hint>
+        </mat-form-field>
+
+        <!-- Judul Laporan -->
+        <mat-form-field appearance="outline" class="form-field span-2">
+          <mat-label>Judul / Fokus Pengawasan *</mat-label>
+          <input matInput formControlName="judul_laporan" placeholder="Contoh: Pengawasan Pemungutan Suara di TPS 01">
+          <mat-error *ngIf="lhppForm.get('judul_laporan')?.hasError('required')">
+            Judul laporan wajib diisi.
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row-grid">
+        <!-- Pemilihan TPS -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Wilayah TPS Pengawasan *</mat-label>
+          <mat-select formControlName="tps_id">
+            <mat-option *ngFor="let t of tpsList" [value]="t.tps_id">
+              TPS {{ t.no_tps }} - {{ t.kelurahan }} ({{ t.kecamatan }})
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="lhppForm.get('tps_id')?.hasError('required')">
+            Wilayah TPS wajib dipilih.
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Tanggal Pengawasan -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Tanggal Pengawasan *</mat-label>
+          <input matInput type="date" formControlName="tanggal_pengawasan">
+          <mat-error *ngIf="lhppForm.get('tanggal_pengawasan')?.hasError('required')">
+            Tanggal pengawasan wajib diisi.
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Tahapan Pemilu -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Tahapan Pemilu *</mat-label>
+          <mat-select formControlName="tahapan_pemilu">
+            <mat-option *ngFor="let tahapan of tahapanOptions" [value]="tahapan">
+              {{ tahapan }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="lhppForm.get('tahapan_pemilu')?.hasError('required')">
+            Tahapan pemilu wajib dipilih.
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Status Unggahan -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Status Pengunggahan *</mat-label>
+          <mat-select formControlName="status_lhpp">
+            <mat-option value="Submitted">Submitted (Kirim untuk Verifikasi)</mat-option>
+            <mat-option value="Draft">Draft (Simpan sebagai Draf)</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Uraian Hasil Pengawasan -->
+      <mat-form-field appearance="outline" class="form-field full-width">
+        <mat-label>Uraian / Ringkasan Hasil Pengawasan & Temuan Lapangan *</mat-label>
+        <textarea matInput formControlName="deskripsi_pengawasan" rows="3" placeholder="Tuliskan ringkasan hasil pengawasan, kepatuhan prosedur, situasi ketertiban, dan catatan khusus..."></textarea>
+        <mat-hint>Minimal 10 karakter penjelasan deskriptif.</mat-hint>
+        <mat-error *ngIf="lhppForm.get('deskripsi_pengawasan')?.hasError('required')">
+          Uraian hasil pengawasan wajib diisi.
+        </mat-error>
+      </mat-form-field>
+
+      <!-- UPLOAD FILE SECTION -->
+      <div class="file-upload-section">
+        <div class="file-drop-box">
+          <div class="file-input-wrapper">
+            <button mat-flat-button color="accent" type="button" class="upload-btn">
+              <mat-icon>attach_file</mat-icon>
+              Pilih Berkas Dokumen (PDF / Gambar)
+            </button>
+            <input type="file" (change)="onFileSelected($event)" accept="application/pdf,image/jpeg,image/png,image/jpg" class="hidden-file-input">
+          </div>
+          <div class="file-info-text">
+            <span *ngIf="filePreviewName" class="file-selected">
+              <mat-icon style="color: #059669; vertical-align: middle; font-size: 20px; width: 20px; height: 20px;">check_circle</mat-icon>
+              {{ filePreviewName }}
+            </span>
+            <span *ngIf="!filePreviewName" class="file-hint">
+              Mendukung berkas format .pdf, .jpg, .jpeg, .png (Maksimal 15 MB).
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FORM ACTIONS -->
+      <div class="form-actions">
+        <button *ngIf="editingLhppId" mat-stroked-button color="warn" type="button" (click)="resetForm()">
+          <mat-icon>close</mat-icon> Batal Edit
+        </button>
+        <button mat-flat-button color="primary" type="submit" [disabled]="isUploading || lhppForm.invalid || (!editingLhppId && !selectedFile)" class="submit-btn">
+          <mat-spinner *ngIf="isUploading" diameter="20" style="display: inline-block; margin-right: 8px; vertical-align: middle;"></mat-spinner>
+          <mat-icon *ngIf="!isUploading">{{ editingLhppId ? 'save' : 'cloud_upload' }}</mat-icon>
+          <span>{{ editingLhppId ? 'Perbarui Dokumen LHPP' : 'Unggah Dokumen LHPP' }}</span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- DAFTAR DOKUMEN LHPP TABEL -->
+  <div class="main-card table-card">
+    <div class="card-header">
+      <div class="card-title-group">
+        <div class="card-icon icon-navy">
+          <mat-icon>table_chart</mat-icon>
+        </div>
+        <div>
+          <h2 class="card-title">Daftar Dokumen LHPP Terunggah</h2>
+          <p class="card-subtitle">Arsip digital hasil pengawasan pemilu berjenjang Bawaslu Kota Cimahi</p>
+        </div>
+      </div>
+
+      <!-- FILTER BAR -->
+      <div class="table-filters">
+        <!-- Filter TPS -->
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Filter TPS</mat-label>
+          <mat-select [(ngModel)]="selectedFilterTps" (selectionChange)="applyFilter()">
+            <mat-option value="">Semua TPS</mat-option>
+            <mat-option *ngFor="let t of tpsList" [value]="t.tps_id">
+              TPS {{ t.no_tps }} - {{ t.kelurahan }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Filter Status -->
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Filter Status</mat-label>
+          <mat-select [(ngModel)]="selectedFilterStatus" (selectionChange)="applyFilter()">
+            <mat-option value="">Semua Status</mat-option>
+            <mat-option value="Verified">Verified (Disetujui)</mat-option>
+            <mat-option value="Submitted">Submitted (Menunggu)</mat-option>
+            <mat-option value="Draft">Draft</mat-option>
+            <mat-option value="Rejected">Rejected</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Search Input -->
+        <mat-form-field appearance="outline" class="filter-field search-field">
+          <mat-label>Cari Judul / No LHPP</mat-label>
+          <input matInput [(ngModel)]="searchKeyword" (keyup.enter)="applyFilter()" placeholder="Ketik kata kunci...">
+          <button mat-icon-button matSuffix (click)="applyFilter()">
+            <mat-icon>search</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <button mat-stroked-button (click)="resetFilter()" matTooltip="Reset Filter" class="reset-filter-btn">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-container">
+      <table mat-table [dataSource]="lhppList" class="custom-table">
+
+        <!-- Nomor & Judul Column -->
+        <ng-container matColumnDef="nomor_judul">
+          <th mat-header-cell *matHeaderCellDef> Dokumen LHPP </th>
+          <td mat-cell *matCellDef="let element">
+            <div class="doc-info-cell">
+              <span class="doc-badge">{{ element.nomor_lhpp }}</span>
+              <strong class="doc-title">{{ element.judul_laporan }}</strong>
+              <p class="doc-desc">{{ element.deskripsi_pengawasan | slice:0:80 }}{{ (element.deskripsi_pengawasan?.length || 0) > 80 ? '...' : '' }}</p>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- TPS & Lokasi Column -->
+        <ng-container matColumnDef="tps">
+          <th mat-header-cell *matHeaderCellDef> Lokasi TPS </th>
+          <td mat-cell *matCellDef="let element">
+            <div class="tps-cell">
+              <span class="tps-chip">{{ getTpsInfo(element.tps_id, element.tps) }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Tanggal & Tahapan Column -->
+        <ng-container matColumnDef="tanggal_tahapan">
+          <th mat-header-cell *matHeaderCellDef> Waktu & Tahapan </th>
+          <td mat-cell *matCellDef="let element">
+            <div class="meta-cell">
+              <span class="date-text"><mat-icon>event</mat-icon> {{ element.tanggal_pengawasan | bawasluDate:'dd MMM yyyy' }}</span>
+              <span class="tahapan-badge">{{ element.tahapan_pemilu }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Berkas Lampiran Column -->
+        <ng-container matColumnDef="berkas">
+          <th mat-header-cell *matHeaderCellDef> Berkas Lampiran </th>
+          <td mat-cell *matCellDef="let element">
+            <button mat-stroked-button color="primary" class="file-download-chip" (click)="downloadFile(element)" matTooltip="Unduh Berkas Lampiran">
+              <mat-icon>{{ element.file_type?.includes('pdf') ? 'picture_as_pdf' : 'image' }}</mat-icon>
+              <span>{{ element.file_name || 'Lihat Berkas' }}</span>
+            </button>
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef> Status </th>
+          <td mat-cell *matCellDef="let element">
+            <span class="status-pill" [ngClass]="{
+              'status-verified': element.status_lhpp === 'Verified',
+              'status-submitted': element.status_lhpp === 'Submitted',
+              'status-draft': element.status_lhpp === 'Draft',
+              'status-rejected': element.status_lhpp === 'Rejected'
+            }">
+              <mat-icon *ngIf="element.status_lhpp === 'Verified'">verified</mat-icon>
+              <mat-icon *ngIf="element.status_lhpp === 'Submitted'">hourglass_empty</mat-icon>
+              <mat-icon *ngIf="element.status_lhpp === 'Draft'">edit_note</mat-icon>
+              <mat-icon *ngIf="element.status_lhpp === 'Rejected'">cancel</mat-icon>
+              {{ element.status_lhpp }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Pengunggah Column -->
+        <ng-container matColumnDef="pengunggah">
+          <th mat-header-cell *matHeaderCellDef> Pengunggah </th>
+          <td mat-cell *matCellDef="let element">
+            <div class="uploader-cell">
+              <span class="uploader-name">{{ element.uploader?.username || 'Aparatur Bawaslu' }}</span>
+              <span class="uploader-role">{{ element.uploader?.role || 'Staf' }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Aksi Column -->
+        <ng-container matColumnDef="aksi">
+          <th mat-header-cell *matHeaderCellDef> Tindakan </th>
+          <td mat-cell *matCellDef="let element">
+            <div class="action-buttons-group">
+              
+              <!-- Verifikasi Approval (Hanya untuk Admin & Kordiv) -->
+              <ng-container *ngIf="canApprove && element.status_lhpp === 'Submitted'">
+                <button mat-stroked-button (click)="onVerify(element, 'Verified')" class="action-approve-btn" matTooltip="Setujui (Validasi) Dokumen">
+                  <mat-icon>check</mat-icon> Setujui
+                </button>
+                <button mat-stroked-button (click)="onVerify(element, 'Rejected')" class="action-reject-btn" matTooltip="Tolak / Minta Revisi">
+                  <mat-icon>close</mat-icon> Tolak
+                </button>
+              </ng-container>
+
+              <!-- Edit (Tampil jika belum Verified untuk pengunggah/staf) -->
+              <ng-container *ngIf="element.status_lhpp !== 'Verified' || canApprove">
+                <button mat-icon-button color="primary" (click)="onEdit(element)" matTooltip="Edit Dokumen LHPP">
+                  <mat-icon>edit_square</mat-icon>
+                </button>
+              </ng-container>
+
+              <!-- Hapus Dokumen: DISEMBUNYIKAN UNTUK PENGAWAS TPS -->
+              <ng-container *ngIf="canDeleteLhpp">
+                <button mat-icon-button color="warn" (click)="onDelete(element)" matTooltip="Hapus Dokumen Permanen">
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+              </ng-container>
+
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+
+      <mat-paginator [pageSizeOptions]="[10, 25, 50]" aria-label="Pilih Halaman Dokumen LHPP"></mat-paginator>
+
+      <div *ngIf="lhppList.data.length === 0" class="empty-state">
+        <mat-icon>folder_off</mat-icon>
+        <p>Belum ada dokumen LHPP yang sesuai kriteria pencarian.</p>
+      </div>
+    </div>
+  </div>
+
+</div>

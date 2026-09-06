@@ -202,4 +202,25 @@ export class AuthService {
   get canExportReport(): boolean {
     return this.isSuperAdmin || this.isPimpinan || this.isKepalaDivisi || this.isStaf;
   }
+
+  get isPengawasTps(): boolean {
+    return this.isSaksiTps;
+  }
+
+  get isStaffP2H(): boolean {
+    const r = this.userRole.toLowerCase();
+    return r.includes('p2h') && (r.includes('staf') || r.includes('pegawai'));
+  }
+
+  get isAdminKordiv(): boolean {
+    return this.isSuperAdmin || this.isKepalaDivisi;
+  }
+
+  get canDeleteLhpp(): boolean {
+    return this.isSuperAdmin || this.isKadivP2H || this.isPimpinan;
+  }
+
+  get canAccessP2H(): boolean {
+    return this.isP2H || this.isSuperAdmin || this.isPimpinan || this.isKepalaDivisi || this.isSaksiTps;
+  }
 }

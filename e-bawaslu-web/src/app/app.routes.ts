@@ -34,11 +34,7 @@ export const routes: Routes = [
         path: 'wfh',
         loadComponent: () => import('./features/dashboard/pages/wfh-dashboard/wfh-dashboard.component').then(m => m.WfhDashboardComponent)
       },
-      {
-        path: 'persuratan',
-        data: { persuratan: true },
-        loadComponent: () => import('./features/dashboard/pages/arsip-dashboard/arsip-dashboard.component').then(m => m.ArsipDashboardComponent)
-      },
+
       {
         path: 'arsip',
         loadComponent: () => import('./features/dashboard/pages/arsip-dashboard/arsip-dashboard.component').then(m => m.ArsipDashboardComponent)

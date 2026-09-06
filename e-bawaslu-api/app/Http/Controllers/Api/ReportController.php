@@ -17,21 +17,25 @@ class ReportController extends Controller
     {
         $request->validate([
             'tipe_laporan' => 'required|in:presensi,worklog',
-            'bulan' => 'required|integer|min:1|max:12',
-            'tahun' => 'required|integer|min:2020|max:2100'
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date'
         ]);
 
         $data = [];
         $title = '';
 
         if ($request->tipe_laporan === 'presensi') {
-            $data = Presensi::whereMonth('timestamp_checkin', $request->bulan)
-                            ->whereYear('timestamp_checkin', $request->tahun)
+            $data = Presensi::join('users', 'presensi_wfh.user_id', '=', 'users.user_id')
+                            ->select('presensi_wfh.*', 'users.username')
+                            ->whereDate('timestamp_checkin', '>=', $request->start_date)
+                            ->whereDate('timestamp_checkin', '<=', $request->end_date)
                             ->get();
             $title = "Laporan Rekapitulasi Presensi Bawaslu";
         } elseif ($request->tipe_laporan === 'worklog') {
-            $data = Worklog::whereMonth('tgl_kerja', $request->bulan)
-                           ->whereYear('tgl_kerja', $request->tahun)
+            $data = Worklog::join('users', 'daily_worklog.user_id', '=', 'users.user_id')
+                           ->select('daily_worklog.*', 'users.username')
+                           ->whereDate('tgl_kerja', '>=', $request->start_date)
+                           ->whereDate('tgl_kerja', '<=', $request->end_date)
                            ->get();
             $title = "Laporan Rekapitulasi Worklog Harian";
         }
@@ -59,27 +63,63 @@ class ReportController extends Controller
                 <body>
                     <div class='watermark'>DOKUMEN RAHASIA BAWASLU<br>DIUNDUH OLEH: {$request->user()->username}</div>
                     <h2>{$title}</h2>
-                    <p>Periode: {$request->bulan} - {$request->tahun}</p>
+                    <p>Periode: {$request->start_date} s.d. {$request->end_date}</p>
                     <table>
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Informasi</th>
+                                <th>Username</th>
+        ";
+
+        if ($request->tipe_laporan === 'presensi') {
+            $html .= "
+                                <th>Tanggal</th>
+                                <th>Jam Masuk</th>
+                                <th>Jam Keluar</th>
+                                <th>Status CI</th>
+                                <th>Status CO</th>
+            ";
+        } else {
+            $html .= "
+                                <th>Tanggal Kerja</th>
+                                <th>Rincian Aktivitas</th>
+                                <th>Status Approval</th>
+            ";
+        }
+
+        $html .= "
                             </tr>
                         </thead>
                         <tbody>
         ";
 
         foreach ($data as $item) {
-            $info = $request->tipe_laporan === 'presensi' ? "CI: {$item->status_ci}, CO: " . ($item->status_co ?: 'Belum CO') : $item->rincian_aktivitas;
-            $id = $request->tipe_laporan === 'presensi' ? $item->presensi_id : $item->worklog_id;
-            $html .= "<tr><td>{$id}</td><td>{$info}</td></tr>";
+            $html .= "<tr>";
+            $html .= "<td>{$item->username}</td>";
+            
+            if ($request->tipe_laporan === 'presensi') {
+                $tanggal = date('Y-m-d', strtotime($item->timestamp_checkin));
+                $jamMasuk = date('H:i:s', strtotime($item->timestamp_checkin));
+                $jamKeluar = $item->timestamp_checkout ? date('H:i:s', strtotime($item->timestamp_checkout)) : '-';
+                
+                $html .= "<td>{$tanggal}</td>";
+                $html .= "<td>{$jamMasuk}</td>";
+                $html .= "<td>{$jamKeluar}</td>";
+                $html .= "<td>{$item->status_ci}</td>";
+                $html .= "<td>" . ($item->status_co ?: 'Belum CO') . "</td>";
+            } else {
+                $tanggal = date('Y-m-d', strtotime($item->tgl_kerja));
+                $html .= "<td>{$tanggal}</td>";
+                $html .= "<td>{$item->rincian_aktivitas}</td>";
+                $html .= "<td>{$item->status_approval}</td>";
+            }
+            
+            $html .= "</tr>";
         }
 
         $html .= "</tbody></table></body></html>";
 
         $pdf = Pdf::loadHTML($html);
 
-        return $pdf->download("laporan_{$request->tipe_laporan}_{$request->bulan}_{$request->tahun}.pdf");
+        return $pdf->download("laporan_{$request->tipe_laporan}_{$request->start_date}_{$request->end_date}.pdf");
     }
 }

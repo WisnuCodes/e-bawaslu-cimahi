@@ -53,9 +53,6 @@ export class ArsipDashboardComponent implements OnInit {
   private fb = inject(FormBuilder);
   private snackBar = inject(MatSnackBar);
   private route = inject(ActivatedRoute);
-  isPersuratan = this.route.snapshot.data['persuratan'] === true;
-  jenisSurat = ['Surat Masuk', 'Surat Keluar', 'Surat Keputusan', 'Nota Dinas'];
-  
   @ViewChild('uploadFileInput') uploadFileInput!: ElementRef<HTMLInputElement>;
   @ViewChild('revisiFileInput') revisiFileInput!: ElementRef<HTMLInputElement>;
   
@@ -123,7 +120,6 @@ export class ArsipDashboardComponent implements OnInit {
   klasifikasiList = ['Biasa', 'Penting', 'Rahasia', 'Sangat Rahasia'];
 
   ngOnInit() {
-    if (this.isPersuratan) this.kategoriList = this.jenisSurat;
     this.loadDivisi();
     this.loadDocuments();
     if (this.canViewLogs) {
@@ -141,7 +137,7 @@ export class ArsipDashboardComponent implements OnInit {
   loadDocuments() {
     this.arsipService.getArsip(this.selectedDivisiFilter || undefined).subscribe({
       next: (res) => {
-        let docs = (res.data || []).filter(doc => !this.isPersuratan || this.jenisSurat.includes(doc.kategori));
+        let docs = res.data || [];
         
         // Ekstrak tahun unik
         const years = new Set<string>();

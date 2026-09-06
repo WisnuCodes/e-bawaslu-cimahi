@@ -10,6 +10,7 @@ export interface User {
   divisi_id?: string;
   mfa_enabled?: boolean;
   status_aktif?: boolean;
+  tps_id?: string;
 }
 
 export interface AuthResponse {

@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\WFH\PresensiController;
 use App\Http\Controllers\Api\WFH\WorklogController;
-use App\Http\Controllers\Api\WFH\TukinController;
+
 use App\Http\Controllers\Api\Arsip\ArsipController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\MasterDataController;
@@ -59,9 +59,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/worklogs/{id}', [WorklogController::class, 'update']);
         Route::delete('/worklogs/{id}', [WorklogController::class, 'destroy']);
 
-        // Tukin Routes
-        Route::get('/tukin', [TukinController::class, 'index']);
-        Route::post('/tukin/calculate', [TukinController::class, 'calculate']);
+
     });
 
     // Arsip Module Routes

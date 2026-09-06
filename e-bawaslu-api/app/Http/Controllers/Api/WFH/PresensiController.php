@@ -8,9 +8,40 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 class PresensiController extends Controller
 {
+    private function isHoliday($date)
+    {
+        // $date format: Y-m-d
+        // Weekend check
+        $carbonDate = Carbon::parse($date);
+        if ($carbonDate->isWeekend()) {
+            return true;
+        }
+
+        try {
+            $response = Http::get('https://api-harilibur.vercel.app/api', [
+                'month' => $carbonDate->month,
+                'year' => $carbonDate->year
+            ]);
+
+            if ($response->successful()) {
+                $holidays = $response->json();
+                foreach ($holidays as $holiday) {
+                    if ($holiday['is_national_holiday'] && $holiday['holiday_date'] == $date) {
+                        return true;
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Error fetching holidays: ' . $e->getMessage());
+        }
+
+        return false;
+    }
+
     private function calculateDistance($lat1, $lon1, $lat2, $lon2) {
         $earthRadius = 6371; // km
         
@@ -129,23 +160,34 @@ class PresensiController extends Controller
 
         $user = $request->user();
         $userId = $user->user_id;
+        $now = Carbon::now();
+        $todayDate = $now->format('Y-m-d');
+
+        if ($this->isHoliday($todayDate)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sistem presensi ditutup pada hari libur / akhir pekan.'
+            ], 403);
+        }
+
+        // Tentukan apakah hari ini WFH (Selasa/Jumat) atau Reguler (Senin/Rabu/Kamis)
+        $isWfhDay = in_array($now->dayOfWeekIso, [2, 5]); // 2: Tuesday, 5: Friday
         
         // Radius 1 km dari Kantor Bawaslu
         $acuan = [-6.871618578044813, 107.54454829659048];
         $current = explode(',', $request->gps_koordinat);
         
-        if (count($current) == 2) {
+        if (!$isWfhDay && count($current) == 2) {
             $distance = $this->calculateDistance($acuan[0], $acuan[1], $current[0], $current[1]);
             if ($distance > 1.0) { // 1 km radius
                 return response()->json([
                     'success' => false,
-                    'message' => 'Presensi ditolak. Lokasi Anda berada di luar radius 1 KM dari Kantor Bawaslu.'
+                    'message' => 'Presensi ditolak. Hari ini adalah hari reguler dan Anda berada di luar radius 1 KM dari Kantor Bawaslu.'
                 ], 403);
             }
         }
 
         $path = $request->file('selfie_image')->store('presensi', 'public');
-        $now = Carbon::now();
 
         // Validasi jam kerja CI
         $status_ci = 'Hadir';
@@ -198,21 +240,33 @@ class PresensiController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
+        $now = Carbon::now();
+        $todayDate = $now->format('Y-m-d');
+
+        if ($this->isHoliday($todayDate)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sistem presensi ditutup pada hari libur / akhir pekan.'
+            ], 403);
+        }
+
+        // Tentukan apakah hari ini WFH (Selasa/Jumat) atau Reguler (Senin/Rabu/Kamis)
+        $isWfhDay = in_array($now->dayOfWeekIso, [2, 5]); // 2: Tuesday, 5: Friday
+
         // Radius 1 km dari Kantor Bawaslu
         $acuan = [-6.871618578044813, 107.54454829659048];
         $current = explode(',', $request->gps_koordinat);
         
-        if (count($current) == 2) {
+        if (!$isWfhDay && count($current) == 2) {
             $distance = $this->calculateDistance($acuan[0], $acuan[1], $current[0], $current[1]);
             if ($distance > 1.0) { // 1 km radius
                 return response()->json([
                     'success' => false,
-                    'message' => 'Presensi ditolak. Lokasi Anda berada di luar radius 1 KM dari Kantor Bawaslu.'
+                    'message' => 'Presensi ditolak. Hari ini adalah hari reguler dan Anda berada di luar radius 1 KM dari Kantor Bawaslu.'
                 ], 403);
             }
         }
 
-        $now = Carbon::now();
         $jamBukaCheckout = Carbon::parse($now->format('Y-m-d') . ' 16:00:00');
 
         if ($now->lessThan($jamBukaCheckout)) {

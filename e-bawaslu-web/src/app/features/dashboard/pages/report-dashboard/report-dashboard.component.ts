@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
 import { ReportService } from '../../../../core/services/report/report.service';
 
 import { MatCardModule } from '@angular/material/card';
@@ -13,13 +13,17 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { provideNativeDateAdapter } from '@angular/material/core';
 
 @Component({
   selector: 'app-report-dashboard',
   standalone: true,
+  providers: [provideNativeDateAdapter()],
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
@@ -29,7 +33,8 @@ import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
     MatRadioModule,
     MatProgressSpinnerModule,
     MatDividerModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatDatepickerModule
   ],
   templateUrl: './report-dashboard.component.html',
   styleUrl: './report-dashboard.component.css'
@@ -39,34 +44,34 @@ export class ReportDashboardComponent {
   private snackBar = inject(MatSnackBar);
 
   tipeLaporan: 'presensi' | 'worklog' = 'presensi';
-  bulan: number = new Date().getMonth() + 1;
-  tahun: number = new Date().getFullYear();
   isExporting = false;
 
-  months = [
-    { value: 1, label: 'Januari' },
-    { value: 2, label: 'Februari' },
-    { value: 3, label: 'Maret' },
-    { value: 4, label: 'April' },
-    { value: 5, label: 'Mei' },
-    { value: 6, label: 'Juni' },
-    { value: 7, label: 'Juli' },
-    { value: 8, label: 'Agustus' },
-    { value: 9, label: 'September' },
-    { value: 10, label: 'Oktober' },
-    { value: 11, label: 'November' },
-    { value: 12, label: 'Desember' },
-  ];
+  dateRange = new FormGroup({
+    start: new FormControl<Date | null>(new Date()),
+    end: new FormControl<Date | null>(new Date()),
+  });
 
   exportReport() {
+    const start = this.dateRange.value.start;
+    const end = this.dateRange.value.end;
+
+    if (!start || !end) {
+      this.snackBar.open('Silakan pilih rentang tanggal laporan.', 'Tutup', { duration: 3000 });
+      return;
+    }
+
+    // Format dates to YYYY-MM-DD
+    const start_date = start.toISOString().split('T')[0];
+    const end_date = end.toISOString().split('T')[0];
+
     this.isExporting = true;
-    this.reportService.exportPdf(this.tipeLaporan, this.bulan, this.tahun).subscribe({
+    this.reportService.exportPdf(this.tipeLaporan, start_date, end_date).subscribe({
       next: (blob: Blob) => {
         this.isExporting = false;
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `laporan_${this.tipeLaporan}_${this.bulan}_${this.tahun}.pdf`;
+        a.download = `laporan_${this.tipeLaporan}_${start_date}_${end_date}.pdf`;
         a.click();
         window.URL.revokeObjectURL(url);
         this.snackBar.open('Laporan PDF berhasil diunduh!', 'Tutup', { duration: 3000 });

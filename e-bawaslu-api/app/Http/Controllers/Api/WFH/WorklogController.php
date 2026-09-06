@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Api\WFH\TukinController;
+
 
 class WorklogController extends Controller
 {
@@ -94,8 +94,7 @@ class WorklogController extends Controller
 
         if ($request->status === 'Approved') {
             Log::info("Notifikasi: Worklog ID {$id} telah disetujui.");
-            // Trigger recalculation tukin if necessary
-            // e.g. TukinController::calculate(...)
+
         }
 
         return response()->json([

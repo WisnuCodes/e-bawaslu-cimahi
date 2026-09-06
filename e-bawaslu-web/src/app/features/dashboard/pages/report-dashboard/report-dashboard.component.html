@@ -21,14 +21,15 @@
       <mat-divider></mat-divider>
       <div>
         <h3>Periode laporan</h3>
-        <div class="form-grid">
+        <div class="form-grid" [formGroup]="dateRange">
           <mat-form-field appearance="outline">
-            <mat-label>Bulan</mat-label>
-            <mat-select [(ngModel)]="bulan"><mat-option *ngFor="let m of months" [value]="m.value">{{ m.label }}</mat-option></mat-select>
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>Tahun</mat-label>
-            <input matInput type="number" [(ngModel)]="tahun" min="2020" max="2100">
+            <mat-label>Rentang Waktu</mat-label>
+            <mat-date-range-input [rangePicker]="picker">
+              <input matStartDate formControlName="start" placeholder="Mulai tanggal">
+              <input matEndDate formControlName="end" placeholder="Sampai tanggal">
+            </mat-date-range-input>
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-date-range-picker #picker></mat-date-range-picker>
           </mat-form-field>
         </div>
       </div>

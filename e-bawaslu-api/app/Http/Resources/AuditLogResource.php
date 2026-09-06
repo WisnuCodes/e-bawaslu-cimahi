@@ -22,6 +22,11 @@ class AuditLogResource extends JsonResource
             'ip_address' => $this->ip_address,
             'reason' => $this->reason,
             'timestamp' => $this->timestamp,
+            'user' => $this->user ? [
+                'username' => $this->user->username,
+                'email' => $this->user->email,
+                'role' => $this->user->role,
+            ] : null,
         ];
     }
 }

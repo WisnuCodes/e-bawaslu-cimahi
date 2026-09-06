@@ -48,12 +48,5 @@ export class WfhService {
     return this.api.post<any>(`/wfh/worklogs/${id}/approve`, { status, catatan_revisi: notes });
   }
 
-  // Tukin (Tunjangan Kinerja)
-  getTukin(): Observable<any> {
-    return this.api.get<any>('/wfh/tukin');
-  }
 
-  calculateTukin(bulan: number, tahun: number): Observable<any> {
-    return this.api.post<any>('/wfh/tukin/calculate', { bulan, tahun });
-  }
 }

@@ -11,6 +11,11 @@ export interface AuditLogItem {
   ip_address: string;
   reason: string | null;
   timestamp: string;
+  user?: {
+    username: string;
+    email: string;
+    role: string;
+  };
 }
 
 @Injectable({

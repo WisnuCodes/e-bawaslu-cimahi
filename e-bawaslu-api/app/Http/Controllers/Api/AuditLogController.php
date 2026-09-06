@@ -15,7 +15,7 @@ class AuditLogController extends Controller
     public function index(Request $request)
     {
         // For production: Add middleware to restrict this to Super Admin
-        $logs = AuditLog::orderBy('timestamp', 'desc')->paginate(50);
+        $logs = AuditLog::with('user')->orderBy('timestamp', 'desc')->paginate(50);
         return AuditLogResource::collection($logs);
     }
 }

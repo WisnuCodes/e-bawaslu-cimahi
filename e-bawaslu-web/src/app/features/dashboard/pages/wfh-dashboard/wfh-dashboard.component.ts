@@ -128,28 +128,7 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
     activity: ['', Validators.required]
   });
 
-  // Tukin State
-  tukinList: any[] = [];
-  selectedTukinBulan: number = new Date().getMonth() + 1;
-  selectedTukinTahun: number = new Date().getFullYear();
-  isCalculatingTukin: boolean = false;
-  latestTukin: any = null;
-  tukinColumns: string[] = ['periode', 'jam_kerja', 'keterlambatan', 'total_tukin'];
 
-  months = [
-    { value: 1, label: 'Januari' },
-    { value: 2, label: 'Februari' },
-    { value: 3, label: 'Maret' },
-    { value: 4, label: 'April' },
-    { value: 5, label: 'Mei' },
-    { value: 6, label: 'Juni' },
-    { value: 7, label: 'Juli' },
-    { value: 8, label: 'Agustus' },
-    { value: 9, label: 'September' },
-    { value: 10, label: 'Oktober' },
-    { value: 11, label: 'November' },
-    { value: 12, label: 'Desember' },
-  ];
 
   get isAdmin(): boolean {
     return this.authService.isAdmin;
@@ -208,7 +187,7 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
 
     this.loadWorklogs();
     this.loadPresensi();
-    this.loadTukin();
+
   }
 
   ngOnDestroy() {
@@ -259,35 +238,7 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadTukin() {
-    this.wfhService.getTukin().subscribe({
-      next: (res) => {
-        this.tukinList = res.data || [];
-        if (this.tukinList.length > 0) {
-          this.latestTukin = this.tukinList[0];
-        }
-      },
-      error: () => {
-        this.tukinList = [];
-      }
-    });
-  }
 
-  onCalculateTukin() {
-    this.isCalculatingTukin = true;
-    this.wfhService.calculateTukin(this.selectedTukinBulan, this.selectedTukinTahun).subscribe({
-      next: (res) => {
-        this.isCalculatingTukin = false;
-        this.latestTukin = res.data;
-        this.showMessage('Kalkulasi Tukin berhasil diperbarui!');
-        this.loadTukin();
-      },
-      error: (err) => {
-        this.isCalculatingTukin = false;
-        this.showMessage(err.error?.message || 'Gagal menghitung Tunjangan Kinerja.');
-      }
-    });
-  }
 
   approveWorklog(id: string, status: 'Approved' | 'Revised') {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {

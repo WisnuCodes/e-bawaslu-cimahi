@@ -9,11 +9,11 @@ import { HttpParams } from '@angular/common/http';
 export class ReportService {
   private api = inject(ApiService);
 
-  exportPdf(tipe_laporan: 'presensi' | 'worklog', bulan: number, tahun: number): Observable<Blob> {
+  exportPdf(tipe_laporan: 'presensi' | 'worklog', start_date: string, end_date: string): Observable<Blob> {
     const params = new HttpParams()
       .set('tipe_laporan', tipe_laporan)
-      .set('bulan', bulan.toString())
-      .set('tahun', tahun.toString());
+      .set('start_date', start_date)
+      .set('end_date', end_date);
 
     return this.api.getBlob('/reports/export', params);
   }

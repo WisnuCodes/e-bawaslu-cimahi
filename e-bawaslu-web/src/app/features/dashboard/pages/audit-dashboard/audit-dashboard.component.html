@@ -34,14 +34,6 @@
     <div style="font-size: 1.5rem; font-weight: 700; color: #0f172a;">{{ logs.length }} <span style="font-size: 0.875rem; font-weight: 500; color: #94a3b8; text-transform: none; letter-spacing: normal;">Aktivitas</span></div>
   </div>
 
-  <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);">
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
-      <h3 style="margin: 0; font-size: 0.875rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Deteksi Anomali</h3>
-      <mat-icon style="color: #cbd5e1; font-size: 24px; width: 24px; height: 24px;">policy</mat-icon>
-    </div>
-    <div style="font-size: 1.5rem; font-weight: 700; color: #0f172a;">0 <span style="font-size: 0.875rem; font-weight: 500; color: #94a3b8; text-transform: none; letter-spacing: normal;">Ancaman</span></div>
-  </div>
-
 </div>
 
 <!-- Table -->
@@ -60,8 +52,9 @@
       <!-- Aktor -->
       <ng-container matColumnDef="actor">
         <th mat-header-cell *matHeaderCellDef> Pengguna </th>
-        <td mat-cell *matCellDef="let log" style="font-weight: 600; color: #334155;">
-          {{ log.actor_id ? log.actor_id.substring(0, 8) + '...' : 'Sistem' }}
+        <td mat-cell *matCellDef="let log">
+          <div style="font-weight: 600; color: #334155;">{{ log.user ? log.user.username : (log.actor_id ? log.actor_id.substring(0, 8) + '...' : 'Sistem') }}</div>
+          <small style="color: #64748b;" *ngIf="log.user">{{ log.user.role }}</small>
         </td>
       </ng-container>
 
