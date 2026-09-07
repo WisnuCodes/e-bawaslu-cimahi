@@ -14,6 +14,8 @@ class Arsip extends Model
     protected $keyType = 'string';
     const UPDATED_AT = null;
 
+    protected $casts = ['catatan_kejadian' => 'array'];
+
     protected $fillable = [
         'id',
         'divisi_id',
@@ -22,6 +24,11 @@ class Arsip extends Model
         'tgl_surat',
         'perihal',
         'kategori',
+        'catatan_kejadian',
+        'kondisi_kotak_surat',
+        'jenjang_pengawas',
+        'jenis_pemilihan',
+        'tahapan_id',
         'klasifikasi',
         'file_path',
         'version',

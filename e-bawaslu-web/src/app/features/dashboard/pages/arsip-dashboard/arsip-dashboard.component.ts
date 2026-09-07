@@ -1,4 +1,5 @@
 import { Component, inject, ViewChild, ElementRef, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ArsipService, ArsipItem, VersionHistoryItem } from '../../../../core/services/arsip/arsip.service';
@@ -49,6 +50,9 @@ export class ArsipDashboardComponent implements OnInit {
   public authService = inject(AuthService);
   private fb = inject(FormBuilder);
   private snackBar = inject(MatSnackBar);
+  private route = inject(ActivatedRoute);
+  isPersuratan = this.route.snapshot.data['persuratan'] === true;
+  jenisSurat = ['Surat Masuk', 'Surat Keluar', 'Surat Keputusan', 'Nota Dinas'];
   
   @ViewChild('uploadFileInput') uploadFileInput!: ElementRef<HTMLInputElement>;
   @ViewChild('revisiFileInput') revisiFileInput!: ElementRef<HTMLInputElement>;
@@ -61,6 +65,8 @@ export class ArsipDashboardComponent implements OnInit {
   selectedYearFilter: string = '';
   availableYears: string[] = [];
   searchQuery: string = '';
+  selectedJenjang = '';
+  jenjangList = ['Panwascam', 'PKD', 'PTPS'];
 
   applyFilterArsip = _.debounce((event: Event) => {
     const filterValue = (event.target as HTMLInputElement).value;
@@ -99,6 +105,7 @@ export class ArsipDashboardComponent implements OnInit {
     tgl_surat: [new Date().toISOString().split('T')[0], Validators.required],
     perihal: ['', Validators.required],
     kategori: ['Surat Keputusan', Validators.required],
+    jenjang_pengawas: [''],
     klasifikasi: ['Biasa', Validators.required]
   });
   uploadFile: File | null = null;
@@ -110,10 +117,11 @@ export class ArsipDashboardComponent implements OnInit {
   // Form Soft Delete
   deleteReason: string = '';
 
-  kategoriList = ['Surat Keputusan', 'Surat Masuk', 'Surat Keluar', 'Berita Acara', 'Nota Dinas', 'Laporan Pengawasan'];
+  kategoriList = ['Surat Keputusan', 'Surat Masuk', 'Surat Keluar', 'Berita Acara', 'Nota Dinas', 'Laporan Pengawasan', 'MHP'];
   klasifikasiList = ['Biasa', 'Penting', 'Rahasia', 'Sangat Rahasia'];
 
   ngOnInit() {
+    if (this.isPersuratan) this.kategoriList = this.jenisSurat;
     this.loadDivisi();
     this.loadDocuments();
     if (this.canViewLogs) {
@@ -131,7 +139,7 @@ export class ArsipDashboardComponent implements OnInit {
   loadDocuments() {
     this.arsipService.getArsip(this.selectedDivisiFilter || undefined).subscribe({
       next: (res) => {
-        let docs = res.data || [];
+        let docs = (res.data || []).filter(doc => !this.isPersuratan || this.jenisSurat.includes(doc.kategori));
         
         // Ekstrak tahun unik
         const years = new Set<string>();
@@ -147,7 +155,7 @@ export class ArsipDashboardComponent implements OnInit {
           docs = docs.filter((doc: ArsipItem) => doc.tgl_surat?.startsWith(this.selectedYearFilter));
         }
 
-        this.documents.data = docs;
+        this.documents.data = docs.filter(doc => !this.selectedJenjang || doc.jenjang_pengawas === this.selectedJenjang);
         this.documents.paginator = this.paginator;
       },
       error: () => {
@@ -168,10 +176,7 @@ export class ArsipDashboardComponent implements OnInit {
   }
 
   get canViewLogs(): boolean {
-    const user = this.authService.currentUser();
-    if (!user) return false;
-    const allowedRoles = ['staf', 'kasubag', 'kabag', 'kordiv', 'ketua', 'admin', 'super_admin'];
-    return allowedRoles.includes(user.role.toLowerCase()) || true; 
+    return this.authService.canAccessAuditLog;
   }
 
   onFilterDivisiChange(divisiId: string) {
@@ -184,19 +189,6 @@ export class ArsipDashboardComponent implements OnInit {
     this.loadDocuments();
   }
 
-  onSearch(event: any) {
-    const query = event.target.value;
-    this.searchQuery = query;
-    if (query.length >= 2) {
-      this.arsipService.searchArsip(query).subscribe({
-        next: (res) => this.documents.data = res.data || [],
-        error: () => this.loadDocuments()
-      });
-    } else if (query.length === 0) {
-      this.loadDocuments();
-    }
-  }
-
   // Upload Arsip Baru
   openUploadModal() {
     this.uploadForm.reset({
@@ -205,6 +197,7 @@ export class ArsipDashboardComponent implements OnInit {
       tgl_surat: new Date().toISOString().split('T')[0],
       perihal: '',
       kategori: 'Surat Keputusan',
+      jenjang_pengawas: this.authService.isSaksiTps ? 'PTPS' : (this.authService.userRole.toLowerCase().includes('panwascam') ? 'Panwascam' : (this.authService.userRole.toLowerCase().includes('pkd') ? 'PKD' : '')),
       klasifikasi: 'Biasa'
     });
     this.uploadFile = null;
@@ -218,7 +211,7 @@ export class ArsipDashboardComponent implements OnInit {
   }
 
   submitUpload() {
-    if (this.uploadForm.invalid || !this.uploadFile) {
+    if (this.uploadForm.invalid || !this.uploadFile || (this.uploadForm.value.kategori === 'MHP' && !this.uploadForm.value.jenjang_pengawas)) {
       this.showNotification('Mohon lengkapi semua field dan sertakan file dokumen.', 'error');
       return;
     }
@@ -229,6 +222,7 @@ export class ArsipDashboardComponent implements OnInit {
     formData.append('no_surat', this.uploadForm.value.no_surat);
     formData.append('tgl_surat', this.uploadForm.value.tgl_surat);
     formData.append('perihal', this.uploadForm.value.perihal);
+    if (this.uploadForm.value.jenjang_pengawas) formData.append('jenjang_pengawas', this.uploadForm.value.jenjang_pengawas);
     formData.append('kategori', this.uploadForm.value.kategori);
     formData.append('klasifikasi', this.uploadForm.value.klasifikasi);
     formData.append('file_dokumen', this.uploadFile);
@@ -316,7 +310,8 @@ export class ArsipDashboardComponent implements OnInit {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${doc.no_surat.replace(/\//g, '_')}_watermarked.pdf`;
+        const ext = doc.file_path.split('.').pop() || 'pdf';
+        a.download = `${doc.no_surat.replace(/\//g, '_')}.${ext}`;
         a.click();
         window.URL.revokeObjectURL(url);
         if (this.canViewLogs) this.loadLogs();

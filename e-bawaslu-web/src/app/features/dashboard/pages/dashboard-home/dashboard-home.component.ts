@@ -70,7 +70,7 @@ export class DashboardHomeComponent implements OnInit {
     // 2. C1 count, mismatches & live progress
     this.c1Service.getC1List().subscribe({
       next: (res: { data: C1Item[] }) => {
-        const list: C1Item[] = res?.data || [];
+        const list: C1Item[] = (res?.data || []).filter(c => (c.jenis_pemilihan || 'Pemilu') === 'Pemilu');
         this.totalC1 = list.length;
         this.c1MismatchCount = list.filter((c: C1Item) => c.status_c1 === 'Mismatch').length;
         this.c1ProgressPercentage = Math.min(100, Math.round((this.totalC1 / this.totalTpsTarget) * 100));

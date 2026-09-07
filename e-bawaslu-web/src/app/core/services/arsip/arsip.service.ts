@@ -11,6 +11,11 @@ export interface ArsipItem {
   tgl_surat: string;
   perihal: string;
   kategori: string;
+  catatan_kejadian?: string[];
+  kondisi_kotak_surat?: string;
+  jenjang_pengawas?: string;
+  jenis_pemilihan?: 'Pemilu' | 'Pilkada';
+  tahapan_id?: string;
   klasifikasi: string;
   file_path: string;
   version: string;

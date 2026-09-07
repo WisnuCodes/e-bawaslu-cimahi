@@ -52,21 +52,32 @@ class ArsipController extends Controller
 
     public function store(Request $request)
     {
+        abort_if(str_contains(strtolower($request->user()->role), 'tamu'), 403, 'Role Tamu hanya dapat melihat dan mengunduh dokumen.');
+        if (in_array(strtoupper($request->input('kategori', '')), ['LHP', 'LHPP'])) {
+            $request->merge(['kategori' => 'LHP']);
+        }
         $request->validate([
-            'divisi_id' => 'required|uuid',
+            'divisi_id' => 'required|uuid|exists:divisi,divisi_id',
+            'jenis_pemilihan' => 'required_if:kategori,LHP,LHPP|nullable|in:Pemilu,Pilkada',
+            'tahapan_id' => ['required_if:kategori,LHP,LHPP', 'nullable', 'uuid', \Illuminate\Validation\Rule::exists('tahapan', 'id')->where('divisi_id', $request->divisi_id)],
             'no_surat' => 'required|string',
             'tgl_surat' => 'required|date',
             'perihal' => 'required|string',
             'kategori' => 'required|string',
+            'jenjang_pengawas' => 'required_if:kategori,MHP|nullable|in:Panwascam,PKD,PTPS',
             'klasifikasi' => 'required|string',
-            'file_dokumen' => 'required|file|mimes:pdf,doc,docx'
+            'catatan_kejadian' => 'nullable|array|max:3',
+            'catatan_kejadian.*' => 'required|string|max:2000',
+            'kondisi_kotak_surat' => 'nullable|string|max:2000',
+            'file_dokumen' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120'
         ]);
 
+        abort_if(str_contains(strtolower($request->user()->role), 'tamu'), 403, 'Role Tamu hanya dapat melihat data.');
         $user = $request->user();
         $userId = $user->user_id;
 
         // Validasi Role Khusus LHPP / LHP / MHP
-        $allowedRoles = ['p2h', 'panwascam', 'pkd', 'ptps', 'ketua', 'admin'];
+        $allowedRoles = ['p2h', 'panwascam', 'pkd', 'ptps', 'pengawas tps', 'staf', 'pegawai', 'kordiv', 'kadiv', 'kepala divisi', 'kasubag', 'kabag', 'bendahara', 'koordinator sekretariat', 'pimpinan', 'ketua', 'admin'];
         $userRoleLower = strtolower($user->role);
         
         $isKetuaOrAdmin = str_contains($userRoleLower, 'ketua') || str_contains($userRoleLower, 'admin');
@@ -79,7 +90,7 @@ class ArsipController extends Controller
             ], 403);
         }
 
-        $isAllowedLhp = false;
+        $isAllowedLhp = !empty($user->divisi_id) && !str_contains($userRoleLower, 'tamu');
         foreach ($allowedRoles as $role) {
             if (str_contains($userRoleLower, $role) && !str_contains($userRoleLower, 'tamu')) {
                 $isAllowedLhp = true;
@@ -103,8 +114,13 @@ class ArsipController extends Controller
             'no_surat' => $request->no_surat,
             'tgl_surat' => $request->tgl_surat,
             'perihal' => $request->perihal,
-            'kategori' => $request->kategori,
+            'kategori' => in_array(strtoupper($request->kategori), ['LHP', 'LHPP']) ? 'LHP' : $request->kategori,
+            'jenis_pemilihan' => $request->jenis_pemilihan,
+            'tahapan_id' => $request->tahapan_id,
             'klasifikasi' => $request->klasifikasi,
+            'jenjang_pengawas' => $request->jenjang_pengawas,
+            'catatan_kejadian' => $request->input('catatan_kejadian', []),
+            'kondisi_kotak_surat' => $request->kondisi_kotak_surat,
             'file_path' => $path,
             'version' => 'v1.0',
             'is_locked' => false,
@@ -123,7 +139,8 @@ class ArsipController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Arsip berhasil disimpan (v1.0).',
+            'message' => str_starts_with($request->file('file_dokumen')->getMimeType(), 'image/')
+                ? 'Foto berhasil diunggah dan laporan berhasil disimpan.' : 'Dokumen berhasil diunggah dan disimpan.',
             'data' => $arsip
         ], 201);
     }
@@ -131,13 +148,15 @@ class ArsipController extends Controller
     public function uploadRevisi(Request $request, $id)
     {
         $arsip = Arsip::findOrFail($id);
+        abort_if(str_contains(strtolower($request->user()->role), 'tamu'), 403);
+        abort_if(in_array($arsip->kategori, ['LHP', 'LHPP']) && str_contains(strtolower($request->user()->role), 'tamu'), 403, 'Role Tamu hanya dapat melihat data.');
 
         if ($arsip->is_locked) {
             return response()->json(['success' => false, 'message' => 'Dokumen sedang dikunci dan tidak dapat direvisi.'], 403);
         }
 
         $request->validate([
-            'file_dokumen' => 'required|file|mimes:pdf,doc,docx',
+            'file_dokumen' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
             'catatan_revisi' => 'required|string'
         ]);
 
@@ -230,6 +249,8 @@ class ArsipController extends Controller
      */
     public function destroy(Request $request, string $id)
     {
+        abort_if(str_contains(strtolower($request->user()->role), 'tamu'), 403);
+        abort_unless(\App\Support\C1Access::leadership($request->user()) || preg_match('/kordiv|kadiv|kepala divisi|kasubag|kabag/i', $request->user()->role), 403);
         $request->validate([
             'alasan_penghapusan' => 'required|string|min:10'
         ]);

@@ -6,6 +6,11 @@ import { HttpParams } from '@angular/common/http';
 export interface C1Item {
   id: string;
   tps_id: string;
+  approval_divisi_id?: string;
+  kecamatan?: string;
+  kelurahan?: string;
+  jenis_pemilihan?: 'Pemilu' | 'Pilkada';
+  sub_jenis_pemilihan?: string;
   uploaded_by: string;
   total_suara_sah: number;
   total_suara_tidak_sah: number;
@@ -23,13 +28,21 @@ export interface C1Item {
 export class C1Service {
   private api = inject(ApiService);
 
-  getC1List(tpsId?: string): Observable<{ data: C1Item[] }> {
+  getC1List(tpsId?: string, kecamatan?: string, kelurahan?: string): Observable<{ data: C1Item[] }> {
     let params = new HttpParams();
     if (tpsId) {
       params = params.set('tps_id', tpsId);
     }
+    if (kecamatan) params = params.set('kecamatan', kecamatan);
+    if (kelurahan) params = params.set('kelurahan', kelurahan);
     return this.api.get<{ data: C1Item[] }>('/c1', params);
   }
+
+  assignApproval(id: string, division: string) {
+    return this.api.put(`/c1/${id}/approval-divisi`, { approval_divisi_id: division });
+  }
+
+  download(id: string) { return this.api.getBlob(`/c1/${id}/download`); }
 
   uploadC1(formData: FormData): Observable<any> {
     return this.api.post<any>('/c1', formData);

@@ -37,6 +37,12 @@ export class UserFormDialogComponent implements OnInit {
   tpsList: WilayahTps[] = [];
 
   roles = [
+    { value: 'Panwascam (Tamu)', label: 'Panwascam (Tamu) ? Viewer' },
+    { value: 'Panwascam', label: 'Panwascam' },
+    { value: 'PKD', label: 'PKD' },
+    { value: 'PTPS', label: 'PTPS / Pengawas TPS' },
+    { value: 'Kepala Divisi', label: 'Kepala Divisi' },
+    { value: 'Ketua', label: 'Ketua' },
     { value: 'Admin', label: 'Admin' },
     { value: 'Superadmin', label: 'Superadmin' },
     { value: 'Pimpinan', label: 'Pimpinan (Ketua/Anggota)' },
@@ -54,6 +60,8 @@ export class UserFormDialogComponent implements OnInit {
       username: [data?.username || '', [Validators.required]],
       email: [data?.email || '', [Validators.required, Validators.email]],
       whatsapp_number: [data?.whatsapp_number || ''],
+      ppid_url: [data?.ppid_url || '', Validators.pattern(/^https?:\/\/.+/i)],
+      koordinat_acuan: [data?.koordinat_acuan || '', Validators.required],
       role: [data?.role || '', [Validators.required]],
       password: [''],
       divisi_id: [data?.divisi_id || ''],

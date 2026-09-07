@@ -31,9 +31,10 @@ class LhpController extends Controller
 
     public function store(Request $request)
     {
+        abort_if(str_contains(strtolower($request->user()->role), 'tamu'), 403, 'Role Tamu hanya dapat melihat data.');
         $request->validate([
             'divisi_id' => 'required|uuid|exists:divisi,divisi_id',
-            'tahapan_id' => 'required|uuid|exists:tahapan,id',
+            'tahapan_id' => ['required', 'uuid', \Illuminate\Validation\Rule::exists('tahapan', 'id')->where('divisi_id', $request->divisi_id)],
             'jenis_pemilihan' => 'required|in:Pemilu,Pilkada',
             'sub_jenis_pemilihan' => 'nullable|string',
             'uraian_hasil' => 'nullable|string',
