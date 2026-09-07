@@ -1,204 +1,209 @@
-/* Clean, Professional Enterprise Auth Layout */
-.auth-wrapper {
-  display: flex;
-  min-height: 100vh;
-  width: 100%;
-  background-color: #f8fafc;
-  overflow: hidden;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+:host{
+  display:block;
+  height:100%;
+  overflow:auto
 }
-
-/* LEFT SIDE - VISUAL / BRANDING */
-.auth-visual-side {
-  flex: 1;
-  display: none; /* hidden on mobile */
-  position: relative;
-  background-color: #0f172a; /* Solid professional slate/navy */
-  /* Subtle pattern overlay instead of glowing gradients */
-  background-image: radial-gradient(#1e293b 1px, transparent 1px);
-  background-size: 24px 24px;
-  color: white;
-  padding: 4rem 5rem;
-  overflow: hidden;
+.auth-wrapper{
+  display:grid;
+  grid-template-columns:46% 54%;
+  min-height:100%;
+  background:#fff;
+  color:var(--color-secondary)
 }
-
-.visual-content {
-  position: relative;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: 100%;
-  max-width: 600px;
+.auth-visual-side{
+  background:var(--color-secondary);
+  color:#fff;
+  padding:48px clamp(32px,5vw,80px);
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+  border-top:5px solid var(--color-primary)
 }
-
-.brand-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 8px 16px;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  margin-bottom: 2rem;
-  width: max-content;
+.brand-lockup{
+  display:flex;
+  align-items:center;
+  gap:14px
 }
-
-.badge-logo {
-  width: 28px;
-  height: 28px;
-  border-radius: 4px;
-  object-fit: contain;
-  background: white;
-  padding: 2px;
+.brand-lockup img,.mobile-brand img{
+  width:44px;
+  height:44px;
+  object-fit:contain;
+  background:#fff;
+  padding:3px
 }
-
-.brand-badge span {
-  font-weight: 500;
-  letter-spacing: 0.5px;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  color: #f1f5f9;
+.brand-lockup strong{
+  display:block;
+  font-size:17px;
+  letter-spacing:.04em
 }
-
-.visual-heading {
-  font-size: 3rem;
-  font-weight: 700;
-  line-height: 1.2;
-  margin: 0 0 1rem 0;
-  letter-spacing: -0.02em;
-  color: #ffffff;
+.brand-lockup span{
+  display:block;
+  font-size:12px;
+  color:#bdc9d0;
+  margin-top:4px
 }
-
-.visual-heading span {
-  color: #38bdf8; /* Soft professional blue accent, not neon */
+.visual-content{
+  margin:auto 0;
+  padding:64px 0
 }
-
-.visual-subheading {
-  font-size: 1.1rem;
-  line-height: 1.6;
-  color: #cbd5e1;
-  font-weight: 400;
-  max-width: 90%;
+.eyebrow{
+  font-size:11px;
+  letter-spacing:.18em;
+  color:var(--color-gold);
+  margin-bottom:22px
 }
-
-/* RIGHT SIDE - FORM */
-.auth-form-side {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 2rem;
-  background-color: #ffffff;
+.visual-content h1{
+  font-size:clamp(28px,3vw,44px);
+  font-weight:600;
+  line-height:1.25;
+  letter-spacing:-.035em;
+  margin:0 0 24px
 }
-
-.auth-container {
-  width: 100%;
-  max-width: 400px;
+.visual-description{
+  max-width:350px;
+  color:#bdc9d0;
+  font-size:14px;
+  line-height:1.8
 }
-
-.auth-header-mobile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 2rem;
-  text-align: center;
+.module-list{
+  margin-top:38px;
+  border-top:1px solid #41515e
 }
-
-.mobile-logo {
-  width: 56px;
-  height: 56px;
-  border-radius: 8px;
-  object-fit: contain;
-  margin-bottom: 1rem;
-  border: 1px solid #e2e8f0;
+.module-list span{
+  display:flex;
+  gap:20px;
+  padding:15px 0;
+  border-bottom:1px solid #41515e;
+  color:var(--color-gold);
+  font-size:11px
 }
-
-.auth-header-mobile h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #0f172a;
-  margin: 0;
+.module-list b{
+  font-weight:400;
+  color:#e2e8ec;
+  font-size:13px
 }
-
-.auth-card {
-  background: transparent;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  padding: 0;
-  border: none;
+.institution{
+  font-size:10px;
+  letter-spacing:.12em;
+  line-height:1.9;
+  color:#bdc9d0
 }
-
-.auth-header {
-  margin-bottom: 2rem;
-  text-align: left;
+.auth-form-side{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:56px 40px
 }
-
-.auth-title h1 {
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: #0f172a;
-  margin: 0 0 0.5rem 0;
-  letter-spacing: -0.02em;
+.auth-container{
+  width:100%;
+  max-width:420px;
+  min-width:0
 }
-
-.auth-title p {
-  color: #64748b;
-  margin: 0;
-  font-size: 0.95rem;
+.mobile-brand{
+  display:none
 }
-
-.auth-body {
-  padding: 0;
+.auth-footer{
+  border-top:1px solid #e0e5e9;
+  margin-top:36px;
+  padding-top:20px;
+  color:#687681;
+  font-size:11px
 }
-
-.auth-footer {
-  margin-top: 3rem;
-  text-align: center;
-  color: #64748b;
-  font-size: 0.8rem;
-  line-height: 1.5;
+:host ::ng-deep .auth-heading{
+  margin-bottom:30px
 }
-.auth-footer p {
-  margin: 0;
+:host ::ng-deep .auth-step{
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:.12em;
+  color:var(--color-primary-hover);
+  margin:0 0 12px
 }
-
-/* Subtle standard animations */
-.animate-fade-in {
-  animation: fadeIn 0.4s ease-out forwards;
+:host ::ng-deep .auth-heading h2{
+  font-size:29px;
+  font-weight:600;
+  letter-spacing:-.035em;
+  margin:0 0 10px;
+  color:var(--color-secondary)
 }
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+:host ::ng-deep .auth-heading p:last-child{
+  font-size:13px;
+  line-height:1.8;
+  color:#63717d;
+  margin:0
 }
-
-/* RESPONSIVE */
-@media (min-width: 992px) {
-  .auth-visual-side {
-    display: block;
+:host ::ng-deep .auth-field{
+  width:100%;
+  --mdc-outlined-text-field-container-shape:6px;
+  --mdc-outlined-text-field-focus-outline-color:var(--color-primary-hover);
+  --mdc-outlined-text-field-focus-label-text-color:var(--color-primary-hover);
+  margin-bottom:12px
+}
+:host ::ng-deep .auth-field mat-icon{
+  color:var(--color-primary-hover);
+  font-size:21px
+}
+:host ::ng-deep .auth-button{
+  width:100%;
+  height:48px;
+  border-radius:8px!important;
+  box-shadow:none!important;
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:0;
+  background:var(--color-primary)!important;
+  color:#fff!important
+}
+:host ::ng-deep .auth-button:hover:not(:disabled){
+  background:var(--color-primary-hover)!important
+}
+:host ::ng-deep .auth-button:disabled{
+  background:#e7eaed!important;
+  color:#7a858e!important
+}
+:host ::ng-deep .auth-button .mdc-button__label{
+  display:flex;
+  align-items:center;
+  gap:10px
+}
+:host ::ng-deep .auth-button mat-spinner{
+  --mdc-circular-progress-active-indicator-color:currentColor
+}
+:host ::ng-deep button:focus-visible,:host ::ng-deep a:focus-visible,:host ::ng-deep summary:focus-visible{
+  outline:2px solid var(--color-secondary);
+  outline-offset:4px
+}
+:host ::ng-deep .auth-error{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  background:#fff2ef;
+  border-left:3px solid #b42318;
+  color:#9c241b;
+  padding:12px;
+  font-size:12px;
+  margin-top:16px
+}
+@media(max-width:850px){
+  .auth-wrapper{
+    grid-template-columns:1fr
   }
-  .auth-header-mobile {
-    display: none;
+  .auth-visual-side{
+    display:none
   }
-}
-
-@media (max-width: 768px) {
-  .auth-form-side {
-    padding: 1.5rem;
-    background-color: #f8fafc;
+  .auth-form-side{
+    padding:36px 24px;
+    border-top:5px solid var(--color-primary);
+    align-items:flex-start
   }
-
-  .auth-card {
-    background: #ffffff;
-    border-radius: 12px !important;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
-    padding: 2rem;
-    border: 1px solid #e2e8f0;
+  .mobile-brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-size:14px;
+    margin-bottom:44px
   }
-
-  .auth-title h1 {
-    font-size: 1.5rem;
+  .auth-footer{
+    margin-top:32px
   }
 }

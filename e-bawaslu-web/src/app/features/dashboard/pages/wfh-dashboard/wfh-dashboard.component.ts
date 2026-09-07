@@ -1,3 +1,5 @@
+import { FilePreviewComponent } from '../../../../shared/components/molecules/file-preview/file-preview.component';
+import { environment } from '../../../../../environments/environment';
 import { Component, inject, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -25,6 +27,7 @@ import * as _ from 'lodash';
   selector: 'app-wfh-dashboard',
   standalone: true,
   imports: [
+    FilePreviewComponent,
     CommonModule, 
     FormsModule,
     ReactiveFormsModule, 
@@ -167,7 +170,10 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
 
   getAttachmentUrl(path: string | null): string {
     if (!path) return '';
-    return `http://localhost:8000/storage/${path}`;
+    if (/^https?:\/\//i.test(path)) return path;
+    const baseUrl = environment.apiUrl.replace(/\/api\/?$/, '');
+    const relativePath = path.replace(/^\/+/, '').replace(/^storage\//, '');
+    return `${baseUrl}/storage/${relativePath}`;
   }
 
   get isCheckoutDisabled(): boolean {

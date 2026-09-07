@@ -1,0 +1,22 @@
+:host { display: block; min-width: 0; }
+.file-card { display: flex; align-items: center; gap: 16px; padding: 12px; margin: 16px 0; border: 1px solid var(--color-border); border-radius: 8px; background: #fff; }
+.file-summary { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; padding: 0; border: 0; background: transparent; text-align: left; color: var(--color-text); font: inherit; cursor: pointer; }
+.file-summary img, .file-icon { width: 80px; height: 64px; flex-shrink: 0; object-fit: contain; background: var(--color-background); border-radius: 4px; }
+.file-icon { display: flex; align-items: center; justify-content: center; color: var(--color-primary-hover); }
+.file-info { min-width: 0; }
+.file-info strong { display: block; overflow-wrap: anywhere; font-size: 13px; font-weight: 500; }
+.file-info small, .preview-help { display: block; margin-top: 6px; font-size: 12px; color: var(--color-text-muted); }
+.preview-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; font-size: 13px; margin-bottom: 16px; overflow-wrap: anywhere; }
+.preview-meta strong { font-weight: 500; }
+.zoom-controls { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.zoom-controls span { min-width: 44px; text-align: center; font-size: 13px; }
+.preview-canvas { background: var(--color-background); border: 1px solid var(--color-border); border-radius: 6px; overflow: auto; max-height: 65vh; }
+.preview-image { display: block; margin: auto; max-width: none; object-fit: contain; }
+iframe { display: block; width: 100%; height: 60vh; border: 0; background: #fff; }
+video { display: block; width: 100%; max-height: 60vh; }
+audio { display: block; width: 100%; margin: 20px 0; }
+.text-preview, .preview-fallback { padding: 24px; font-size: 13px; }
+.text-preview pre { white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+.preview-fallback { text-align: center; color: var(--color-text-muted); }
+.preview-fallback p { margin: 12px 0 0; }
+@media (max-width: 600px) { .file-card { flex-wrap: wrap; } .file-summary { flex-basis: 100%; } .file-card > button:last-child { width: 100%; } }

@@ -4,14 +4,14 @@
       <img src="assets/icon/icon_bawaslu.jpg" alt="Logo" class="logo">
       <span class="app-title">SIMBA CIMAHI</span>
     </div>
-    <button mat-icon-button (click)="toggleSidebar()" class="toggle-btn" [class.centered]="isCollapsed">
+    <button mat-icon-button (click)="toggleSidebar()" aria-label="Ubah lebar menu navigasi" class="toggle-btn" [class.centered]="isCollapsed">
       <mat-icon>{{ isCollapsed ? 'menu' : 'menu_open' }}</mat-icon>
     </button>
   </div>
 
   <div class="sidebar-content custom-scrollbar">
     <mat-accordion displayMode="flat" multi="false" class="premium-accordion">
-      
+
       <!-- MENU UTAMA -->
       <mat-expansion-panel [expanded]="true" *ngIf="!isPTPS">
         <mat-expansion-panel-header>
@@ -50,7 +50,7 @@
       </mat-expansion-panel>
 
       <!-- KAMAR PEMILU -->
-      <mat-expansion-panel *ngIf="!isPTPS && (authService.canAccessC1 || authService.canAccessLhp)" [expanded]="true">
+      <mat-expansion-panel *ngIf="authService.canAccessC1 || authService.canAccessLhp" [expanded]="true">
         <mat-expansion-panel-header>
           <mat-panel-title>
             <mat-icon>how_to_vote</mat-icon>
@@ -68,7 +68,7 @@
       </mat-expansion-panel>
 
       <!-- KAMAR PILKADA -->
-      <mat-expansion-panel *ngIf="!isPTPS && (authService.canAccessC1 || authService.canAccessLhp)" [expanded]="true">
+      <mat-expansion-panel *ngIf="authService.canAccessC1 || authService.canAccessLhp" [expanded]="true">
         <mat-expansion-panel-header>
           <mat-panel-title>
             <mat-icon>how_to_vote</mat-icon>
@@ -108,7 +108,7 @@
           </a>
         </mat-nav-list>
       </mat-expansion-panel>
-      
+
     </mat-accordion>
   </div>
 
@@ -120,7 +120,7 @@
         <span class="name">{{ authService.currentUser()?.username || 'User' }}</span>
       </div>
     </div>
-    <button class="logout-btn" (click)="onLogout()">
+    <button class="logout-btn" aria-label="Keluar dari akun" (click)="onLogout()">
       <mat-icon>logout</mat-icon>
       <span *ngIf="!isCollapsed">Logout</span>
     </button>

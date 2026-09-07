@@ -1,0 +1,35 @@
+<div class="file-card" *ngIf="file">
+  <button type="button" class="file-summary" (click)="open()" [attr.aria-label]="'Pratinjau ' + file.name">
+    <img *ngIf="kind === 'image' && !failed; else fileIcon" [src]="url" alt="" (error)="failed = true">
+    <ng-template #fileIcon><span class="file-icon"><mat-icon>{{ kind === 'pdf' ? 'picture_as_pdf' : 'insert_drive_file' }}</mat-icon></span></ng-template>
+    <span class="file-info"><strong>{{ file.name }}</strong><small>{{ sizeLabel }} · Klik untuk melihat berkas</small></span>
+  </button>
+  <button type="button" mat-stroked-button color="primary" (click)="open()"><mat-icon>visibility</mat-icon>Pratinjau</button>
+</div>
+
+<ng-template #previewDialog>
+  <h2 mat-dialog-title>Pratinjau berkas</h2>
+  <mat-dialog-content>
+    <div class="preview-meta"><strong>{{ file?.name }}</strong><span>{{ sizeLabel }}</span></div>
+    <div class="zoom-controls" *ngIf="kind === 'image' && !failed">
+      <button type="button" mat-icon-button aria-label="Perkecil gambar" [disabled]="zoom <= 50" (click)="changeZoom(-25)"><mat-icon>zoom_out</mat-icon></button>
+      <span aria-live="polite">{{ zoom }}%</span>
+      <button type="button" mat-icon-button aria-label="Perbesar gambar" [disabled]="zoom >= 300" (click)="changeZoom(25)"><mat-icon>zoom_in</mat-icon></button>
+      <button type="button" mat-button (click)="zoom = 100">Atur ulang</button>
+    </div>
+    <div class="preview-canvas" *ngIf="!failed" [ngSwitch]="kind">
+      <img *ngSwitchCase="'image'" class="preview-image" [src]="url" [alt]="file?.name || 'Pratinjau gambar'" [style.width.%]="zoom" [style.max-height]="zoom === 100 ? '60vh' : 'none'" (error)="failed = true">
+      <iframe *ngSwitchCase="'pdf'" [src]="pdfUrl" title="Pratinjau PDF" (error)="failed = true"></iframe>
+      <div *ngSwitchCase="'text'" class="text-preview"><p *ngIf="loading" role="status">Memuat pratinjau...</p><pre>{{ text }}</pre><p *ngIf="truncated">Pratinjau dibatasi sampai 1 MB. Unduh untuk membaca seluruh isi.</p></div>
+      <audio *ngSwitchCase="'audio'" controls [src]="url" (error)="failed = true"></audio>
+      <video *ngSwitchCase="'video'" controls [src]="url" (error)="failed = true"></video>
+      <div *ngSwitchDefault class="preview-fallback"><mat-icon>description</mat-icon><p>Format berkas ini belum dapat ditampilkan langsung di browser.</p><p>Unduh salinan untuk membukanya di aplikasi yang sesuai.</p></div>
+    </div>
+    <p *ngIf="failed" class="preview-fallback" role="alert">Pratinjau tidak dapat dimuat. Unduh berkas untuk membukanya di aplikasi yang sesuai.</p>
+    <p *ngIf="kind === 'pdf'" class="preview-help">Jika PDF tidak tampil di browser ini, gunakan tombol Unduh berkas.</p>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <a mat-stroked-button [href]="url" [download]="file?.name"><mat-icon>download</mat-icon>Unduh berkas</a>
+    <button type="button" mat-flat-button color="primary" (click)="close()">Tutup</button>
+  </mat-dialog-actions>
+</ng-template>

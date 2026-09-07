@@ -1,135 +1,43 @@
-.login-form {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
+.login-form{
+  width:100%
 }
-
-.w-full {
-  width: 100%;
+.demo-accounts-panel{
+  margin-top:26px;
+  border-top:1px solid #e0e5e9;
+  padding-top:18px
 }
-
-.mb-3 {
-  margin-bottom: 1rem;
+.demo-accounts-panel summary{
+  font-size:12px;
+  font-weight:600;
+  color:#455562;
+  cursor:pointer;
+  padding:4px 0
 }
-
-mat-form-field {
-  width: 100%;
+.demo-accounts-panel p{
+  font-size:11px;
+  color:#687681;
+  margin:12px 0
 }
-
-/* Make outline form fields look standard corporate */
-::ng-deep .mat-mdc-text-field-wrapper {
-  background-color: #ffffff !important;
-  border-radius: 6px !important;
+.demo-list{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  max-height:210px;
+  overflow:auto;
+  padding:4px
 }
-
-::ng-deep .mdc-notched-outline__leading,
-::ng-deep .mdc-notched-outline__notch,
-::ng-deep .mdc-notched-outline__trailing {
-  border-color: #cbd5e1 !important;
+.demo-btn{
+  background:#fff;
+  border:1px solid #cbd3d9;
+  border-radius:6px;
+  padding:10px;
+  font-size:11px;
+  color:#344754;
+  cursor:pointer;
+  text-align:left;
+  min-height:40px
 }
-
-::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
-::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
-::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
-  border-color: #2563eb !important;
-  border-width: 2px !important;
-}
-
-.demo-accounts-panel {
-  margin-top: 2rem;
-  padding: 1.25rem;
-  background-color: #f8fafc;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-}
-
-.demo-panel-header {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #334155;
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.demo-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  max-height: 180px;
-  overflow-y: auto;
-  padding-right: 4px;
-}
-
-.demo-list::-webkit-scrollbar {
-  width: 4px;
-}
-.demo-list::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1;
-  border-radius: 4px;
-}
-
-.demo-btn {
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  padding: 8px 12px;
-  font-size: 0.8rem;
-  color: #334155;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.15s ease-in-out;
-  display: flex;
-  align-items: center;
-  font-weight: 500;
-}
-
-.demo-btn:hover {
-  background: #f1f5f9;
-  border-color: #94a3b8;
-}
-
-.login-btn {
-  width: 100%;
-  padding: 22px 0 !important;
-  font-size: 0.95rem !important;
-  font-weight: 600 !important;
-  border-radius: 6px !important;
-  background-color: #2563eb !important;
-  color: #ffffff !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
-  transition: background-color 0.15s ease !important;
-}
-
-.login-btn:hover:not([disabled]) {
-  background-color: #1d4ed8 !important;
-}
-
-::ng-deep .login-btn .mdc-button__label {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-@media (max-width: 768px) {
-  .login-btn {
-    padding: 20px 0 !important;
-  }
-  
-  .demo-accounts-panel {
-    padding: 1rem;
-    margin-top: 1.5rem;
-  }
-
-  .demo-list {
-    flex-direction: column;
-    max-height: none;
-    overflow-y: visible;
-  }
-  
-  .demo-btn {
-    width: 100%;
-    padding: 10px 12px;
-  }
+.demo-btn:hover{
+  background:#fff4f4;
+  border-color:#c51620
 }

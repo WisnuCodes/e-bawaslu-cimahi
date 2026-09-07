@@ -1,6 +1,6 @@
 <div class="org-page-header animate-fade-in">
   <div class="badge">Badan Pengawas Pemilihan Umum</div>
-  <h1>STRUKTUR ORGANISASI</h1>
+  <h1>Struktur Organisasi</h1>
   <h2>Bawaslu Kota Cimahi</h2>
 </div>
 
@@ -8,7 +8,7 @@
 
   <!-- LEVEL 1: PLENO PIMPINAN -->
   <div class="org-level">
-    <div class="level-label" style="background: #1e3a8a;">Pleno Pimpinan</div>
+    <div class="level-label">Pleno Pimpinan</div>
 
     <!-- Ketua di atas sendiri -->
     <div style="max-width: 480px; margin: 0 auto 16px;">
@@ -38,12 +38,12 @@
 
   <!-- LEVEL 2: SEKRETARIAT -->
   <div class="org-level">
-    <div class="level-label" style="background: #16a34a;">Sekretariat</div>
+    <div class="level-label">Sekretariat</div>
 
     <div class="people-grid cols-2">
       <!-- Kepala Sekretariat -->
-      <div class="person-card" style="border-color: #16a34a; border-width: 2px;">
-        <img [src]="kasek.foto" alt="Kasek" style="border-color: #86efac;">
+      <div class="person-card">
+        <img [src]="kasek.foto" alt="Kasek">
         <div class="info">
           <p class="name">{{ kasek.nama }}</p>
           <p class="role">{{ kasek.jabatan }}</p>
@@ -52,8 +52,8 @@
       </div>
 
       <!-- Bendahara -->
-      <div class="person-card" style="border-color: #ca8a04; border-width: 2px;">
-        <img [src]="bendahara.foto" alt="Bendahara" style="border-color: #fde68a;">
+      <div class="person-card">
+        <img [src]="bendahara.foto" alt="Bendahara">
         <div class="info">
           <p class="name">{{ bendahara.nama }}</p>
           <p class="role">{{ bendahara.jabatan }}</p>
@@ -64,7 +64,7 @@
 
   <!-- LEVEL 3: SUB-BAGIAN & STAF PELAKSANA -->
   <div class="org-level">
-    <div class="level-label" style="background: #475569;">Sub-Bagian & Staf Pelaksana</div>
+    <div class="level-label">Sub-Bagian & Staf Pelaksana</div>
 
     <div class="people-grid cols-4">
       <div class="divisi-section" *ngFor="let div of divisiStaff">
@@ -84,7 +84,7 @@
 
   <!-- LEVEL 4: STAF PENDUKUNG -->
   <div class="org-level" style="background: #fafafa;">
-    <div class="level-label" style="background: #64748b;">Staf Pendukung Sekretariat</div>
+    <div class="level-label">Staf Pendukung Sekretariat</div>
 
     <div class="people-grid cols-3">
       <div class="staf-row" *ngFor="let sp of stafPendukung" style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px;">
@@ -96,7 +96,7 @@
 
   <!-- LEVEL 5: AD-HOC -->
   <div class="org-level" style="background: #f8fafc;">
-    <div class="level-label" style="background: #0369a1;">Pengawas Ad-Hoc Kecamatan & Kelurahan</div>
+    <div class="level-label">Pengawas Ad-Hoc Kecamatan & Kelurahan</div>
 
     <div class="people-grid cols-3">
       <div class="adhoc-card" *ngFor="let ad of adhoc">
@@ -116,7 +116,7 @@
           <span>Jl. Babakan No. 37 RT 03 RW 04, Kel. Cimahi, Kec. Cimahi Tengah, Kota Cimahi, Prov. Jawa Barat</span>
         </p>
       </div>
-      
+
       <div class="footer-socials">
         <a href="https://instagram.com/bawaslucimahi" target="_blank" class="social-link">
           <mat-icon>photo_camera</mat-icon>

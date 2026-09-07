@@ -57,12 +57,12 @@
     <!-- Tabel Dokumen Arsip -->
     <div style="border-radius: var(--radius-md); overflow: auto; border: 1px solid var(--color-border);">
       <table mat-table [dataSource]="documents" style="width: 100%;">
-        
+
         <!-- No Surat -->
         <ng-container matColumnDef="no_surat">
           <th mat-header-cell *matHeaderCellDef> No. Surat </th>
-          <td mat-cell *matCellDef="let doc" style="font-weight: 600; color: var(--color-primary);"> 
-            {{ doc.no_surat }} 
+          <td mat-cell *matCellDef="let doc" style="font-weight: 600; color: var(--color-primary);">
+            {{ doc.no_surat }}
           </td>
         </ng-container>
 
@@ -170,7 +170,7 @@
   <mat-card-content>
     <div style="border-radius: var(--radius-md); overflow: auto; border: 1px solid var(--color-border);">
       <table mat-table [dataSource]="arsipLogs" style="width: 100%;">
-        
+
         <ng-container matColumnDef="waktu">
           <th mat-header-cell *matHeaderCellDef> Waktu </th>
           <td mat-cell *matCellDef="let log"> {{ log.timestamp | date:'dd MMM yyyy, HH:mm' }} </td>
@@ -209,7 +209,7 @@
 
         <tr mat-header-row *matHeaderRowDef="['waktu', 'aksi', 'user', 'role', 'keterangan']"></tr>
         <tr mat-row *matRowDef="let row; columns: ['waktu', 'aksi', 'user', 'role', 'keterangan'];"></tr>
-        
+
         <tr class="mat-row" *matNoDataRow>
           <td class="mat-cell" colspan="5" style="text-align: center; padding: 2rem; color: var(--color-text-muted);">
             Belum ada aktivitas dokumen arsip yang tercatat.
@@ -249,7 +249,7 @@
         <button type="button" mat-flat-button color="primary" [disabled]="tahapanForm.invalid || isSavingTahapan || isLoadingTahapan" (click)="saveTahapan()">{{ isSavingTahapan ? 'Menyimpan...' : 'Simpan dan pilih tahapan' }}</button>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+      <div class="form-grid">
         <mat-form-field appearance="outline">
           <mat-label>Nomor Surat</mat-label>
           <input matInput formControlName="no_surat" placeholder="Contoh: 001/BAWASLU/2026">
@@ -266,7 +266,7 @@
         <textarea matInput formControlName="perihal" rows="2" placeholder="Tulis perihal atau ringkasan isi surat..."></textarea>
       </mat-form-field>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+      <div class="form-grid">
         <mat-form-field appearance="outline">
           <mat-label>Kategori</mat-label>
           <input matInput formControlName="kategori" readonly>
@@ -300,9 +300,10 @@
           </span>
           <input type="file" #uploadFileInput (change)="onUploadFileSelected($event)" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style="display: none;">
         </div>
+        <app-file-preview [file]="uploadFile"></app-file-preview>
       </div>
 
-      <img *ngIf="uploadPreview" [src]="uploadPreview" alt="Pratinjau foto LHP" style="max-width: 100%; max-height: 240px; object-fit: contain;">
+
       <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 1rem;">
         <button type="button" mat-stroked-button (click)="showUploadModal = false">Batal</button>
         <button type="submit" mat-flat-button color="primary" [disabled]="uploadForm.invalid || !uploadFile || isUploading">
@@ -346,6 +347,7 @@
           </span>
           <input type="file" #revisiFileInput (change)="onRevisiFileSelected($event)" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style="display: none;">
         </div>
+        <app-file-preview [file]="revisiFile"></app-file-preview>
       </div>
 
       <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 1rem;">

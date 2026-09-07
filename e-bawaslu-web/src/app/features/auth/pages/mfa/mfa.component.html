@@ -1,37 +1,20 @@
-<div class="mfa-form text-center">
-  <div class="security-icon-wrapper">
-    <mat-icon class="security-icon">security</mat-icon>
-  </div>
-  
-  <h2 class="mfa-title">Verifikasi 2 Langkah</h2>
-  <p class="mfa-subtitle">
-    Kode OTP telah dikirimkan ke perangkat/email Anda.<br>
-    Silakan masukkan 6 digit kode untuk melanjutkan.
-  </p>
-  
-  <mat-form-field appearance="outline" class="otp-input-field">
-    <input 
-      matInput 
-      [(ngModel)]="otpCode" 
-      placeholder="000000" 
-      type="text"
-      maxlength="6"
-      autocomplete="one-time-code"
-      class="otp-input-text">
-    <mat-error *ngIf="errorMsg">{{ errorMsg }}</mat-error>
+<header class="auth-heading">
+  <p class="auth-step">VERIFIKASI AKUN</p>
+  <div class="security-mark"><mat-icon>phonelink_lock</mat-icon></div>
+  <h2>Verifikasi OTP</h2>
+  <p>Masukkan kode OTP 6 digit untuk menyelesaikan proses masuk ke akun Anda.</p>
+</header>
+<form class="mfa-form" (ngSubmit)="verifyOtp()">
+  <mat-form-field appearance="outline" class="auth-field otp-input-field">
+    <mat-label>Kode OTP</mat-label>
+    <input matInput name="otp" [(ngModel)]="otpCode" placeholder="000000" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" class="otp-input-text" aria-describedby="otp-help">
   </mat-form-field>
-
-  <div class="form-actions">
-    <button mat-flat-button color="primary" [disabled]="otpCode.length < 6 || isLoading()" (click)="verifyOtp()" class="verify-btn">
-      <mat-spinner *ngIf="isLoading()" diameter="24" style="margin-right: 8px; display: inline-block; vertical-align: middle;"></mat-spinner>
-      <span style="vertical-align: middle;">{{ isLoading() ? 'Memverifikasi...' : 'Verifikasi' }}</span>
-    </button>
-  </div>
-  
-  <div class="resend-wrapper">
-    <p>Belum menerima kode?</p>
-    <button mat-button color="primary" style="font-weight: 600;">
-      Kirim ulang OTP (60s)
-    </button>
-  </div>
-</div>
+  <p id="otp-help" class="otp-help">Pastikan seluruh digit kode sudah terisi.</p>
+  <button mat-flat-button type="submit" [disabled]="!isOtpValid || isLoading()" class="auth-button">
+    <mat-spinner *ngIf="isLoading()" diameter="18"></mat-spinner>
+    <span>{{ isLoading() ? 'Memverifikasi...' : 'Verifikasi & masuk' }}</span>
+    <mat-icon *ngIf="!isLoading()" iconPositionEnd>arrow_forward</mat-icon>
+  </button>
+  <div class="auth-error" *ngIf="errorMsg" role="alert"><mat-icon>error_outline</mat-icon><span>{{ errorMsg }}</span></div>
+  <a class="back-link" routerLink="/auth/login"><mat-icon>arrow_back</mat-icon>Kembali ke halaman masuk</a>
+</form>

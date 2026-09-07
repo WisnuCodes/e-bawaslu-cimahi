@@ -1,19 +1,19 @@
 <header class="header">
   <div class="header-left">
-    <button *ngIf="isMobile" class="hamburger-btn" (click)="onToggleMenu()">
+    <button *ngIf="isMobile" class="hamburger-btn" aria-label="Buka menu navigasi" (click)="onToggleMenu()">
       <mat-icon>menu</mat-icon>
     </button>
-    <div class="brand-group hide-mobile">
+    <div class="brand-group">
       <h2 class="page-title">SIMBA CIMAHI</h2>
     </div>
   </div>
-  
+
   <div class="header-right">
     <a routerLink="/dashboard/struktur-organisasi" class="struktur-link hide-mobile">
-      <mat-icon style="font-size: 18px; width: 18px; height: 18px;">account_tree</mat-icon> 
+      <mat-icon style="font-size: 18px; width: 18px; height: 18px;">account_tree</mat-icon>
       Bagan Struktur
     </a>
-    
+
     <div class="user-profile">
       <div class="avatar">
         {{ userInitial() }}

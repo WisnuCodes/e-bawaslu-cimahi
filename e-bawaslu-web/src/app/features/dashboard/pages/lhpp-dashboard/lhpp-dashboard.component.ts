@@ -1,3 +1,4 @@
+import { FilePreviewComponent } from '../../../../shared/components/molecules/file-preview/file-preview.component';
 import { Component, inject, ViewChild, ElementRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormGroupDirective, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -25,6 +26,7 @@ import * as _ from 'lodash';
   selector: 'app-lhpp-dashboard',
   standalone: true,
   imports: [
+    FilePreviewComponent,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
@@ -175,7 +177,6 @@ export class LhppDashboardComponent implements OnInit {
     klasifikasi: ['Rahasia', Validators.required]
   });
   uploadFile: File | null = null;
-  uploadPreview: string | null = null;
 
   // Form Revisi
   revisiCatatan: string = '';
@@ -275,7 +276,6 @@ export class LhppDashboardComponent implements OnInit {
       klasifikasi: 'Rahasia'
     });
     this.uploadFile = null;
-    this.uploadPreview = null;
     this.showUploadModal = true;
   }
 
@@ -283,7 +283,6 @@ export class LhppDashboardComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0] || null;
     this.uploadFile = null;
-    this.uploadPreview = null;
     if (!file) return;
     if (file.size > 5 * 1024 * 1024 || !/\.(pdf|doc|docx|jpg|jpeg|png)$/i.test(file.name)) {
       input.value = '';
@@ -291,11 +290,7 @@ export class LhppDashboardComponent implements OnInit {
       return;
     }
     this.uploadFile = file;
-    if (file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = () => { if (this.uploadFile === file) this.uploadPreview = reader.result as string; };
-      reader.readAsDataURL(file);
-    }
+
   }
 
   submitUpload() {

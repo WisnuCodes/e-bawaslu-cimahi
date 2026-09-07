@@ -47,8 +47,8 @@
 }
 
 .doc-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
+  border-color: #b7c3cc;
+  box-shadow: var(--shadow-sm);
 }
 
 .doc-icon {
@@ -126,10 +126,10 @@
 .stage-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
 .stage-heading h3 { margin: 0 0 6px; font-size: 1.15rem; font-weight: 600; }
 .stage-heading p, .stage-help, .stage-empty { color: var(--color-text-muted); margin: 0; font-size: .875rem; line-height: 1.6; }
-.stage-count { padding: 5px 12px; border-radius: 20px; background: #eff6ff; color: #1e40af; white-space: nowrap; font-size: .8rem; }
+.stage-count { padding: 5px 12px; border-radius: 6px; background: var(--color-gold-light); color: var(--color-warning); white-space: nowrap; font-size: .8rem; }
 .stage-form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: 16px; align-items: start; }
 .stage-form mat-form-field { width: 100%; min-width: 0; }
-.stage-form > button { height: 56px; }
+.stage-form > button { margin-top: 2px; }
 .stage-help { margin: 12px 0 20px; }
 .stage-list { border: 1px solid var(--color-border, #e2e8f0); border-radius: 10px; overflow: hidden; }
 .stage-row { display: flex; align-items: center; gap: 14px; padding: 14px 16px; }

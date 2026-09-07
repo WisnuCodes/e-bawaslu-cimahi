@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ButtonComponent } from '../../../../shared/components/atoms/button/button.component';
@@ -17,11 +17,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   selector: 'app-mfa',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule, 
-    MatButtonModule, 
-    MatInputModule, 
-    MatFormFieldModule, 
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    MatButtonModule,
+    MatInputModule,
+    MatFormFieldModule,
     MatIconModule,
     MatProgressSpinnerModule
   ],
@@ -31,7 +32,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 export class MfaComponent {
   private router = inject(Router);
   private authService = inject(AuthService);
-  
+
   // Menggunakan custom hook yang baru kita buat
   loadingHook = useLoading();
   isLoading = this.loadingHook.isLoading;
@@ -39,7 +40,12 @@ export class MfaComponent {
   otpCode = '';
   errorMsg = '';
 
+  get isOtpValid(): boolean {
+    return /^[0-9]{6}$/.test(this.otpCode);
+  }
+
   verifyOtp() {
+    if (!this.isOtpValid || this.isLoading()) return;
     this.errorMsg = '';
     this.isLoading.set(true);
 

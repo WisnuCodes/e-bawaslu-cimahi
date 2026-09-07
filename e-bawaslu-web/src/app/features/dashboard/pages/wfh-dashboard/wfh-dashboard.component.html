@@ -1,4 +1,4 @@
-<p style="padding: 1rem; background: #eff6ff; border-radius: 8px;">
+<p class="location-notice">
   Radius presensi: <strong>1 km</strong> dari Kantor Bawaslu Kota Cimahi (-6.8716, 107.5445). Lokasi otomatis diaktifkan saat check-in/out.
 </p>
 <!-- Page Header -->
@@ -90,6 +90,7 @@
             </button>
             <input type="file" #fileInput (change)="onFileSelected($event)" accept=".pdf,image/jpeg,image/png" style="display: none;">
           </div>
+        <app-file-preview [file]="selectedFile"></app-file-preview>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px;">
@@ -250,7 +251,7 @@
           <a *ngIf="p.gps_koordinat" [href]="'https://www.google.com/maps/search/?api=1&query=' + p.gps_koordinat" target="_blank" style="color: #3b82f6; text-decoration: none; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 4px;">
             <mat-icon style="font-size: 16px; width: 16px; height: 16px;">location_on</mat-icon> Peta
           </a>
-          <span *ngIf="!p.gps_koordinat" style="color: #94a3b8;">—</span>
+          <span *ngIf="!p.gps_koordinat" style="color: #94a3b8;">â€”</span>
         </td>
       </ng-container>
 

@@ -1,43 +1,22 @@
 <div class="auth-wrapper">
-  <!-- Split Screen Design -->
-  <div class="auth-visual-side">
-    <div class="visual-content animate-fade-in-up">
-      <div class="brand-badge">
-        <img src="assets/icon/icon_bawaslu.jpg" alt="Logo" class="badge-logo">
-        <span>SIMBA CIMAHI</span>
-      </div>
-      <h1 class="visual-heading">Sistem Informasi Manajemen<br/>Bawaslu Kota Cimahi</h1>
-      <p class="visual-subheading">Portal Terpadu untuk Pelaporan Kinerja, Pengawasan WFH, dan Manajemen E-Arsip Berbasis Cloud.</p>
+  <aside class="auth-visual-side">
+    <div class="brand-lockup">
+      <img src="assets/icon/icon_bawaslu.jpg" alt="Logo Bawaslu" />
+      <div><strong>SIMBA CIMAHI</strong><span>Bawaslu Kota Cimahi</span></div>
     </div>
-    <div class="visual-overlay"></div>
-  </div>
-  
+    <div class="visual-content">
+      <p class="eyebrow">PORTAL INTERNAL</p>
+      <h1>Sistem Informasi<br>Manajemen Bawaslu<br>Kota Cimahi</h1>
+      <p class="visual-description">Akses presensi, arsip, dan laporan pengawasan dalam satu sistem.</p>
+      <div class="module-list"><span>01 <b>Presensi & Kinerja</b></span><span>02 <b>Persuratan & Arsip</b></span><span>03 <b>Pengawasan Pemilu & Pilkada</b></span></div>
+    </div>
+    <p class="institution">BADAN PENGAWAS PEMILIHAN UMUM<br>KOTA CIMAHI</p>
+  </aside>
   <main class="auth-form-side">
-    <div class="auth-container animate-fade-in">
-      
-      <div class="auth-header-mobile">
-        <img src="assets/icon/icon_bawaslu.jpg" alt="Logo Bawaslu" class="mobile-logo" />
-        <h2>Portal Internal</h2>
-      </div>
-
-      <mat-card class="auth-card">
-        <div class="auth-header">
-          <div class="auth-title">
-            <h1>Selamat Datang</h1>
-            <p>Silakan masuk menggunakan kredensial Anda</p>
-          </div>
-        </div>
-        
-        <mat-card-content class="auth-body">
-          <router-outlet></router-outlet>
-        </mat-card-content>
-      </mat-card>
-
-      <div class="auth-footer">
-        <p>&copy; 2026 Badan Pengawas Pemilihan Umum Kota Cimahi.</p>
-        <p>Aplikasi ini dilindungi oleh Enkripsi End-to-End.</p>
-      </div>
-
+    <div class="auth-container">
+      <div class="mobile-brand"><img src="assets/icon/icon_bawaslu.jpg" alt="Logo Bawaslu"><strong>SIMBA CIMAHI</strong></div>
+      <router-outlet></router-outlet>
+      <footer class="auth-footer">&copy; 2026 Bawaslu Kota Cimahi</footer>
     </div>
   </main>
 </div>

@@ -177,7 +177,7 @@ export class AuthService {
     return this.userRole.toLowerCase().includes('p2h') || this.isPimpinan || this.isSuperAdmin;
   }
 
-  // Hak Akses Ingesti / Approval C1
+  // Hak Akses / Approval C1
   get canAccessC1(): boolean {
     const r = this.userRole.toLowerCase();
     const isP2H = r.includes('p2h');

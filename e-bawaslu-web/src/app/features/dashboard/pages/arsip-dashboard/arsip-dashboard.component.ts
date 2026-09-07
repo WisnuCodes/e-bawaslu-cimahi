@@ -1,3 +1,4 @@
+import { FilePreviewComponent } from '../../../../shared/components/molecules/file-preview/file-preview.component';
 import { Component, inject, ViewChild, ElementRef, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -25,6 +26,7 @@ import * as _ from 'lodash';
   selector: 'app-arsip-dashboard',
   standalone: true,
   imports: [
+    FilePreviewComponent,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,

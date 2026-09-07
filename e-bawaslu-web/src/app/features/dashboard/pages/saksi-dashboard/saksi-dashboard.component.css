@@ -3,14 +3,7 @@
   font-family: 'Inter', sans-serif;
 }
 
-.page-header {
-  margin-bottom: 1.5rem;
-  padding: 1.5rem;
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-}
+
 
 .page-title {
   margin: 0 0 0.5rem 0;
@@ -29,7 +22,7 @@
   background: #ffffff;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  padding: 1.5rem;
+  padding: 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
@@ -46,7 +39,7 @@
 
 .saksi-grid {
   display: grid;
-  grid-template-columns: 350px 1fr;
+  grid-template-columns: 320px minmax(0, 1fr);
   gap: 1.5rem;
   align-items: start;
 }
@@ -66,8 +59,8 @@
 }
 
 .submit-btn {
-  padding: 24px 0 !important;
-  font-size: 1rem !important;
+  width: 100%;
+  font-size: 13px;
   border-radius: 8px !important;
 }
 

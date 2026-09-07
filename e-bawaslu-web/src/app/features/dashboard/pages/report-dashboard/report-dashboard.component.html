@@ -1,114 +1,45 @@
-<div class="page-header animate-fade-in" style="margin-bottom: 2rem;">
-  <h2 style="margin: 0; color: #1e293b; font-weight: 700; font-size: 1.5rem; display: flex; align-items: center; gap: 8px;">
-    <mat-icon style="color: #64748b;">file_download</mat-icon> Ekspor Laporan
-  </h2>
-  <p style="margin: 4px 0 0 32px; color: #64748b; font-size: 0.9rem;">
-    Unduh rekapitulasi data presensi dan aktivitas harian pegawai dalam format PDF.
-  </p>
+<div class="page-header">
+  <h2>Ekspor Laporan</h2>
+  <p>Unduh rekapitulasi presensi dan aktivitas harian pegawai dalam format PDF.</p>
 </div>
-
-<div class="animate-fade-in" style="max-width: 800px;">
-  <mat-card style="background: white; border: 1px solid #f1f5f9; border-radius: 12px; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);">
-    
-    <mat-card-content style="padding: 1.5rem;">
-      <div style="display: flex; flex-direction: column; gap: 2rem;">
-        
-        <!-- Pilihan Jenis Laporan -->
-        <div>
-          <label style="display: block; font-weight: 600; font-size: 0.95rem; color: #0f172a; margin-bottom: 1rem;">
-            Pilih Jenis Laporan
-          </label>
-          
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            
-            <!-- Option 1: Presensi -->
-            <div (click)="tipeLaporan = 'presensi'" 
-                 [ngStyle]="{
-                   'border': tipeLaporan === 'presensi' ? '2px solid #3b82f6' : '1px solid #e2e8f0',
-                   'background': tipeLaporan === 'presensi' ? '#eff6ff' : '#ffffff',
-                   'padding': '1.25rem',
-                   'border-radius': '8px',
-                   'cursor': 'pointer',
-                   'display': 'flex',
-                   'align-items': 'center',
-                   'gap': '16px',
-                   'transition': 'all 0.2s ease-in-out'
-                 }">
-              <mat-icon [style.color]="tipeLaporan === 'presensi' ? '#2563eb' : '#94a3b8'" style="font-size: 28px; width: 28px; height: 28px;">
-                how_to_reg
-              </mat-icon>
-              <div>
-                <strong [style.color]="tipeLaporan === 'presensi' ? '#1e40af' : '#334155'" style="display: block; font-size: 0.95rem; font-weight: 600;">Rekap Presensi</strong>
-                <small [style.color]="tipeLaporan === 'presensi' ? '#3b82f6' : '#64748b'" style="display: block; margin-top: 2px;">Data jam masuk, pulang, dan status.</small>
-              </div>
-            </div>
-
-            <!-- Option 2: Worklog -->
-            <div (click)="tipeLaporan = 'worklog'" 
-                 [ngStyle]="{
-                   'border': tipeLaporan === 'worklog' ? '2px solid #3b82f6' : '1px solid #e2e8f0',
-                   'background': tipeLaporan === 'worklog' ? '#eff6ff' : '#ffffff',
-                   'padding': '1.25rem',
-                   'border-radius': '8px',
-                   'cursor': 'pointer',
-                   'display': 'flex',
-                   'align-items': 'center',
-                   'gap': '16px',
-                   'transition': 'all 0.2s ease-in-out'
-                 }">
-              <mat-icon [style.color]="tipeLaporan === 'worklog' ? '#2563eb' : '#94a3b8'" style="font-size: 28px; width: 28px; height: 28px;">
-                assignment
-              </mat-icon>
-              <div>
-                <strong [style.color]="tipeLaporan === 'worklog' ? '#1e40af' : '#334155'" style="display: block; font-size: 0.95rem; font-weight: 600;">Rekap Worklog</strong>
-                <small [style.color]="tipeLaporan === 'worklog' ? '#3b82f6' : '#64748b'" style="display: block; margin-top: 2px;">Aktivitas harian dan status approval.</small>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        <mat-divider style="border-color: #f1f5f9;"></mat-divider>
-
-        <!-- Pilihan Periode -->
-        <div>
-          <label style="display: block; font-weight: 600; font-size: 0.95rem; color: #0f172a; margin-bottom: 1rem;">
-            Pilih Periode
-          </label>
-
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <mat-form-field appearance="outline" class="density-3">
-              <mat-label>Bulan</mat-label>
-              <mat-select [(ngModel)]="bulan">
-                <mat-option *ngFor="let m of months" [value]="m.value">{{ m.label }}</mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="density-3">
-              <mat-label>Tahun</mat-label>
-              <input matInput type="number" [(ngModel)]="tahun" min="2020" max="2100">
-            </mat-form-field>
-          </div>
-        </div>
-
-        <!-- Info Watermark -->
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 1rem 1.25rem; border-radius: 8px; display: flex; gap: 12px; align-items: center;">
-          <mat-icon style="color: #64748b;">info</mat-icon>
-          <div style="font-size: 0.85rem; color: #475569; line-height: 1.5;">
-            Dokumen PDF akan secara otomatis menyertakan <i>watermark</i> identitas pengunduh untuk menjaga keamanan dan keaslian data.
-          </div>
-        </div>
-
-        <!-- Tombol Download -->
-        <div style="display: flex; justify-content: flex-end;">
-          <button mat-flat-button color="primary" [disabled]="isExporting" (click)="exportReport()" style="height: 40px; padding: 0 24px; border-radius: 8px;">
-            <mat-icon *ngIf="!isExporting">download</mat-icon>
-            <mat-progress-spinner *ngIf="isExporting" diameter="18" mode="indeterminate" style="display: inline-block; margin-right: 8px;"></mat-progress-spinner>
-            {{ isExporting ? 'Memproses Dokumen...' : 'Ekspor ke PDF' }}
+<mat-card class="report-card">
+  <mat-card-content>
+    <div class="report-form">
+      <div>
+        <h3 id="report-type-label">Jenis laporan</h3>
+        <div class="report-options" role="group" aria-labelledby="report-type-label">
+          <button type="button" class="report-option" [class.selected]="tipeLaporan === 'presensi'" [attr.aria-pressed]="tipeLaporan === 'presensi'" (click)="tipeLaporan = 'presensi'">
+            <mat-icon>how_to_reg</mat-icon>
+            <span><strong>Rekap Presensi</strong><small>Jam masuk, pulang, dan status kehadiran.</small></span>
+          </button>
+          <button type="button" class="report-option" [class.selected]="tipeLaporan === 'worklog'" [attr.aria-pressed]="tipeLaporan === 'worklog'" (click)="tipeLaporan = 'worklog'">
+            <mat-icon>assignment</mat-icon>
+            <span><strong>Rekap Worklog</strong><small>Aktivitas harian dan status persetujuan.</small></span>
           </button>
         </div>
-
       </div>
-    </mat-card-content>
-  </mat-card>
-</div>
+      <mat-divider></mat-divider>
+      <div>
+        <h3>Periode laporan</h3>
+        <div class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Bulan</mat-label>
+            <mat-select [(ngModel)]="bulan"><mat-option *ngFor="let m of months" [value]="m.value">{{ m.label }}</mat-option></mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Tahun</mat-label>
+            <input matInput type="number" [(ngModel)]="tahun" min="2020" max="2100">
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="report-note"><mat-icon>info_outline</mat-icon><p>PDF menyertakan watermark identitas pengunduh untuk menjaga keamanan dan keaslian data.</p></div>
+      <div class="report-actions">
+        <button mat-flat-button color="primary" [disabled]="isExporting" (click)="exportReport()">
+          <mat-icon *ngIf="!isExporting">download</mat-icon>
+          <mat-progress-spinner *ngIf="isExporting" diameter="18" mode="indeterminate"></mat-progress-spinner>
+          {{ isExporting ? 'Memproses dokumen...' : 'Ekspor ke PDF' }}
+        </button>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

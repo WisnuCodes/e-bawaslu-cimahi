@@ -48,6 +48,7 @@ Aplikasi ini mencakup 6 modul utama dan 1 modul khusus sesuai Spesifikasi Kebutu
    cp .env.example .env
    php artisan key:generate
    php artisan migrate:fresh --seed
+   php artisan storage:link
    php artisan serve
    ```
 3. Setup Frontend:

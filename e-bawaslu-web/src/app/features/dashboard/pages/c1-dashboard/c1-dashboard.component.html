@@ -2,12 +2,12 @@
 
   <!-- PAGE HEADER -->
   <div class="page-header">
-    <div>
-      <span class="status-badge badge-neutral" style="margin-bottom: 8px; display: inline-block;">
-        PENGAWASAN TPS ? KELURAHAN ? KECAMATAN ? KOTA
+    <div class="c1-heading">
+      <span class="status-badge badge-neutral c1-scope">
+        Pengawasan TPS &rsaquo; Kelurahan &rsaquo; Kecamatan &rsaquo; Kota
       </span>
       <h1 class="page-title">
-        Pengawasan, Ingesti & Rekapitulasi Berkas C1-Hasil (Kamar {{ kamar }})
+        Pengawasan & Rekapitulasi Berkas C1-Hasil (Kamar {{ kamar }})
       </h1>
       <p class="page-subtitle">
         Unggah dan unduh dokumen C1, pantau hasil per wilayah, serta tinjau persetujuan divisi.
@@ -15,10 +15,10 @@
     </div>
 
     <!-- FILTER TPS -->
-    <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-      <mat-form-field appearance="outline"><mat-label>Kecamatan</mat-label><mat-select [(ngModel)]="selectedKecamatan" (selectionChange)="changeRegion(true)"><mat-option value="">Semua Kecamatan</mat-option><mat-option *ngFor="let kec of kecamatanList" [value]="kec">{{ kec }}</mat-option></mat-select></mat-form-field>
-      <mat-form-field appearance="outline"><mat-label>Kelurahan</mat-label><mat-select [(ngModel)]="selectedKelurahan" (selectionChange)="changeRegion()"><mat-option value="">Semua Kelurahan</mat-option><mat-option *ngFor="let kel of kelurahanList" [value]="kel">{{ kel }}</mat-option></mat-select></mat-form-field>
-      <mat-form-field appearance="outline" style="width: 300px; margin-bottom: -1.25rem;">
+    <div class="c1-filter-grid" role="group" aria-label="Filter wilayah dan tahun C1">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Kecamatan</mat-label><mat-select [(ngModel)]="selectedKecamatan" (selectionChange)="changeRegion(true)"><mat-option value="">Semua Kecamatan</mat-option><mat-option *ngFor="let kec of kecamatanList" [value]="kec">{{ kec }}</mat-option></mat-select></mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Kelurahan</mat-label><mat-select [(ngModel)]="selectedKelurahan" (selectionChange)="changeRegion()"><mat-option value="">Semua Kelurahan</mat-option><mat-option *ngFor="let kel of kelurahanList" [value]="kel">{{ kel }}</mat-option></mat-select></mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <mat-label>Filter Berdasarkan TPS</mat-label>
         <mat-select [(value)]="selectedFilterTps" (selectionChange)="onFilterTpsChange($event.value)">
           <mat-option value="">Semua TPS Kota Cimahi</mat-option>
@@ -28,7 +28,7 @@
         </mat-select>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" style="min-width: 150px; margin-bottom: -1.25rem;">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <mat-label>Filter Tahun</mat-label>
         <mat-select [(ngModel)]="selectedFilterYear" (selectionChange)="onFilterYearChange($event.value)">
           <mat-option value="">Semua Tahun</mat-option>
@@ -43,7 +43,7 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 8px;">
       <div style="display: flex; align-items: center; gap: 8px; color: #212121;">
         <mat-icon style="color: #616161;">show_chart</mat-icon>
-        <strong style="font-size: 1rem; font-weight: 500;">Live Progress Ingesti Form C1 Kota Cimahi</strong>
+        <strong style="font-size: 1rem; font-weight: 500;">Live Progress Form C1 Kota Cimahi</strong>
       </div>
       <div style="font-size: 0.9rem; color: #424242;">
         Total Berkas Masuk: <strong>{{ c1List.data.length }}</strong> dari <strong>{{ totalTpsPilot }} TPS</strong> ({{ progressPercentage }}%)
@@ -124,7 +124,7 @@
   <div class="clean-card">
     <div style="margin-bottom: 1.5rem;">
       <h3 style="margin: 0; font-size: 1.1rem; font-weight: 500; color: #212121; display: flex; align-items: center; gap: 8px;">
-        <mat-icon style="color: #616161;">publish</mat-icon> Unggah Lembar Model C1-Hasil (Enkripsi AES-256)
+        <mat-icon style="color: #616161;">publish</mat-icon> Unggah Lembar Model C1-Hasil
       </h3>
       <p style="margin: 6px 0 0; font-size: 0.9rem; color: #757575;">
         Sistem secara otomatis menghitung Hash SHA-256 berkas fisik dan memvalidasi rumus konsistensi suara secara real-time.
@@ -132,11 +132,11 @@
     </div>
 
     <!-- PANDUAN PENGISIAN & UPLOAD -->
-    <div style="background-color: #e0f2fe; border: 1px solid #bae6fd; border-left: 4px solid #0284c7; border-radius: 6px; padding: 1rem; margin-bottom: 1.5rem;">
-      <h4 style="margin: 0 0 0.5rem 0; color: #0369a1; font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+    <div style="background-color: #f5f7f9; border: 1px solid #dfe5ea; border-left: 4px solid #d9b968; border-radius: 6px; padding: 1rem; margin-bottom: 1.5rem;">
+      <h4 style="margin: 0 0 0.5rem 0; color: #172b3a; font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 6px;">
         <mat-icon style="font-size: 18px; width: 18px; height: 18px;">lightbulb</mat-icon> Panduan Pengisian & Unggah Form C1
       </h4>
-      <ul style="margin: 0; padding-left: 1.5rem; color: #0c4a6e; font-size: 0.875rem; line-height: 1.6;">
+      <ul style="margin: 0; padding-left: 1.5rem; color: #455562; font-size: 0.875rem; line-height: 1.6;">
         <li><strong>Langkah 1:</strong> Ketikkan jumlah Pasangan Calon (Paslon) terlebih dahulu pada kolom <strong>Kustom Jumlah Paslon</strong> di bawah (misal: isi angka 1, 3, 5, atau lebih).</li>
         <li><strong>Langkah 2:</strong> Sistem akan otomatis membuatkan kotak isian Suara Paslon sebanyak angka yang Anda ketikkan.</li>
         <li><strong>Langkah 3:</strong> Klik tombol <strong>Pilih Berkas</strong> dan unggah foto Form C1 Anda. Mesin AI (OCR) akan mencoba membaca gambar tersebut dan <strong>menyekrupkan angka-angkanya secara otomatis</strong> ke kotak Anda!</li>
@@ -217,7 +217,7 @@
         <div>
           <strong style="font-size: 0.9rem; display: block; margin-bottom: 4px;">MISMATCH: Rumus Matematika Tidak Sinkron!</strong>
           <span style="font-size: 0.85rem;">
-            (Suara Sah: {{ c1Form.value.total_suara_sah }} + Suara Tidak Sah: {{ c1Form.value.total_suara_tidak_sah }} = {{ totalSuaraMasukForm }}) ≠ (Total Pemilih: {{ c1Form.value.total_pemilih }}). Berkas akan ditandai Mismatch.
+            (Suara Sah: {{ c1Form.value.total_suara_sah }} + Suara Tidak Sah: {{ c1Form.value.total_suara_tidak_sah }} = {{ totalSuaraMasukForm }}) â‰  (Total Pemilih: {{ c1Form.value.total_pemilih }}). Berkas akan ditandai Mismatch.
           </span>
         </div>
       </div>
@@ -231,7 +231,7 @@
 
       <!-- FILE SCAN UPLOAD (Material Style) -->
       <div style="display: flex; gap: 1.5rem; align-items: flex-start; flex-wrap: wrap;">
-        <div style="flex: 1; min-width: 250px;">
+        <div style="flex: 1; min-width: min(250px, 100%);">
           <div style="font-size: 0.85rem; font-weight: 500; color: #424242; margin-bottom: 8px;">Berkas Scan Form C1 (PDF/JPG/PNG)</div>
 
           <div style="display: flex; gap: 12px; align-items: center;">
@@ -248,16 +248,12 @@
           </div>
         </div>
 
-        <div *ngIf="selectedFile" style="border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; width: 140px; height: 100px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; position: relative;">
-          <img *ngIf="selectedFile.type.startsWith('image/')" [src]="imagePreviewUrl" alt="Preview C1" style="max-width: 100%; max-height: 100%; object-fit: contain;" [style.opacity]="isOcrScanning ? '0.3' : '1'">
-          <mat-icon *ngIf="!selectedFile.type.startsWith('image/')" style="font-size: 48px; width: 48px; height: 48px; color: #9e9e9e;" [style.opacity]="isOcrScanning ? '0.3' : '1'">picture_as_pdf</mat-icon>
-          <div *ngIf="isOcrScanning" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; text-align: center;">
-             <mat-spinner diameter="24" style="margin-bottom: 4px;"></mat-spinner>
-             <span style="font-size: 0.65rem; color: #1e40af; font-weight: 700; line-height: 1.1;">{{ ocrStatusText }}</span>
-          </div>
-        </div>
       </div>
-
+      <app-file-preview [file]="selectedFile"></app-file-preview>
+      <div *ngIf="isOcrScanning" class="ocr-preview-status" role="status">
+        <mat-spinner diameter="20"></mat-spinner>
+        <span>{{ ocrStatusText }}</span>
+      </div>
       <!-- SUBMIT BUTTON -->
       <div style="display: flex; justify-content: flex-end; padding-top: 1.5rem; border-top: 1px solid #eeeeee; gap: 16px;">
         <button *ngIf="editingC1Id" mat-stroked-button color="warn" type="button" (click)="resetForm()" style="padding: 0 2rem; border-radius: 8px; font-weight: 600;">

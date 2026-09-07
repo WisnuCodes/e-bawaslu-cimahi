@@ -23,7 +23,7 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
       <div style="display: flex; align-items: center; gap: 8px;">
         <mat-icon style="color: #616161;">bar_chart</mat-icon>
-        <strong style="color: #212121; font-size: 1rem; font-weight: 500;">Live Progress Ingesti Form C1 Pemilu Kota Cimahi</strong>
+        <strong style="color: #212121; font-size: 1rem; font-weight: 500;">Live Progress Form C1 Pemilu Kota Cimahi</strong>
       </div>
       <span style="font-size: 0.9rem; color: #424242;">
         <strong>{{ totalC1 }}</strong> dari <strong>{{ totalTpsTarget }} TPS</strong> Masuk ({{ c1ProgressPercentage }}%)
@@ -183,24 +183,24 @@
         </div>
       </a>
 
-      <!-- Ingesti C1 -->
+      <!-- C1 -->
       <a routerLink="/dashboard/c1" class="action-tile-modern" *ngIf="authService.canAccessC1">
         <div class="action-tile-icon">
           <mat-icon>admin_panel_settings</mat-icon>
         </div>
         <div class="action-tile-content">
-          <span class="action-tile-title">Ingesti Form C1 (Pemilu)</span>
+          <span class="action-tile-title">Live Form C1 (Pemilu)</span>
           <span class="action-tile-desc">Enkripsi AES-256 & Validasi Integritas SHA-256</span>
         </div>
       </a>
 
-      <!-- Ingesti C1 Pilkada -->
+      <!-- C1 Pilkada -->
       <a routerLink="/dashboard/c1" [queryParams]="{kamar: 'Pilkada'}" class="action-tile-modern" *ngIf="authService.canAccessC1">
         <div class="action-tile-icon" style="background-color: #e0e0e0; color: #757575;">
           <mat-icon>how_to_vote</mat-icon>
         </div>
         <div class="action-tile-content">
-          <span class="action-tile-title" style="color: #757575;">Ingesti Form C1 (Pilkada)</span>
+          <span class="action-tile-title" style="color: #757575;">Live Form C1 (Pilkada)</span>
           <span class="action-tile-desc">Pengawasan Pemilihan Kepala Daerah / Wali Kota</span>
         </div>
       </a>

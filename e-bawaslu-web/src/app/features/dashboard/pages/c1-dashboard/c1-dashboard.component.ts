@@ -1,3 +1,4 @@
+import { FilePreviewComponent } from '../../../../shared/components/molecules/file-preview/file-preview.component';
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators, FormArray } from '@angular/forms';
@@ -30,6 +31,7 @@ import { ConfirmDialogComponent } from '../../../../shared/components/molecules/
   selector: 'app-c1-dashboard',
   standalone: true,
   imports: [
+    FilePreviewComponent,
     CommonModule, 
     FormsModule,
     ReactiveFormsModule,
@@ -126,7 +128,6 @@ export class C1DashboardComponent implements OnInit {
   ocrProgress = 0;
   ocrStatusText = '';
   selectedFile: File | null = null;
-  imagePreviewUrl: string | null = null;
   editingC1Id: string | null = null;
 
   c1Form: FormGroup = this.fb.group({
@@ -366,17 +367,11 @@ export class C1DashboardComponent implements OnInit {
     this.selectedFile = file;
 
     if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.imagePreviewUrl = reader.result as string;
-      };
-      reader.readAsDataURL(file);
 
       // Mulai proses OCR cerdas di Backend
       this.runBackendOcr(file);
 
     } else {
-      this.imagePreviewUrl = null;
       this.c1Form.patchValue({ total_suara_sah: 0, total_suara_tidak_sah: 0, total_pemilih: 0 });
     }
   }
@@ -511,7 +506,6 @@ export class C1DashboardComponent implements OnInit {
 
   resetForm() {
     this.selectedFile = null;
-    this.imagePreviewUrl = null;
     this.editingC1Id = null;
     const currentJumlah = this.c1Form.value.jumlah_paslon;
     this.c1Form.reset({
