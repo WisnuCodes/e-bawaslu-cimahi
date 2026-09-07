@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { CardComponent } from '../../../../shared/components/molecules/card/card.component';
 import { DateFormatPipe } from '../../../../shared/pipes/date-format.pipe';
 import { MatIconModule } from '@angular/material/icon';
@@ -52,7 +52,14 @@ export class DashboardHomeComponent implements OnInit {
   pendingApprovalWorklog: number = 0;
   presensiTodayStatus: 'Checked In' | 'Checked Out' | 'Belum Presensi' = 'Belum Presensi';
 
+  private router = inject(Router);
+
   ngOnInit(): void {
+    const user = this.authService.currentUser();
+    if (user?.role === 'PTPS' || user?.role === 'Saksi TPS') {
+      this.router.navigate(['/dashboard/wfh']);
+      return;
+    }
     this.loadStats();
   }
 

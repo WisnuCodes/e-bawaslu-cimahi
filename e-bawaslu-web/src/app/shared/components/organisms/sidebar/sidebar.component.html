@@ -13,7 +13,7 @@
     <mat-accordion displayMode="flat" multi="false" class="premium-accordion">
       
       <!-- MENU UTAMA -->
-      <mat-expansion-panel [expanded]="true">
+      <mat-expansion-panel [expanded]="true" *ngIf="!isPTPS">
         <mat-expansion-panel-header>
           <mat-panel-title>
             <mat-icon>widgets</mat-icon>
@@ -42,15 +42,15 @@
           <a mat-list-item routerLink="/dashboard/wfh" routerLinkActive="active-link">
             <span class="nav-item-content">WFH & Presensi</span>
           </a>
-          <a mat-list-item routerLink="/dashboard/persuratan" routerLinkActive="active-link"><span class="nav-item-content">Persuratan</span></a>
-          <a mat-list-item routerLink="/dashboard/arsip" routerLinkActive="active-link">
+          <a mat-list-item routerLink="/dashboard/persuratan" routerLinkActive="active-link" *ngIf="!isPTPS"><span class="nav-item-content">Persuratan</span></a>
+          <a mat-list-item routerLink="/dashboard/arsip" routerLinkActive="active-link" *ngIf="!isPTPS">
             <span class="nav-item-content">E-Arsip</span>
           </a>
         </mat-nav-list>
       </mat-expansion-panel>
 
       <!-- KAMAR PEMILU -->
-      <mat-expansion-panel *ngIf="authService.canAccessC1 || authService.canAccessLhp" [expanded]="true">
+      <mat-expansion-panel *ngIf="!isPTPS && (authService.canAccessC1 || authService.canAccessLhp)" [expanded]="true">
         <mat-expansion-panel-header>
           <mat-panel-title>
             <mat-icon>how_to_vote</mat-icon>
@@ -68,7 +68,7 @@
       </mat-expansion-panel>
 
       <!-- KAMAR PILKADA -->
-      <mat-expansion-panel *ngIf="authService.canAccessC1 || authService.canAccessLhp" [expanded]="true">
+      <mat-expansion-panel *ngIf="!isPTPS && (authService.canAccessC1 || authService.canAccessLhp)" [expanded]="true">
         <mat-expansion-panel-header>
           <mat-panel-title>
             <mat-icon>how_to_vote</mat-icon>
