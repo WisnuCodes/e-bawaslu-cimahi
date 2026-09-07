@@ -16,7 +16,7 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $hidden = ['password_hash', 'password', 'otp_code', 'otp_expires_at'];
+    protected $hidden = ['password_hash', 'otp_code', 'otp_expires_at'];
 
     protected $primaryKey = 'user_id';
     public $incrementing = false;
@@ -35,7 +35,6 @@ class User extends Authenticatable
         'username',
         'email',
         'whatsapp_number',
-        'ppid_url',
         'koordinat_acuan',
         'otp_code',
         'otp_expires_at',
@@ -54,7 +53,6 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
         ];
     }
 }

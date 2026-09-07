@@ -152,6 +152,11 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
     return this.authService.isAdmin;
   }
 
+  get isPTPS(): boolean {
+    const user = this.authService.currentUser();
+    return user?.role === 'PTPS' || user?.role === 'Saksi TPS';
+  }
+
   get canApprove(): boolean {
     return this.authService.canApprove;
   }

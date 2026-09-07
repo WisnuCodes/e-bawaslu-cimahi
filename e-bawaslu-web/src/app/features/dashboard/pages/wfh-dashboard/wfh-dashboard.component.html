@@ -1,5 +1,5 @@
 <p style="padding: 1rem; background: #eff6ff; border-radius: 8px;">
-  Radius presensi: <strong>1 km</strong> dari titik rumah/kantor {{ authService.currentUser()?.koordinat_acuan || 'yang belum diatur. Hubungi admin sebelum presensi.' }}.
+  Radius presensi: <strong>1 km</strong> dari Kantor Bawaslu Kota Cimahi (-6.8716, 107.5445). Lokasi otomatis diaktifkan saat check-in/out.
 </p>
 <!-- Page Header -->
 <div class="wfh-header animate-fade-in">
@@ -63,7 +63,7 @@
   </div>
 
   <!-- RIGHT: Worklog Form -->
-  <div class="section-card">
+  <div class="section-card" *ngIf="!isPTPS">
     <div class="card-header">
       <mat-icon class="card-icon">edit_note</mat-icon>
       <h3>Worklogs (Laporan Harian)</h3>
@@ -105,7 +105,7 @@
 </div>
 
 <!-- TABEL RIWAYAT WORKLOG -->
-<div class="section-card animate-fade-in" style="margin-bottom: 1.5rem;">
+<div class="section-card animate-fade-in" style="margin-bottom: 1.5rem;" *ngIf="!isPTPS">
   <div class="table-section-header">
     <h3>
       <mat-icon class="card-icon">history</mat-icon>
@@ -340,7 +340,7 @@
 </div>
 
 <!-- SECTION: TUNJANGAN KINERJA (TUKIN) -->
-<div class="section-card animate-fade-in">
+<div class="section-card animate-fade-in" *ngIf="!isPTPS">
   <div class="card-header">
     <mat-icon class="card-icon">account_balance_wallet</mat-icon>
     <h3>Kalkulasi & Rekapitulasi Tunjangan Kinerja (Tukin)</h3>

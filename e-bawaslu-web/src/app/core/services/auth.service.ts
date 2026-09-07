@@ -43,10 +43,6 @@ export class AuthService {
     });
   }
 
-  get ppidUrl(): string | null {
-    const url = this.currentUser()?.ppid_url;
-    return url && /^https?:\/\//i.test(url) ? url : null;
-  }
 
   get canWriteDocuments(): boolean {
     return !!this.currentUser() && !this.userRole.toLowerCase().includes('tamu');

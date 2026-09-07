@@ -46,6 +46,10 @@ export class SidebarComponent {
     return user?.role || 'Aparatur Bawaslu';
   }
 
+  get isPTPS(): boolean {
+    return this.userRole === 'PTPS' || this.userRole === 'Pengawas TPS';
+  }
+
   get isPimpinan(): boolean {
     return this.authService.isPimpinan;
   }

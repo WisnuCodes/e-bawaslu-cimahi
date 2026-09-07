@@ -104,13 +104,12 @@ class FieldSupervisorTest extends TestCase
         $this->travelBack();
     }
 
-    public function test_admin_can_save_ppid_and_home_coordinates_and_invalid_values_are_rejected(): void
+    public function test_admin_can_save_home_coordinates_and_invalid_values_are_rejected(): void
     {
         $this->user('Superadmin');
         $data = ['username' => 'pkd-test', 'email' => 'pkd@example.test', 'role' => 'PKD',
-            'koordinat_acuan' => '-6.87,107.54', 'ppid_url' => 'https://example.test/ppid'];
-        $this->postJson('/api/users', $data)->assertCreated()->assertJsonPath('data.ppid_url', $data['ppid_url']);
-        $this->postJson('/api/users', array_replace($data, ['ppid_url' => 'javascript:alert(1)']))->assertUnprocessable()->assertJsonValidationErrors('ppid_url');
-        $this->postJson('/api/users', array_replace($data, ['koordinat_acuan' => '100,200']))->assertUnprocessable()->assertJsonValidationErrors('koordinat_acuan');
+            'koordinat_acuan' => '-6.87,107.54'];
+        $this->postJson('/api/users', $data)->assertCreated();
+        $this->postJson('/api/users', array_replace($data, ['koordinat_acuan' => '100,200', 'username' => 'pkd-test2', 'email' => 'pkd2@example.test']))->assertUnprocessable()->assertJsonValidationErrors('koordinat_acuan');
     }
 }

@@ -130,21 +130,17 @@ class PresensiController extends Controller
         $user = $request->user();
         $userId = $user->user_id;
         
-        abort_unless($user->koordinat_acuan, 422, 'Titik acuan presensi belum diatur. Hubungi admin untuk menetapkan titik rumah atau kantor (radius 1 km).');
-        validator(['koordinat_acuan' => $user->koordinat_acuan], ['koordinat_acuan' => ['required', new \App\Rules\Coordinates]])->validate();
-        // Radius 1 km dari titik acuan pengguna
-        if ($user->koordinat_acuan) {
-            $acuan = explode(',', $user->koordinat_acuan);
-            $current = explode(',', $request->gps_koordinat);
-            
-            if (count($acuan) == 2 && count($current) == 2) {
-                $distance = $this->calculateDistance($acuan[0], $acuan[1], $current[0], $current[1]);
-                if ($distance > 1.0) { // 1 km radius
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Presensi ditolak. Lokasi Anda berada di luar radius 1 KM dari titik acuan.'
-                    ], 403);
-                }
+        // Radius 1 km dari Kantor Bawaslu
+        $acuan = [-6.871618578044813, 107.54454829659048];
+        $current = explode(',', $request->gps_koordinat);
+        
+        if (count($current) == 2) {
+            $distance = $this->calculateDistance($acuan[0], $acuan[1], $current[0], $current[1]);
+            if ($distance > 1.0) { // 1 km radius
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Presensi ditolak. Lokasi Anda berada di luar radius 1 KM dari Kantor Bawaslu.'
+                ], 403);
             }
         }
 
@@ -202,21 +198,17 @@ class PresensiController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        abort_unless($user->koordinat_acuan, 422, 'Titik acuan presensi belum diatur. Hubungi admin untuk menetapkan titik rumah atau kantor (radius 1 km).');
-        validator(['koordinat_acuan' => $user->koordinat_acuan], ['koordinat_acuan' => ['required', new \App\Rules\Coordinates]])->validate();
-        // Radius 1 km dari titik acuan pengguna
-        if ($user->koordinat_acuan) {
-            $acuan = explode(',', $user->koordinat_acuan);
-            $current = explode(',', $request->gps_koordinat);
-            
-            if (count($acuan) == 2 && count($current) == 2) {
-                $distance = $this->calculateDistance($acuan[0], $acuan[1], $current[0], $current[1]);
-                if ($distance > 1.0) { // 1 km radius
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Presensi ditolak. Lokasi Anda berada di luar radius 1 KM dari titik acuan.'
-                    ], 403);
-                }
+        // Radius 1 km dari Kantor Bawaslu
+        $acuan = [-6.871618578044813, 107.54454829659048];
+        $current = explode(',', $request->gps_koordinat);
+        
+        if (count($current) == 2) {
+            $distance = $this->calculateDistance($acuan[0], $acuan[1], $current[0], $current[1]);
+            if ($distance > 1.0) { // 1 km radius
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Presensi ditolak. Lokasi Anda berada di luar radius 1 KM dari Kantor Bawaslu.'
+                ], 403);
             }
         }
 
