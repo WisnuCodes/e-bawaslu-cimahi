@@ -67,15 +67,6 @@
       <input matInput type="password" formControlName="password" placeholder="Masukkan password">
     </mat-form-field>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Hyperlink PPID</mat-label><input matInput formControlName="ppid_url" type="url" placeholder="https://ppid.example.go.id">
-      <mat-error>Gunakan URL https:// atau http:// yang valid.</mat-error>
-    </mat-form-field>
-    <mat-form-field appearance="outline">
-      <mat-label>Titik Acuan Rumah / Kantor</mat-label><input matInput formControlName="koordinat_acuan" placeholder="-6.872, 107.542">
-      <mat-hint>Latitude, longitude. Check-in dan check-out maksimal 1 km dari titik ini.</mat-hint>
-      <mat-error>Titik acuan wajib diisi.</mat-error>
-    </mat-form-field>
     <mat-slide-toggle formControlName="status_aktif" color="primary">
       Status Aktif
     </mat-slide-toggle>

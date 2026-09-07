@@ -54,16 +54,22 @@ class UserController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
+        // Konversi empty string ke null untuk field nullable
+        $nullableFields = ['divisi_id', 'tps_id', 'whatsapp_number'];
+        foreach ($nullableFields as $field) {
+            if ($request->has($field) && $request->$field === '') {
+                $request->merge([$field => null]);
+            }
+        }
+
         $request->validate([
-            'username' => 'required|string|max:255|unique:users',
-            'email' => 'required|email|max:255|unique:users',
+            'username' => 'required|string|max:50|unique:users',
+            'email' => 'required|email|max:100|unique:users',
             'whatsapp_number' => 'nullable|string|max:20',
             'password' => 'nullable|string|min:6',
-            'role' => 'required|string|max:50',
+            'role' => 'required|string|max:30',
             'divisi_id' => 'nullable|uuid|exists:divisi,divisi_id',
             'tps_id' => 'nullable|uuid|exists:wilayah_tps,tps_id',
-            'koordinat_acuan' => ['required', new \App\Rules\Coordinates],
-            'ppid_url' => ['nullable', 'url:http,https', 'max:255'],
             'status_aktif' => 'nullable|boolean'
         ]);
 
@@ -74,13 +80,10 @@ class UserController extends Controller
             'username' => $request->username,
             'email' => $request->email,
             'whatsapp_number' => $request->whatsapp_number,
-            'password_hash' => Hash::make($password), // Gunakan Hash::make atau bcrypt
-            'password' => Hash::make($password), // Untuk default auth laravel jika digunakan
+            'password_hash' => Hash::make($password),
             'role' => $request->role,
             'divisi_id' => $request->divisi_id,
             'tps_id' => $request->tps_id,
-            'koordinat_acuan' => $request->koordinat_acuan,
-            'ppid_url' => $request->ppid_url,
             'status_aktif' => $request->status_aktif ?? true,
             'mfa_enabled' => false
         ]);
@@ -100,36 +103,39 @@ class UserController extends Controller
 
         $user = User::findOrFail($id);
 
+        // Konversi empty string ke null untuk field nullable
+        $nullableFields = ['divisi_id', 'tps_id', 'whatsapp_number'];
+        foreach ($nullableFields as $field) {
+            if ($request->has($field) && $request->$field === '') {
+                $request->merge([$field => null]);
+            }
+        }
+
         $request->validate([
-            'username' => 'required|string|max:255|unique:users,username,'.$id.',user_id',
-            'email' => 'required|email|max:255|unique:users,email,'.$id.',user_id',
+            'username' => 'sometimes|string|max:50|unique:users,username,'.$id.',user_id',
+            'email' => 'sometimes|email|max:100|unique:users,email,'.$id.',user_id',
             'whatsapp_number' => 'nullable|string|max:20',
-            'role' => 'required|string|max:50',
+            'role' => 'sometimes|string|max:30',
             'divisi_id' => 'nullable|uuid|exists:divisi,divisi_id',
             'tps_id' => 'nullable|uuid|exists:wilayah_tps,tps_id',
-            'koordinat_acuan' => ['required', new \App\Rules\Coordinates],
-            'ppid_url' => ['nullable', 'url:http,https', 'max:255'],
             'status_aktif' => 'nullable|boolean'
         ]);
 
-        $updateData = [
-            'username' => $request->username,
-            'email' => $request->email,
-            'whatsapp_number' => $request->whatsapp_number,
-            'role' => $request->role,
-            'divisi_id' => $request->divisi_id,
-            'tps_id' => $request->tps_id,
-            'koordinat_acuan' => $request->koordinat_acuan,
-            'ppid_url' => $request->ppid_url,
-        ];
+        $updateData = [];
+
+        $optionalFields = ['username', 'email', 'whatsapp_number', 'role', 'divisi_id', 'tps_id'];
+        foreach ($optionalFields as $field) {
+            if ($request->has($field)) {
+                $updateData[$field] = $request->$field;
+            }
+        }
 
         if ($request->has('status_aktif')) {
             $updateData['status_aktif'] = $request->status_aktif;
         }
         
-        if ($request->password) {
+        if ($request->filled('password')) {
             $updateData['password_hash'] = Hash::make($request->password);
-            $updateData['password'] = Hash::make($request->password);
         }
 
         $user->update($updateData);

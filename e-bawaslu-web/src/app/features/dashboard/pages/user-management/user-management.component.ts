@@ -71,7 +71,11 @@ export class UserManagementComponent implements OnInit {
               this.snackBar.open('Pengguna berhasil diperbarui', 'Tutup', { duration: 3000 });
               this.loadUsers();
             },
-            error: () => this.snackBar.open('Gagal memperbarui pengguna', 'Tutup', { duration: 3000 })
+            error: (err) => {
+              console.error('Update user error:', err);
+              const msg = err.error?.message || Object.values(err.error?.errors || {}).flat().join(', ') || 'Gagal memperbarui pengguna';
+              this.snackBar.open(msg, 'Tutup', { duration: 5000 });
+            }
           });
         } else {
           // Create
@@ -80,7 +84,11 @@ export class UserManagementComponent implements OnInit {
               this.snackBar.open('Pengguna berhasil ditambahkan', 'Tutup', { duration: 3000 });
               this.loadUsers();
             },
-            error: () => this.snackBar.open('Gagal menambahkan pengguna', 'Tutup', { duration: 3000 })
+            error: (err) => {
+              console.error('Create user error:', err);
+              const msg = err.error?.message || Object.values(err.error?.errors || {}).flat().join(', ') || 'Gagal menambahkan pengguna';
+              this.snackBar.open(msg, 'Tutup', { duration: 5000 });
+            }
           });
         }
       }

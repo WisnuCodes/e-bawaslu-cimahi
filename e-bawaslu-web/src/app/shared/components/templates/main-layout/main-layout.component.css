@@ -68,3 +68,38 @@
 .footer-right {
   font-weight: 500;
 }
+
+.footer-center {
+  display: flex;
+  align-items: center;
+}
+
+.ppid-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.3px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
+}
+
+.ppid-link:hover {
+  background: linear-gradient(135deg, #ea580c, #c2410c);
+  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.45);
+  transform: translateY(-1px);
+}
+
+.ppid-link:active {
+  transform: translateY(0);
+}
+
+.ppid-link svg {
+  flex-shrink: 0;
+}

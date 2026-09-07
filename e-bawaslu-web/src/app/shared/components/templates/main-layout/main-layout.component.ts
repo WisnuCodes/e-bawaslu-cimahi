@@ -23,6 +23,12 @@ import { HeaderComponent } from '../../organisms/header/header.component';
             <span class="footer-brand">SIMBA CIMAHI</span>
             <span class="footer-version">v2.0.0</span>
           </div>
+          <div class="footer-center">
+            <a href="https://ppid-cimahikota.bawaslu.go.id/" target="_blank" rel="noopener noreferrer" class="ppid-link">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              PPID Kota Cimahi
+            </a>
+          </div>
           <div class="footer-right">
             &copy; 2026 Badan Pengawas Pemilihan Umum Kota Cimahi
           </div>
@@ -51,6 +57,12 @@ import { HeaderComponent } from '../../organisms/header/header.component';
           <div class="footer-left">
             <span class="footer-brand">SIMBA CIMAHI</span>
             <span class="footer-version">v2.0.0</span>
+          </div>
+          <div class="footer-center">
+            <a href="https://ppid-cimahikota.bawaslu.go.id/" target="_blank" rel="noopener noreferrer" class="ppid-link">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              PPID Kota Cimahi
+            </a>
           </div>
           <div class="footer-right">
             &copy; 2026 Bawaslu Kota Cimahi
@@ -126,6 +138,36 @@ import { HeaderComponent } from '../../organisms/header/header.component';
     .footer-right {
       font-weight: 500;
     }
+    .footer-center {
+      display: flex;
+      align-items: center;
+    }
+    .ppid-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      letter-spacing: 0.3px;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
+    }
+    .ppid-link:hover {
+      background: linear-gradient(135deg, #ea580c, #c2410c);
+      box-shadow: 0 4px 16px rgba(249, 115, 22, 0.45);
+      transform: translateY(-1px);
+    }
+    .ppid-link:active {
+      transform: translateY(0);
+    }
+    .ppid-link svg {
+      flex-shrink: 0;
+    }
 
     @media (max-width: 768px) {
       .main-content {
@@ -133,10 +175,14 @@ import { HeaderComponent } from '../../organisms/header/header.component';
       }
       .app-footer {
         flex-direction: column;
-        gap: 4px;
+        gap: 8px;
         text-align: center;
         padding: 0.75rem 1rem;
         font-size: 0.75rem;
+      }
+      .ppid-link {
+        font-size: 0.75rem;
+        padding: 5px 12px;
       }
     }
   `]

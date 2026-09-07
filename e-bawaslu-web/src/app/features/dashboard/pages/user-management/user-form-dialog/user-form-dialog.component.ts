@@ -56,18 +56,31 @@ export class UserFormDialogComponent implements OnInit {
   ) {
     this.isEditMode = !!data;
     
-    this.userForm = this.fb.group({
-      username: [data?.username || '', [Validators.required]],
-      email: [data?.email || '', [Validators.required, Validators.email]],
-      whatsapp_number: [data?.whatsapp_number || ''],
-      ppid_url: [data?.ppid_url || '', Validators.pattern(/^https?:\/\/.+/i)],
-      koordinat_acuan: [data?.koordinat_acuan || '', Validators.required],
-      role: [data?.role || '', [Validators.required]],
-      password: [''],
-      divisi_id: [data?.divisi_id || ''],
-      tps_id: [data?.tps_id || ''],
-      status_aktif: [data ? data.status_aktif : true]
-    });
+    if (this.isEditMode) {
+      // Edit mode: semua field opsional
+      this.userForm = this.fb.group({
+        username: [data?.username || ''],
+        email: [data?.email || '', data?.email ? [Validators.email] : []],
+        whatsapp_number: [data?.whatsapp_number || ''],
+        role: [data?.role || ''],
+        password: [''],
+        divisi_id: [data?.divisi_id || ''],
+        tps_id: [data?.tps_id || ''],
+        status_aktif: [data ? data.status_aktif : true]
+      });
+    } else {
+      // Create mode: field wajib tetap strict
+      this.userForm = this.fb.group({
+        username: ['', [Validators.required]],
+        email: ['', [Validators.required, Validators.email]],
+        whatsapp_number: [''],
+        role: ['', [Validators.required]],
+        password: [''],
+        divisi_id: [''],
+        tps_id: [''],
+        status_aktif: [true]
+      });
+    }
   }
 
   ngOnInit(): void {
@@ -82,10 +95,15 @@ export class UserFormDialogComponent implements OnInit {
 
   onSubmit(): void {
     if (this.userForm.valid) {
-      const formValue = this.userForm.value;
-      if (this.isEditMode && !formValue.password) {
-        delete formValue.password;
+      const formValue = { ...this.userForm.value };
+      
+      if (this.isEditMode) {
+        // Hapus password kosong
+        if (!formValue.password) {
+          delete formValue.password;
+        }
       }
+      
       this.dialogRef.close(formValue);
     }
   }

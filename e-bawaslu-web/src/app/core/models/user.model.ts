@@ -6,7 +6,6 @@ export interface User {
   name?: string;
   email: string;
   role: string;
-  ppid_url?: string;
   koordinat_acuan?: string;
   divisi_id?: string;
   mfa_enabled?: boolean;
