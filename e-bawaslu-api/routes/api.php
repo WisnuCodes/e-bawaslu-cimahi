@@ -23,6 +23,7 @@ Route::post('/verify-mfa', [AuthController::class, 'verifyMfa']);
 
 // Protected API Routes
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/me', fn (Request $request) => response()->json(['data' => $request->user()]));
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Master Data Routes
@@ -80,6 +81,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [C1Controller::class, 'index']);
         Route::post('/scan', [C1Controller::class, 'scanOcr']); // High-level OCR scan
         Route::post('/', [C1Controller::class, 'store']); // Enkripsi AES-256
+        Route::get('/{id}/download', [C1Controller::class, 'download']);
+        Route::put('/{id}/approval-divisi', [C1Controller::class, 'assignApproval']);
         Route::put('/{id}', [C1Controller::class, 'update']);
         Route::post('/{id}/approve', [C1Controller::class, 'approve']);
         Route::delete('/{id}', [C1Controller::class, 'destroy']);
@@ -89,6 +92,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('tahapan')->group(function () {
         Route::get('/', [TahapanController::class, 'index']);
         Route::post('/', [TahapanController::class, 'store']);
+        Route::delete('/{id}', [TahapanController::class, 'destroy']);
     });
 
     // LHP Module Routes

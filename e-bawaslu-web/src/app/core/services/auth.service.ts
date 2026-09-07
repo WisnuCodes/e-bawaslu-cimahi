@@ -20,6 +20,7 @@ export class AuthService {
 
   constructor() {
     this.checkToken();
+    if (this.getToken()) queueMicrotask(() => this.refreshProfile());
   }
 
   private checkToken() {
@@ -33,6 +34,22 @@ export class AuthService {
         } catch (e) {}
       }
     }
+  }
+
+  refreshProfile() {
+    this.api.get<{data: User}>('/me').subscribe({
+      next: res => { this.currentUserSignal.set(res.data); localStorage.setItem('auth_user', JSON.stringify(res.data)); },
+      error: () => {}
+    });
+  }
+
+  get ppidUrl(): string | null {
+    const url = this.currentUser()?.ppid_url;
+    return url && /^https?:\/\//i.test(url) ? url : null;
+  }
+
+  get canWriteDocuments(): boolean {
+    return !!this.currentUser() && !this.userRole.toLowerCase().includes('tamu');
   }
 
   login(credentials: any) {
@@ -137,7 +154,7 @@ export class AuthService {
 
   // Hak Hapus Log C1 (HANYA Kadiv P2H, Super Admin, dan Pimpinan)
   get canDeleteC1(): boolean {
-    return this.isSuperAdmin || this.isKadivP2H || this.isPimpinan;
+    return this.isSuperAdmin || this.isPimpinan;
   }
 
   // Hak Edit Presensi/Absensi User Lain (HANYA Super Admin dan Pimpinan)
@@ -156,7 +173,7 @@ export class AuthService {
   }  // Pengawas TPS (Tetap pakai isSaksiTps untuk meminimalisir refaktor)
   get isSaksiTps(): boolean {
     const r = this.userRole.toLowerCase();
-    return r.includes('pengawas tps') || r.includes('saksi');
+    return r.includes('pengawas tps') || r.includes('saksi') || r.includes('ptps');
   }
 
   // Divisi P2H Khusus
@@ -168,13 +185,21 @@ export class AuthService {
   get canAccessC1(): boolean {
     const r = this.userRole.toLowerCase();
     const isP2H = r.includes('p2h');
-    return isP2H || this.isSaksiTps || this.isSuperAdmin || this.isPimpinan; 
+    return isP2H || this.isSaksiTps || this.isSuperAdmin || this.isPimpinan || this.isKepalaDivisi || !!this.currentUser()?.divisi_id || r.includes('panwascam') || r.includes('pkd');
   }
 
   // Hak Akses LHP
   get canAccessLhp(): boolean {
     const r = this.userRole.toLowerCase();
-    return this.isP2H || r.includes('panwascam') || r.includes('pkd') || r.includes('ptps') || this.isPimpinan || this.isSuperAdmin;
+    return !!this.currentUser() && (!!this.currentUser()?.divisi_id || this.isP2H || this.isKepalaDivisi || this.isStaf || this.isSaksiTps || r.includes('ptps'));
+  }
+
+  get canManageTahapan(): boolean {
+    return this.isSuperAdmin || this.userRole.toLowerCase().includes('ketua');
+  }
+
+  get canWriteLhp(): boolean {
+    return this.canAccessLhp && !this.userRole.toLowerCase().includes('tamu');
   }
 
   // Hak Ekspor Laporan Resmi BPK

@@ -20,6 +20,7 @@ class C1 extends Model
         'total_suara_sah',
         'total_suara_tidak_sah',
         'total_pemilih',
+        'suara_paslon',
         'sha256_hash',
         'file_url',
         'status_c1',

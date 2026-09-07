@@ -12,7 +12,7 @@ class StoreC1Request extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return \App\Support\C1Access::write($this->user());
     }
 
     /**
@@ -23,11 +23,14 @@ class StoreC1Request extends FormRequest
     public function rules(): array
     {
         return [
-            'tps_id' => 'required|uuid',
+            'jenis_pemilihan' => 'sometimes|in:Pemilu,Pilkada',
+            'sub_jenis_pemilihan' => 'nullable|string|max:100',
+            'tps_id' => 'required|uuid|exists:wilayah_tps,tps_id',
+            'suara_paslon' => 'nullable|json',
             'total_suara_sah' => 'required|integer|min:0',
             'total_suara_tidak_sah' => 'required|integer|min:0',
             'total_pemilih' => 'required|integer|min:0',
-            'file_c1' => 'required|image|mimes:jpeg,png,jpg|max:5120',
+            'file_c1' => 'required|file|mimes:jpeg,png,jpg,pdf|max:5120',
         ];
     }
 }

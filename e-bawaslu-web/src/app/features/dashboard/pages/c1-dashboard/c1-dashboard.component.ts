@@ -2,9 +2,9 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators, FormArray } from '@angular/forms';
 import { C1Service, C1Item } from '../../../../core/services/c1/c1.service';
-import { MasterDataService, WilayahTps } from '../../../../core/services/master-data.service';
+import { MasterDataService, WilayahTps, Divisi } from '../../../../core/services/master-data.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -57,6 +57,49 @@ export class C1DashboardComponent implements OnInit {
   public authService = inject(AuthService);
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  kamar = 'Pemilu';
+  selectedKecamatan = '';
+  selectedKelurahan = '';
+  divisiList: Divisi[] = [];
+  savingApproval: Record<string, boolean> = {};
+
+  get kecamatanList() { return [...new Set(this.tpsList.map(t => t.kecamatan))].sort(); }
+  get kelurahanList() { return [...new Set(this.tpsList.filter(t => !this.selectedKecamatan || t.kecamatan === this.selectedKecamatan).map(t => t.kelurahan))].sort(); }
+  get filteredTps() { return this.tpsList.filter(t => (!this.selectedKecamatan || t.kecamatan === this.selectedKecamatan) && (!this.selectedKelurahan || t.kelurahan === this.selectedKelurahan)); }
+
+  changeRegion(kecamatanChanged = false) {
+    if (kecamatanChanged) this.selectedKelurahan = '';
+    this.selectedFilterTps = '';
+    this.loadC1List();
+  }
+
+  canApproveItem(item: C1Item): boolean {
+    if (!this.authService.canWriteDocuments) return false;
+    // Koordiv P2H mendapat hak approval global sama seperti Pimpinan/Ketua
+    if (this.isPimpinan || this.authService.isKadivP2H) return true;
+    return (!!item.approval_divisi_id && item.approval_divisi_id === this.authService.currentUser()?.divisi_id && /kordiv|kadiv|kepala divisi|kasubag|kabag/i.test(this.authService.userRole));
+  }
+
+  assignApproval(item: C1Item, division: string) {
+    this.savingApproval[item.id] = true;
+    this.c1Service.assignApproval(item.id, division).subscribe({
+      next: () => { this.savingApproval[item.id] = false; this.loadC1List(); this.showNotification('Divisi approval disimpan.', 'success'); },
+      error: err => { this.savingApproval[item.id] = false; this.loadC1List(); this.showNotification(err.error?.message || 'Gagal mengatur approval.', 'error'); }
+    });
+  }
+
+  downloadC1(item: C1Item) {
+    this.c1Service.download(item.id).subscribe({
+      next: blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url;
+        const ext = blob.type === 'application/pdf' ? 'pdf' : blob.type === 'image/png' ? 'png' : 'jpg';
+        a.download = `C1-${item.id}.${ext}`; a.click(); URL.revokeObjectURL(url);
+      },
+      error: err => this.showNotification('Gagal mengunduh dokumen C1.', 'error')
+    });
+  }
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
   
@@ -227,7 +270,7 @@ export class C1DashboardComponent implements OnInit {
   // FR-REC-03: LIVE PROGRESS BAR
   // ========================================================
   get totalTpsPilot(): number {
-    return this.tpsList.length > 0 ? this.tpsList.length : 15;
+    return this.filteredTps.filter(t => !this.selectedFilterTps || t.tps_id === this.selectedFilterTps).length;
   }
 
   get progressPercentage(): number {
@@ -249,8 +292,13 @@ export class C1DashboardComponent implements OnInit {
       return;
     }
     
+    this.masterDataService.getDivisi().subscribe({ next: res => this.divisiList = res.data, error: () => this.showNotification('Gagal memuat divisi.', 'error') });
     this.loadTps();
-    this.loadC1List();
+    this.route.queryParamMap.subscribe(params => {
+      this.kamar = params.get('kamar') === 'Pilkada' ? 'Pilkada' : 'Pemilu';
+      this.resetForm();
+      this.loadC1List();
+    });
   }
 
   showNotification(message: string, type: 'success' | 'error' | 'info' = 'info') {
@@ -275,9 +323,9 @@ export class C1DashboardComponent implements OnInit {
   }
 
   loadC1List() {
-    this.c1Service.getC1List(this.selectedFilterTps).subscribe({
+    this.c1Service.getC1List(this.selectedFilterTps, this.selectedKecamatan, this.selectedKelurahan).subscribe({
       next: (res) => {
-        let docs = res.data || [];
+        let docs = (res.data || []).filter(doc => (doc.jenis_pemilihan || 'Pemilu') === this.kamar);
         
         // Ekstrak tahun unik
         const years = new Set<string>();
@@ -433,6 +481,8 @@ export class C1DashboardComponent implements OnInit {
     } else {
       // PROSES CREATE
       const formData = new FormData();
+      formData.append('jenis_pemilihan', this.kamar);
+      if (this.kamar === 'Pilkada') formData.append('sub_jenis_pemilihan', 'Wali Kota');
       formData.append('tps_id', this.c1Form.value.tps_id);
       formData.append('suara_paslon', JSON.stringify(paslonObj));
       formData.append('total_suara_sah', this.c1Form.value.total_suara_sah);
@@ -443,7 +493,7 @@ export class C1DashboardComponent implements OnInit {
       this.c1Service.uploadC1(formData).subscribe({
         next: (res) => {
           this.isUploading = false;
-          this.showNotification('Form C1 berhasil dienkripsi dan disimpan.', 'success');
+          this.showNotification('Foto/dokumen C1 berhasil diunggah dan disimpan.', 'success');
           this.resetForm();
           this.loadC1List();
         },

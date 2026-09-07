@@ -116,7 +116,7 @@ class PresensiController extends Controller
     {
         $request->validate([
             'selfie_image' => 'required|file|mimes:jpeg,png,jpg',
-            'gps_koordinat' => 'required|string',
+            'gps_koordinat' => ['required', new \App\Rules\Coordinates],
             'liveness_score' => 'required|numeric'
         ]);
 
@@ -130,7 +130,9 @@ class PresensiController extends Controller
         $user = $request->user();
         $userId = $user->user_id;
         
-        // Cek Radius jika koordinat acuan diset
+        abort_unless($user->koordinat_acuan, 422, 'Titik acuan presensi belum diatur. Hubungi admin untuk menetapkan titik rumah atau kantor (radius 1 km).');
+        validator(['koordinat_acuan' => $user->koordinat_acuan], ['koordinat_acuan' => ['required', new \App\Rules\Coordinates]])->validate();
+        // Radius 1 km dari titik acuan pengguna
         if ($user->koordinat_acuan) {
             $acuan = explode(',', $user->koordinat_acuan);
             $current = explode(',', $request->gps_koordinat);
@@ -181,7 +183,7 @@ class PresensiController extends Controller
         $request->validate([
             'presensi_id' => 'required|uuid',
             'selfie_image' => 'required|file|mimes:jpeg,png,jpg',
-            'gps_koordinat' => 'required|string',
+            'gps_koordinat' => ['required', new \App\Rules\Coordinates],
             'liveness_score' => 'required|numeric'
         ]);
 
@@ -200,7 +202,9 @@ class PresensiController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        // Cek Radius jika koordinat acuan diset
+        abort_unless($user->koordinat_acuan, 422, 'Titik acuan presensi belum diatur. Hubungi admin untuk menetapkan titik rumah atau kantor (radius 1 km).');
+        validator(['koordinat_acuan' => $user->koordinat_acuan], ['koordinat_acuan' => ['required', new \App\Rules\Coordinates]])->validate();
+        // Radius 1 km dari titik acuan pengguna
         if ($user->koordinat_acuan) {
             $acuan = explode(',', $user->koordinat_acuan);
             $current = explode(',', $request->gps_koordinat);

@@ -8,6 +8,8 @@ export interface User {
   email: string;
   whatsapp_number?: string;
   role: string;
+  ppid_url?: string;
+  koordinat_acuan?: string;
   divisi_id?: string;
   nama_divisi?: string;
   tps_id?: string;

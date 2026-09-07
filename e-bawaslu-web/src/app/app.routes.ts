@@ -35,6 +35,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/dashboard/pages/wfh-dashboard/wfh-dashboard.component').then(m => m.WfhDashboardComponent)
       },
       {
+        path: 'persuratan',
+        data: { persuratan: true },
+        loadComponent: () => import('./features/dashboard/pages/arsip-dashboard/arsip-dashboard.component').then(m => m.ArsipDashboardComponent)
+      },
+      {
         path: 'arsip',
         loadComponent: () => import('./features/dashboard/pages/arsip-dashboard/arsip-dashboard.component').then(m => m.ArsipDashboardComponent)
       },
@@ -43,7 +48,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/dashboard/pages/c1-dashboard/c1-dashboard.component').then(m => m.C1DashboardComponent)
       },
       {
-        path: 'lhpp',
+        path: 'lhpp', redirectTo: 'lhp', pathMatch: 'full'
+      },
+      {
+        path: 'lhp',
         loadComponent: () => import('./features/dashboard/pages/lhpp-dashboard/lhpp-dashboard.component').then(m => m.LhppDashboardComponent)
       },
       {

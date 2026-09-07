@@ -62,8 +62,8 @@ class UserController extends Controller
             'role' => 'required|string|max:50',
             'divisi_id' => 'nullable|uuid|exists:divisi,divisi_id',
             'tps_id' => 'nullable|uuid|exists:wilayah_tps,tps_id',
-            'koordinat_acuan' => 'nullable|string',
-            'ppid_url' => 'nullable|string',
+            'koordinat_acuan' => ['required', new \App\Rules\Coordinates],
+            'ppid_url' => ['nullable', 'url:http,https', 'max:255'],
             'status_aktif' => 'nullable|boolean'
         ]);
 
@@ -107,8 +107,8 @@ class UserController extends Controller
             'role' => 'required|string|max:50',
             'divisi_id' => 'nullable|uuid|exists:divisi,divisi_id',
             'tps_id' => 'nullable|uuid|exists:wilayah_tps,tps_id',
-            'koordinat_acuan' => 'nullable|string',
-            'ppid_url' => 'nullable|string',
+            'koordinat_acuan' => ['required', new \App\Rules\Coordinates],
+            'ppid_url' => ['nullable', 'url:http,https', 'max:255'],
             'status_aktif' => 'nullable|boolean'
         ]);
 

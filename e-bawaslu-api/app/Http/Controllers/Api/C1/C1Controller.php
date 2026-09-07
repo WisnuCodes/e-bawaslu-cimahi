@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\C1;
 
 use App\Http\Controllers\Controller;
 use App\Models\C1;
+use App\Support\C1Access;
 use App\Http\Requests\C1\StoreC1Request;
 use App\Http\Resources\C1\C1Resource;
 use Illuminate\Http\Request;
@@ -16,6 +17,7 @@ class C1Controller extends Controller
 {
     public function scanOcr(Request $request, \App\Services\OcrService $ocrService)
     {
+        abort_unless(C1Access::write($request->user()), 403, 'Anda tidak memiliki akses C1.');
         $request->validate([
             'file_c1' => 'required|file|mimes:jpeg,png,jpg,pdf|max:10240',
         ]);
@@ -33,6 +35,7 @@ class C1Controller extends Controller
 
     public function index(Request $request)
     {
+        abort_unless(C1Access::read($request->user()), 403, 'Anda tidak memiliki akses C1.');
         $query = C1::query()
             ->join('wilayah_tps', 'berkas_c1.tps_id', '=', 'wilayah_tps.tps_id')
             ->select('berkas_c1.*', 'wilayah_tps.kecamatan', 'wilayah_tps.kelurahan');
@@ -52,6 +55,7 @@ class C1Controller extends Controller
 
     public function store(StoreC1Request $request)
     {
+        abort_unless(C1Access::write($request->user()), 403, 'Anda tidak memiliki akses C1.');
         $userId = $request->user()->user_id;
         $file = $request->file('file_c1');
 
@@ -98,6 +102,8 @@ class C1Controller extends Controller
             'c1_id' => (string) Str::uuid(),
             'tps_id' => $request->tps_id,
             'uploaded_by' => $userId,
+            'jenis_pemilihan' => $request->input('jenis_pemilihan', 'Pemilu'),
+            'sub_jenis_pemilihan' => $request->sub_jenis_pemilihan,
             'total_suara_sah' => $totalSah,
             'total_suara_tidak_sah' => $totalTidakSah,
             'total_pemilih' => $totalPemilih,
@@ -122,17 +128,8 @@ class C1Controller extends Controller
 
         $c1 = C1::findOrFail($id);
         
-        // Cek custom approval divisi if set by admin
-        $user = $request->user();
-        if ($c1->approval_divisi_id && $user->divisi_id !== $c1->approval_divisi_id) {
-            // Admin or Ketua can override this restriction
-            $role = strtolower($user->role);
-            if (!str_contains($role, 'admin') && !str_contains($role, 'ketua')) {
-                return response()->json([
-                    'message' => 'Anda tidak berada pada divisi yang diberi wewenang untuk menyetujui form C1 ini.'
-                ], 403);
-            }
-        }
+        abort_unless(C1Access::approve($request->user(), $c1), 403, 'Approval hanya untuk pimpinan atau kepala divisi yang ditunjuk admin.');
+        abort_unless($c1->status_c1 === 'Draft', 422, 'Hanya C1 berstatus Draft yang dapat disetujui atau ditolak.');
 
         $c1->update([
             'status_c1' => $request->status
@@ -146,7 +143,9 @@ class C1Controller extends Controller
 
     public function update(Request $request, $id)
     {
+        abort_unless(C1Access::write($request->user()), 403);
         $c1 = C1::findOrFail($id);
+        abort_if($c1->status_c1 === 'Approved', 422, 'C1 yang sudah disetujui tidak dapat diubah.');
 
         $request->validate([
             'tps_id' => 'required|exists:wilayah_tps,tps_id',
@@ -159,7 +158,7 @@ class C1Controller extends Controller
         $totalSah = (int) $request->total_suara_sah;
         $totalTidakSah = (int) $request->total_suara_tidak_sah;
         $totalPemilih = (int) $request->total_pemilih;
-        $status_c1 = $c1->status_c1;
+        $status_c1 = 'Draft';
 
         $suaraPaslon = $request->suara_paslon ? json_decode($request->suara_paslon, true) : null;
 
@@ -197,8 +196,36 @@ class C1Controller extends Controller
         ], 200);
     }
 
-    public function destroy($id)
+    public function assignApproval(Request $request, $id)
     {
+        abort_unless(C1Access::admin($request->user()), 403);
+        $data = $request->validate(['approval_divisi_id' => 'required|uuid|exists:divisi,divisi_id']);
+        $c1 = C1::findOrFail($id);
+        $c1->update($data);
+        return response()->json(['message' => 'Divisi approval berhasil ditetapkan.', 'data' => new C1Resource($c1)]);
+    }
+
+    public function download(Request $request, $id)
+    {
+        abort_unless(C1Access::read($request->user()), 403);
+        $c1 = C1::findOrFail($id);
+        abort_unless(Storage::disk('public')->exists($c1->file_url), 404, 'Dokumen tidak ditemukan.');
+        $contents = Crypt::decrypt(Storage::disk('public')->get($c1->file_url));
+        $mime = (new \finfo(FILEINFO_MIME_TYPE))->buffer($contents);
+        $extension = match ($mime) { 'image/png' => 'png', 'application/pdf' => 'pdf', default => 'jpg' };
+        \App\Models\AuditLog::create([
+            'log_id' => (string) Str::uuid(), 'actor_id' => $request->user()->user_id,
+            'action' => 'DOWNLOAD_C1', 'target_entity' => 'c1:'.$id,
+            'ip_address' => $request->ip(), 'reason' => 'Unduh dokumen C1', 'timestamp' => Carbon::now(),
+        ]);
+        return response($contents)->header('Content-Type', $mime)
+            ->header('Content-Disposition', 'attachment; filename="C1-'.$id.'.'.$extension.'"')
+            ->header('Cache-Control', 'private, no-store');
+    }
+
+    public function destroy(Request $request, $id)
+    {
+        abort_unless(C1Access::leadership($request->user()), 403);
         $c1 = C1::findOrFail($id);
         $c1->delete();
 

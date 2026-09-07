@@ -48,7 +48,7 @@ import * as _ from 'lodash';
 })
 export class WfhDashboardComponent implements OnInit, OnDestroy {
   private wfhService = inject(WfhService);
-  private authService = inject(AuthService);
+  public authService = inject(AuthService);
   private fb = inject(FormBuilder);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
@@ -400,7 +400,7 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
       this.wfhService.checkIn(formData).subscribe({
         next: (res) => {
           this.isCheckingIn = false;
-          this.showMessage('Berhasil Check In pada lokasi: ' + coords);
+          this.showMessage('Foto berhasil diunggah. Check-in berhasil pada lokasi: ' + coords);
           this.loadPresensi();
         },
         error: (err) => {
@@ -413,7 +413,7 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
       this.wfhService.checkOut(formData).subscribe({
         next: (res) => {
           this.isCheckingOut = false;
-          this.showMessage('Berhasil Check Out pada lokasi: ' + coords);
+          this.showMessage('Foto berhasil diunggah. Check-out berhasil pada lokasi: ' + coords);
           this.loadPresensi();
         },
         error: (err) => {

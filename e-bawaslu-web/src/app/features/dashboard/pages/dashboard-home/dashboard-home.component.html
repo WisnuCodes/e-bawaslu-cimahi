@@ -23,7 +23,7 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
       <div style="display: flex; align-items: center; gap: 8px;">
         <mat-icon style="color: #616161;">bar_chart</mat-icon>
-        <strong style="color: #212121; font-size: 1rem; font-weight: 500;">Live Progress Ingesti Form C1 Kota Cimahi (Pilot Project)</strong>
+        <strong style="color: #212121; font-size: 1rem; font-weight: 500;">Live Progress Ingesti Form C1 Pemilu Kota Cimahi</strong>
       </div>
       <span style="font-size: 0.9rem; color: #424242;">
         <strong>{{ totalC1 }}</strong> dari <strong>{{ totalTpsTarget }} TPS</strong> Masuk ({{ c1ProgressPercentage }}%)
@@ -42,7 +42,7 @@
   <div class="stats-grid">
     
     <!-- Status Presensi Hari Ini -->
-    <div class="stat-card-modern" *ngIf="!authService.isSaksiTps">
+    <div class="stat-card-modern">
       <div class="stat-card-header">
         <h3 class="stat-title">Status Presensi<br>Hari Ini</h3>
         <div class="stat-icon-wrapper">
@@ -61,7 +61,7 @@
     </div>
 
     <!-- Dokumen E-Arsip -->
-    <div class="stat-card-modern" *ngIf="!authService.isSaksiTps">
+    <div class="stat-card-modern">
       <div class="stat-card-header">
         <h3 class="stat-title">Dokumen<br>E-Arsip</h3>
         <div class="stat-icon-wrapper">
@@ -105,21 +105,21 @@
       </div>
     </div>
 
-    <!-- Manajemen LHPP Khusus P2H -->
-    <div class="stat-card-modern" *ngIf="authService.isP2H">
+    <!-- Manajemen LHP Semua Divisi -->
+    <div class="stat-card-modern" *ngIf="authService.canAccessLhp">
       <div class="stat-card-header">
-        <h3 class="stat-title">Manajemen LHPP<br>(Kamar Pemilu)</h3>
+        <h3 class="stat-title">Manajemen LHP<br>(Kamar Pemilu)</h3>
         <div class="stat-icon-wrapper">
           <mat-icon>assignment</mat-icon>
         </div>
       </div>
       <div class="stat-value" style="color: var(--color-primary);">
-        P2H
+        Semua Divisi
       </div>
       <div class="stat-action">
-        <span class="stat-subtitle">Akses Eksklusif Divisi</span>
-        <a routerLink="/dashboard/lhpp" class="stat-link">
-          Kelola LHPP <mat-icon style="font-size: 16px; width: 16px; height: 16px; margin-top: 2px;">chevron_right</mat-icon>
+        <span class="stat-subtitle">Sesuai Tahapan Pengawasan</span>
+        <a routerLink="/dashboard/lhp" class="stat-link">
+          Kelola LHP <mat-icon style="font-size: 16px; width: 16px; height: 16px; margin-top: 2px;">chevron_right</mat-icon>
         </a>
       </div>
     </div>
@@ -143,22 +143,12 @@
       </div>
     </div>
 
-    <!-- Placeholder C1 Pilkada -->
-    <div class="stat-card-modern" *ngIf="authService.canAccessC1" style="opacity: 0.7;">
-      <div class="stat-card-header">
-        <h3 class="stat-title">Form C1<br>(Kamar Pilkada)</h3>
-        <div class="stat-icon-wrapper">
-          <mat-icon>how_to_vote</mat-icon>
-        </div>
-      </div>
-      <div class="stat-value">
-        -
-      </div>
+    <div class="stat-card-modern" *ngIf="authService.canAccessC1 || authService.canAccessLhp">
+      <div class="stat-card-header"><h3 class="stat-title">Kamar Pilkada</h3><mat-icon>how_to_vote</mat-icon></div>
+      <p>Pemilihan Kepala Daerah / Wali Kota</p>
       <div class="stat-action">
-        <span class="stat-subtitle">Coming Soon</span>
-        <span class="stat-link" style="color: #9e9e9e; cursor: not-allowed;">
-          Pantau Form <mat-icon style="font-size: 16px; width: 16px; height: 16px; margin-top: 2px;">chevron_right</mat-icon>
-        </span>
+        <a *ngIf="authService.canAccessC1" routerLink="/dashboard/c1" [queryParams]="{kamar: 'Pilkada'}" class="stat-link">Form C1</a>
+        <a *ngIf="authService.canAccessLhp" routerLink="/dashboard/lhp" [queryParams]="{kamar: 'Pilkada'}" class="stat-link">Kelola LHP</a>
       </div>
     </div>
   </div>
@@ -172,7 +162,7 @@
     <div class="quick-actions-grid">
       
       <!-- Presensi WFH -->
-      <a routerLink="/dashboard/wfh" class="action-tile-modern" *ngIf="!authService.isSaksiTps">
+      <a routerLink="/dashboard/wfh" class="action-tile-modern">
         <div class="action-tile-icon">
           <mat-icon>add_a_photo</mat-icon>
         </div>
@@ -183,7 +173,7 @@
       </a>
 
       <!-- E-Arsip -->
-      <a routerLink="/dashboard/arsip" class="action-tile-modern" *ngIf="!authService.isSaksiTps">
+      <a routerLink="/dashboard/arsip" class="action-tile-modern">
         <div class="action-tile-icon">
           <mat-icon>drive_folder_upload</mat-icon>
         </div>
@@ -204,14 +194,14 @@
         </div>
       </a>
 
-      <!-- Ingesti C1 Pilkada Placeholder -->
-      <a class="action-tile-modern" *ngIf="authService.canAccessC1" style="opacity: 0.6; cursor: not-allowed; border: 1px dashed #ccc; box-shadow: none;" (click)="$event.preventDefault()">
+      <!-- Ingesti C1 Pilkada -->
+      <a routerLink="/dashboard/c1" [queryParams]="{kamar: 'Pilkada'}" class="action-tile-modern" *ngIf="authService.canAccessC1">
         <div class="action-tile-icon" style="background-color: #e0e0e0; color: #757575;">
           <mat-icon>how_to_vote</mat-icon>
         </div>
         <div class="action-tile-content">
           <span class="action-tile-title" style="color: #757575;">Ingesti Form C1 (Pilkada)</span>
-          <span class="action-tile-desc">Segera Hadir untuk Pemilihan Kepala Daerah</span>
+          <span class="action-tile-desc">Pengawasan Pemilihan Kepala Daerah / Wali Kota</span>
         </div>
       </a>
 

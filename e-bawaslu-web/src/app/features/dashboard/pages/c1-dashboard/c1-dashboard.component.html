@@ -4,23 +4,25 @@
   <div class="page-header">
     <div>
       <span class="status-badge badge-neutral" style="margin-bottom: 8px; display: inline-block;">
-        DIVISI P2H (PENCEGAHAN, PARMAS & HUMAS)
+        PENGAWASAN TPS ? KELURAHAN ? KECAMATAN ? KOTA
       </span>
       <h1 class="page-title">
-        Pengawasan, Ingesti & Rekapitulasi Berkas C1-Hasil (Pemilu)
+        Pengawasan, Ingesti & Rekapitulasi Berkas C1-Hasil (Kamar {{ kamar }})
       </h1>
       <p class="page-subtitle">
-        Terproteksi Enkripsi Storage AES-256, Hash SHA-256 Anti-Tampering, dan Auto Cross-Check Rekapitulasi.
+        Unggah dan unduh dokumen C1, pantau hasil per wilayah, serta tinjau persetujuan divisi.
       </p>
     </div>
 
     <!-- FILTER TPS -->
     <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+      <mat-form-field appearance="outline"><mat-label>Kecamatan</mat-label><mat-select [(ngModel)]="selectedKecamatan" (selectionChange)="changeRegion(true)"><mat-option value="">Semua Kecamatan</mat-option><mat-option *ngFor="let kec of kecamatanList" [value]="kec">{{ kec }}</mat-option></mat-select></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Kelurahan</mat-label><mat-select [(ngModel)]="selectedKelurahan" (selectionChange)="changeRegion()"><mat-option value="">Semua Kelurahan</mat-option><mat-option *ngFor="let kel of kelurahanList" [value]="kel">{{ kel }}</mat-option></mat-select></mat-form-field>
       <mat-form-field appearance="outline" style="width: 300px; margin-bottom: -1.25rem;">
         <mat-label>Filter Berdasarkan TPS</mat-label>
         <mat-select [(value)]="selectedFilterTps" (selectionChange)="onFilterTpsChange($event.value)">
           <mat-option value="">Semua TPS Kota Cimahi</mat-option>
-          <mat-option *ngFor="let t of tpsList" [value]="t.tps_id">
+          <mat-option *ngFor="let t of filteredTps" [value]="t.tps_id">
             TPS {{ t.no_tps }} - {{ t.kelurahan }} (Kec. {{ t.kecamatan }})
           </mat-option>
         </mat-select>
@@ -143,7 +145,7 @@
       </ul>
     </div>
 
-    <form [formGroup]="c1Form" (ngSubmit)="onSubmit()" style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <form *ngIf="authService.canWriteDocuments" [formGroup]="c1Form" (ngSubmit)="onSubmit()" style="display: flex; flex-direction: column; gap: 1.5rem;">
 
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem;">
         <!-- PILIH TPS -->
@@ -381,8 +383,12 @@
           <td mat-cell *matCellDef="let element">
             <div style="display: flex; gap: 8px; align-items: center;">
 
+              <button mat-icon-button (click)="downloadC1(element)" matTooltip="Unduh Dokumen C1"><mat-icon>download</mat-icon></button>
+              <mat-form-field *ngIf="authService.isSuperAdmin" appearance="outline" style="min-width: 200px;">
+                <mat-label>Divisi Approval</mat-label><mat-select [value]="element.approval_divisi_id" [disabled]="savingApproval[element.id]" (selectionChange)="assignApproval(element, $event.value)"><mat-option *ngFor="let div of divisiList" [value]="div.divisi_id">{{ div.nama_divisi }}</mat-option></mat-select>
+              </mat-form-field>
               <!-- Pimpinan Approval Buttons -->
-              <ng-container *ngIf="canApprove && element.status_c1 === 'Draft'">
+              <ng-container *ngIf="canApproveItem(element) && element.status_c1 === 'Draft'">
                 <button mat-stroked-button (click)="onApprove(element, 'Approved')" style="height: 32px; line-height: 30px; padding: 0 12px; font-size: 0.75rem; border-color: #10b981; color: #047857; font-weight: 600; border-radius: 6px; background-color: #ecfdf5;">
                   Setujui
                 </button>
@@ -392,7 +398,7 @@
               </ng-container>
 
               <!-- Tombol Edit (Tampil untuk Staf, Pimpinan & Kadiv jika perlu direvisi) -->
-              <ng-container *ngIf="(isStaf || isPimpinan || isKepalaDivisi) && element.status_c1 !== 'Approved'">
+              <ng-container *ngIf="authService.canWriteDocuments && element.status_c1 !== 'Approved'">
                 <button mat-icon-button color="primary" (click)="onEdit(element)" matTooltip="Edit & Koreksi Data">
                   <mat-icon>edit_square</mat-icon>
                 </button>

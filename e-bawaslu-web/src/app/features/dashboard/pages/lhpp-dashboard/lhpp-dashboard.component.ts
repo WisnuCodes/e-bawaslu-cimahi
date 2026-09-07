@@ -1,10 +1,10 @@
 import { Component, inject, ViewChild, ElementRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormGroupDirective, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ArsipService, ArsipItem, VersionHistoryItem } from '../../../../core/services/arsip/arsip.service';
-import { MasterDataService, Divisi } from '../../../../core/services/master-data.service';
+import { MasterDataService, Divisi, Tahapan } from '../../../../core/services/master-data.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
@@ -51,6 +51,72 @@ export class LhppDashboardComponent implements OnInit {
   private fb = inject(FormBuilder);
   private snackBar = inject(MatSnackBar);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  kamar = 'Pemilu';
+  tahapanList: Tahapan[] = [];
+  selectedDivisiFilter = '';
+  selectedTahapanFilter = '';
+  tahapanForm = this.fb.nonNullable.group({ nama_tahapan: ['', Validators.required], divisi_id: ['', Validators.required] });
+  isSavingTahapan = false;
+  isLoadingTahapan = false;
+  tahapanLoadError = false;
+  showInlineTahapan = false;
+  pendingDeleteTahapan: Tahapan | null = null;
+  deletingTahapan = false;
+  @ViewChild('stageForm') stageForm?: FormGroupDirective;
+
+  deleteTahapan() {
+    const tahap = this.pendingDeleteTahapan;
+    if (!tahap || this.deletingTahapan) return;
+    this.deletingTahapan = true;
+    this.masterDataService.deleteTahapan(tahap.id).subscribe({
+      next: res => {
+        this.deletingTahapan = false; this.pendingDeleteTahapan = null;
+        this.tahapanList = this.tahapanList.filter(t => t.id !== tahap.id);
+        if (this.selectedTahapanFilter === tahap.id) { this.selectedTahapanFilter = ''; this.loadDocuments(); }
+        if (this.uploadForm.value.tahapan_id === tahap.id) this.uploadForm.patchValue({ tahapan_id: '', divisi_id: '' });
+        this.showNotification(res.message, 'success');
+      },
+      error: err => { this.deletingTahapan = false; this.pendingDeleteTahapan = null; this.showNotification(err.error?.message || 'Gagal menghapus tahapan.', 'error'); }
+    });
+  }
+
+  loadTahapan() {
+    this.isLoadingTahapan = true;
+    this.tahapanLoadError = false;
+    this.masterDataService.getTahapan().subscribe({
+      next: res => { this.tahapanList = res.data || []; this.isLoadingTahapan = false; },
+      error: () => { this.isLoadingTahapan = false; this.tahapanLoadError = true; }
+    });
+  }
+
+  saveTahapan() {
+    if (this.tahapanForm.invalid || this.isSavingTahapan) return;
+    this.isSavingTahapan = true;
+    this.masterDataService.createTahapan(this.tahapanForm.getRawValue()).subscribe({
+      next: res => {
+        this.isSavingTahapan = false;
+        this.tahapanList = [...this.tahapanList, res.data];
+        if (this.showUploadModal) {
+          this.uploadForm.patchValue({ tahapan_id: res.data.id, divisi_id: res.data.divisi_id });
+        }
+        this.showInlineTahapan = false;
+        this.tahapanLoadError = false;
+        this.tahapanForm.reset();
+        this.stageForm?.resetForm();
+        this.showNotification('Tahapan berhasil ditambahkan dan siap dipilih.');
+      },
+      error: err => { this.isSavingTahapan = false; this.showNotification(err.error?.message || 'Gagal menyimpan tahapan.', 'error'); }
+    });
+  }
+
+  selectTahapan(id: string) {
+    this.uploadForm.patchValue({ divisi_id: this.tahapanList.find(t => t.id === id)?.divisi_id || '' });
+  }
+
+  tahapanName(id?: string): string {
+    return this.tahapanList.find(t => t.id === id)?.nama_tahapan || 'Belum ditentukan';
+  }
   
   @ViewChild('uploadFileInput') uploadFileInput!: ElementRef<HTMLInputElement>;
   @ViewChild('revisiFileInput') revisiFileInput!: ElementRef<HTMLInputElement>;
@@ -100,10 +166,16 @@ export class LhppDashboardComponent implements OnInit {
     no_surat: ['', Validators.required],
     tgl_surat: [new Date().toISOString().split('T')[0], Validators.required],
     perihal: ['', Validators.required],
-    kategori: ['LHPP', Validators.required],
+    kategori: ['LHP', Validators.required],
+    kejadian_1: ['', Validators.maxLength(2000)],
+    kejadian_2: ['', Validators.maxLength(2000)],
+    kejadian_3: ['', Validators.maxLength(2000)],
+    kondisi_kotak_surat: ['', Validators.maxLength(2000)],
+    tahapan_id: ['', Validators.required],
     klasifikasi: ['Rahasia', Validators.required]
   });
   uploadFile: File | null = null;
+  uploadPreview: string | null = null;
 
   // Form Revisi
   revisiCatatan: string = '';
@@ -116,13 +188,18 @@ export class LhppDashboardComponent implements OnInit {
   klasifikasiList = ['Biasa', 'Penting', 'Rahasia', 'Sangat Rahasia'];
 
   ngOnInit() {
-    if (!this.authService.isP2H) {
-      this.showNotification('Akses Ditolak: Hanya Divisi P2H yang berwenang mengakses Manajemen LHPP.', 'error');
+    if (!this.authService.canAccessLhp) {
+      this.showNotification('Akses Ditolak: Anda tidak memiliki akses LHP.', 'error');
       this.router.navigate(['/dashboard']);
       return;
     }
     this.loadDivisi();
-    this.loadDocuments();
+    this.loadTahapan();
+    this.route.queryParamMap.subscribe(params => {
+      this.kamar = params.get('kamar') === 'Pilkada' ? 'Pilkada' : 'Pemilu';
+      this.showUploadModal = false;
+      this.loadDocuments();
+    });
     if (this.canViewLogs) {
       this.loadLogs();
     }
@@ -138,7 +215,7 @@ export class LhppDashboardComponent implements OnInit {
   loadDocuments() {
     this.arsipService.getArsip().subscribe({
       next: (res) => {
-        let lhppDocs = (res.data || []).filter((doc: ArsipItem) => doc.kategori === 'LHPP');
+        let lhppDocs = (res.data || []).filter((doc: ArsipItem) => ['LHP', 'LHPP'].includes(doc.kategori) && (doc.jenis_pemilihan || 'Pemilu') === this.kamar);
         
         // Ekstrak tahun unik
         const years = new Set<string>();
@@ -154,7 +231,7 @@ export class LhppDashboardComponent implements OnInit {
           lhppDocs = lhppDocs.filter((doc: ArsipItem) => doc.tgl_surat?.startsWith(this.selectedYearFilter));
         }
 
-        this.documents.data = lhppDocs;
+        this.documents.data = lhppDocs.filter(doc => (!this.selectedDivisiFilter || doc.divisi_id === this.selectedDivisiFilter) && (!this.selectedTahapanFilter || doc.tahapan_id === this.selectedTahapanFilter));
         this.documents.paginator = this.paginator;
       },
       error: () => {
@@ -175,10 +252,7 @@ export class LhppDashboardComponent implements OnInit {
   }
 
   get canViewLogs(): boolean {
-    const user = this.authService.currentUser();
-    if (!user) return false;
-    const allowedRoles = ['staf', 'kasubag', 'kabag', 'kordiv', 'ketua', 'admin', 'super_admin'];
-    return allowedRoles.includes(user.role.toLowerCase()) || true; 
+    return this.authService.canAccessAuditLog;
   }
 
   onFilterYearChange(year: string) {
@@ -186,42 +260,41 @@ export class LhppDashboardComponent implements OnInit {
     this.loadDocuments();
   }
 
-  onSearch(event: any) {
-    const query = event.target.value;
-    this.searchQuery = query;
-    if (query.length >= 2) {
-      this.arsipService.searchArsip(query).subscribe({
-        next: (res) => this.documents.data = res.data || [],
-        error: () => this.loadDocuments()
-      });
-    } else if (query.length === 0) {
-      this.loadDocuments();
-    }
-  }
-
   // Upload Arsip Baru
   openUploadModal() {
-    // Cari divisi P2H atau Penanganan Pelanggaran
-    const p2hDiv = this.divisiList.find(d => 
-      d.nama_divisi.toLowerCase().includes('p2h') || 
-      d.nama_divisi.toLowerCase().includes('penanganan pelanggaran')
-    );
-
+    this.showInlineTahapan = false;
+    this.loadTahapan();
     this.uploadForm.reset({
-      divisi_id: p2hDiv ? p2hDiv.divisi_id : (this.divisiList.length > 0 ? this.divisiList[0].divisi_id : ''),
+      divisi_id: '',
+      tahapan_id: '',
       no_surat: '',
       tgl_surat: new Date().toISOString().split('T')[0],
       perihal: '',
-      kategori: 'LHPP',
+      kategori: 'LHP',
+      kejadian_1: '', kejadian_2: '', kejadian_3: '', kondisi_kotak_surat: '',
       klasifikasi: 'Rahasia'
     });
     this.uploadFile = null;
+    this.uploadPreview = null;
     this.showUploadModal = true;
   }
 
-  onUploadFileSelected(event: any) {
-    if (event.target.files.length > 0) {
-      this.uploadFile = event.target.files[0];
+  onUploadFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] || null;
+    this.uploadFile = null;
+    this.uploadPreview = null;
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024 || !/\.(pdf|doc|docx|jpg|jpeg|png)$/i.test(file.name)) {
+      input.value = '';
+      this.showNotification('Gunakan PDF, DOC, DOCX, JPG, atau PNG maksimal 5 MB.', 'error');
+      return;
+    }
+    this.uploadFile = file;
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = () => { if (this.uploadFile === file) this.uploadPreview = reader.result as string; };
+      reader.readAsDataURL(file);
     }
   }
 
@@ -237,15 +310,19 @@ export class LhppDashboardComponent implements OnInit {
     formData.append('no_surat', this.uploadForm.value.no_surat);
     formData.append('tgl_surat', this.uploadForm.value.tgl_surat);
     formData.append('perihal', this.uploadForm.value.perihal);
-    formData.append('kategori', this.uploadForm.value.kategori);
+    formData.append('kategori', 'LHP');
+    formData.append('jenis_pemilihan', this.kamar);
+    formData.append('tahapan_id', this.uploadForm.value.tahapan_id);
     formData.append('klasifikasi', this.uploadForm.value.klasifikasi);
+    ['kejadian_1', 'kejadian_2', 'kejadian_3'].map(key => (this.uploadForm.value[key] || '').trim()).filter(Boolean).forEach((note, index) => formData.append(`catatan_kejadian[${index}]`, note));
+    formData.append('kondisi_kotak_surat', (this.uploadForm.value.kondisi_kotak_surat || '').trim());
     formData.append('file_dokumen', this.uploadFile);
 
     this.arsipService.uploadArsip(formData).subscribe({
-      next: () => {
+      next: (res) => {
         this.isUploading = false;
         this.showUploadModal = false;
-        this.showNotification('Dokumen arsip berhasil didaftarkan (v1.0)!', 'success');
+        this.showNotification(res.message || 'LHP berhasil diunggah.', 'success');
         this.loadDocuments();
         if (this.canViewLogs) this.loadLogs();
       },
@@ -324,7 +401,8 @@ export class LhppDashboardComponent implements OnInit {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${doc.no_surat.replace(/\//g, '_')}_watermarked.pdf`;
+        const ext = doc.file_path.split('.').pop() || 'pdf';
+        a.download = `${doc.no_surat.replace(/\//g, '_')}.${ext}`;
         a.click();
         window.URL.revokeObjectURL(url);
         if (this.canViewLogs) this.loadLogs();
