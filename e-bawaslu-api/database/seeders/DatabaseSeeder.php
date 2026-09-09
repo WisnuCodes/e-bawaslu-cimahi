@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
             'SDMOD' => [
                 'id' => (string) Str::uuid(),
                 'nama' => 'Divisi SDM, Organisasi, Pendidikan & Pelatihan',
-                'deskripsi' => 'Pengelolaan Presensi WFH, Daily Worklog, dan Rekapitulasi Tukin Pegawai'
+                'deskripsi' => 'Pengelolaan Presensi WFH, Daily Worklog, dan Rekapitulasi Pegawai'
             ],
             'PPDATIN' => [
                 'id' => (string) Str::uuid(),

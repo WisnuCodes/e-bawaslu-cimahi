@@ -170,19 +170,19 @@ class PresensiController extends Controller
             ], 403);
         }
 
-        // Tentukan apakah hari ini WFH (Selasa/Jumat) atau Reguler (Senin/Rabu/Kamis)
+        // Tentukan apakah hari ini WFH (Selasa/Jumat) atau WFO (Senin/Rabu/Kamis)
         $isWfhDay = in_array($now->dayOfWeekIso, [2, 5]); // 2: Tuesday, 5: Friday
         
-        // Radius 1 km dari Kantor Bawaslu
+        // Radius 500 meter dari Kantor Bawaslu
         $acuan = [-6.871618578044813, 107.54454829659048];
         $current = explode(',', $request->gps_koordinat);
         
         if (!$isWfhDay && count($current) == 2) {
             $distance = $this->calculateDistance($acuan[0], $acuan[1], $current[0], $current[1]);
-            if ($distance > 1.0) { // 1 km radius
+            if ($distance > 0.5) { // 0.5 km = 500 meters radius
                 return response()->json([
                     'success' => false,
-                    'message' => 'Presensi ditolak. Hari ini adalah hari reguler dan Anda berada di luar radius 1 KM dari Kantor Bawaslu.'
+                    'message' => 'Presensi ditolak. Hari ini adalah hari WFO dan Anda berada di luar radius 500 meter dari Kantor Bawaslu.'
                 ], 403);
             }
         }
@@ -250,19 +250,19 @@ class PresensiController extends Controller
             ], 403);
         }
 
-        // Tentukan apakah hari ini WFH (Selasa/Jumat) atau Reguler (Senin/Rabu/Kamis)
+        // Tentukan apakah hari ini WFH (Selasa/Jumat) atau WFO (Senin/Rabu/Kamis)
         $isWfhDay = in_array($now->dayOfWeekIso, [2, 5]); // 2: Tuesday, 5: Friday
 
-        // Radius 1 km dari Kantor Bawaslu
+        // Radius 500 meter dari Kantor Bawaslu
         $acuan = [-6.871618578044813, 107.54454829659048];
         $current = explode(',', $request->gps_koordinat);
         
         if (!$isWfhDay && count($current) == 2) {
             $distance = $this->calculateDistance($acuan[0], $acuan[1], $current[0], $current[1]);
-            if ($distance > 1.0) { // 1 km radius
+            if ($distance > 0.5) { // 0.5 km = 500 meters radius
                 return response()->json([
                     'success' => false,
-                    'message' => 'Presensi ditolak. Hari ini adalah hari reguler dan Anda berada di luar radius 1 KM dari Kantor Bawaslu.'
+                    'message' => 'Presensi ditolak. Hari ini adalah hari WFO dan Anda berada di luar radius 500 meter dari Kantor Bawaslu.'
                 ], 403);
             }
         }

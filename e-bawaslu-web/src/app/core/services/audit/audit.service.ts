@@ -24,8 +24,12 @@ export interface AuditLogItem {
 export class AuditService {
   private api = inject(ApiService);
 
-  getAuditLogs(page: number = 1): Observable<{ data: AuditLogItem[]; links?: any; meta?: any }> {
-    const params = new HttpParams().set('page', page.toString());
+  getAuditLogs(page: number = 1, search: string = '', startDate: string = '', endDate: string = ''): Observable<{ data: AuditLogItem[]; links?: any; meta?: any }> {
+    let params = new HttpParams().set('page', page.toString());
+    if (search) params = params.set('search', search);
+    if (startDate) params = params.set('start_date', startDate);
+    if (endDate) params = params.set('end_date', endDate);
+    
     return this.api.get<{ data: AuditLogItem[]; links?: any; meta?: any }>('/audit-logs', params);
   }
 }
