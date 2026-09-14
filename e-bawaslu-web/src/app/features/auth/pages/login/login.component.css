@@ -1,43 +1,88 @@
-.login-form{
-  width:100%
+/* ══════════════════════════════════════════════════════════════
+   LOGIN COMPONENT — Premium Styles
+   ══════════════════════════════════════════════════════════════ */
+
+.login-form {
+  width: 100%;
 }
-.demo-accounts-panel{
-  margin-top:26px;
-  border-top:1px solid #e0e5e9;
-  padding-top:18px
+
+/* ── Demo Accounts Panel ─────────────────────────────────────── */
+.demo-accounts-panel {
+  margin-top: 28px;
+  border-top: 1px solid #edf0f3;
+  padding-top: 20px;
 }
-.demo-accounts-panel summary{
-  font-size:12px;
-  font-weight:600;
-  color:#455562;
-  cursor:pointer;
-  padding:4px 0
+
+.demo-accounts-panel summary {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #4a5966;
+  cursor: pointer;
+  padding: 6px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+  transition: color 150ms;
 }
-.demo-accounts-panel p{
-  font-size:11px;
-  color:#687681;
-  margin:12px 0
+
+.demo-accounts-panel summary:hover {
+  color: var(--color-secondary);
 }
-.demo-list{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-  max-height:210px;
-  overflow:auto;
-  padding:4px
+
+.summary-icon {
+  font-size: 14px;
 }
-.demo-btn{
-  background:#fff;
-  border:1px solid #cbd3d9;
-  border-radius:6px;
-  padding:10px;
-  font-size:11px;
-  color:#344754;
-  cursor:pointer;
-  text-align:left;
-  min-height:40px
+
+.demo-accounts-panel p {
+  font-size: 11.5px;
+  color: #8a9aa6;
+  margin: 12px 0;
+  line-height: 1.5;
 }
-.demo-btn:hover{
-  background:#fff4f4;
-  border-color:#c51620
+
+.demo-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  max-height: 240px;
+  overflow: auto;
+  padding: 4px 2px;
+  scrollbar-width: thin;
+  scrollbar-color: #d0d7dd transparent;
+}
+
+.demo-btn {
+  background: #fff;
+  border: 1px solid #e0e5ea;
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  text-align: left;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  transition: all 200ms ease;
+}
+
+.demo-btn:hover {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(231, 25, 37, 0.1);
+}
+
+.demo-btn:active {
+  transform: translateY(0);
+}
+
+.demo-role {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #344754;
+  line-height: 1.4;
+}
+
+.demo-btn:hover .demo-role {
+  color: var(--color-primary-hover);
 }

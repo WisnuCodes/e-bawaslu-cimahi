@@ -2,12 +2,14 @@ import { Injectable, signal, inject } from '@angular/core';
 import { ApiService } from './api.service';
 import { tap } from 'rxjs';
 import { User } from '../models/user.model';
+import { MasterDataService } from './master-data.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private api = inject(ApiService);
+  private masterDataService = inject(MasterDataService);
   
   // Angular Signals for reactive state
   private currentUserSignal = signal<User | null>(null);
@@ -20,7 +22,9 @@ export class AuthService {
 
   constructor() {
     this.checkToken();
-    if (this.getToken()) queueMicrotask(() => this.refreshProfile());
+    // Menggunakan setTimeout (macrotask) agar perubahan signal dari refreshProfile()
+    // terjadi di siklus change detection baru — mencegah NG0100 di SidebarComponent.
+    if (this.getToken()) setTimeout(() => this.refreshProfile());
   }
 
   private checkToken() {
@@ -89,6 +93,7 @@ export class AuthService {
     localStorage.removeItem('auth_user');
     this.isAuthenticatedSignal.set(false);
     this.currentUserSignal.set(null);
+    this.masterDataService.clearAllCache();
   }
 
   getToken(): string | null {

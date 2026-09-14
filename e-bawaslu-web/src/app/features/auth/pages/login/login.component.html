@@ -3,30 +3,48 @@
   <h2>Masuk ke SIMBA</h2>
   <p>Gunakan akun Bawaslu Anda untuk melanjutkan.</p>
 </header>
+
 <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+  <!-- Email Field -->
   <mat-form-field appearance="outline" class="auth-field">
     <mat-label>Email / Akun SSO Bawaslu</mat-label>
     <input matInput type="email" formControlName="email" autocomplete="username" placeholder="nama@cimahi.bawaslu.go.id">
     <mat-icon matSuffix>mail_outline</mat-icon>
     <mat-error *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">Email wajib diisi</mat-error>
   </mat-form-field>
+
+  <!-- Password Field -->
   <mat-form-field appearance="outline" class="auth-field">
     <mat-label>Kata sandi</mat-label>
     <input matInput type="password" formControlName="password" autocomplete="current-password" placeholder="Masukkan kata sandi">
     <mat-icon matSuffix>lock_outline</mat-icon>
     <mat-error *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">Kata sandi wajib diisi</mat-error>
   </mat-form-field>
+
+  <!-- Submit -->
   <button mat-flat-button type="submit" [disabled]="loginForm.invalid || isLoading" class="auth-button">
     <mat-spinner *ngIf="isLoading" diameter="18"></mat-spinner>
     <span>{{ isLoading ? 'Memverifikasi...' : 'Masuk' }}</span>
     <mat-icon *ngIf="!isLoading" iconPositionEnd>arrow_forward</mat-icon>
   </button>
-  <div class="auth-error" *ngIf="errorMessage" role="alert"><mat-icon>error_outline</mat-icon><span>{{ errorMessage }}</span></div>
+
+  <!-- Error -->
+  <div class="auth-error" *ngIf="errorMessage" role="alert">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <!-- Demo Accounts -->
   <details class="demo-accounts-panel">
-    <summary>Pilihan akun aparatur</summary>
-    <p>Pilih akun untuk mengisi formulir masuk.</p>
+    <summary>
+      <span class="summary-icon">👤</span>
+      Pilihan akun aparatur
+    </summary>
+    <p>Pilih akun untuk mengisi formulir masuk secara otomatis.</p>
     <div class="demo-list">
-      <button type="button" *ngFor="let acc of demoAccounts" (click)="selectDemoAccount(acc.email)" class="demo-btn">{{ acc.role }}</button>
+      <button type="button" *ngFor="let acc of demoAccounts" (click)="selectDemoAccount(acc.email)" class="demo-btn">
+        <span class="demo-role">{{ acc.role }}</span>
+      </button>
     </div>
   </details>
 </form>

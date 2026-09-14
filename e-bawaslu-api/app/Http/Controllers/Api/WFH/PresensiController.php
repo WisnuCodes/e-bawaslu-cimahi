@@ -78,6 +78,16 @@ class PresensiController extends Controller
             $query->where('presensi_wfh.user_id', $user->user_id);
         }
 
+        // Filter berdasarkan start_date dan end_date (jika tidak ada, ambil hari ini)
+        if ($request->has('start_date') && $request->has('end_date')) {
+            $startDate = Carbon::parse($request->start_date)->startOfDay();
+            $endDate = Carbon::parse($request->end_date)->endOfDay();
+            $query->whereBetween('timestamp_checkin', [$startDate, $endDate]);
+        } else {
+            $today = Carbon::today();
+            $query->whereDate('timestamp_checkin', $today);
+        }
+
         return response()->json([
             'success' => true,
             'data' => $query->get()
@@ -212,6 +222,55 @@ class PresensiController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Check-in berhasil tercatat.',
+            'data' => $presensi
+        ], 201);
+    }
+
+    public function submitIzin(Request $request)
+    {
+        $request->validate([
+            'jenis_izin' => 'required|in:Sakit,Izin,Cuti',
+            'keterangan_izin' => 'required|string',
+            'file_lampiran' => 'required|file|mimes:pdf,jpeg,png,jpg'
+        ]);
+
+        $user = $request->user();
+        $userId = $user->user_id;
+        $now = Carbon::now();
+        $todayDate = $now->format('Y-m-d');
+
+        // Check if already checked in today
+        $existing = Presensi::where('user_id', $userId)
+            ->whereDate('timestamp_checkin', $todayDate)
+            ->first();
+
+        if ($existing) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda sudah memiliki catatan presensi hari ini. Tidak dapat mengajukan izin.'
+            ], 403);
+        }
+
+        $path = $request->file('file_lampiran')->store('izin', 'public');
+
+        $presensi = Presensi::create([
+            'presensi_id' => (string) Str::uuid(),
+            'user_id' => $userId,
+            'timestamp_checkin' => $now,
+            'selfie_masuk_url' => $path,
+            'status_ci' => $request->jenis_izin,
+            'status_co' => $request->jenis_izin,
+            'timestamp_checkout' => clone $now->setTime(16, 0, 0), // Dummy checkout time to complete the record
+            'gps_koordinat' => '-',
+            'liveness_score' => 1.0,
+            'keterangan_izin' => $request->keterangan_izin
+        ]);
+
+        Log::info("NOTIFIKASI: Pengajuan {$request->jenis_izin} berhasil oleh user: " . $user->username);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Pengajuan {$request->jenis_izin} berhasil dicatat.",
             'data' => $presensi
         ], 201);
     }

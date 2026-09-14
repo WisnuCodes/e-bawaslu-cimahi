@@ -33,3 +33,17 @@
 .logout-btn:hover { background: #50333f; color: white; }
 .logout-btn mat-icon { font-size: 20px; width: 20px; height: 20px; }
 .collapsed .sidebar-footer { padding: 12px; }
+
+/* ================================================
+   MOBILE: Sidebar selalu expanded di dalam mat-sidenav.
+   Tombol collapse disembunyikan karena user menutup 
+   sidebar via backdrop click atau swipe.
+   ================================================ */
+@media (max-width: 768px) {
+  .sidebar-container.collapsed { width: 260px; }
+  .sidebar-container.collapsed .logo-container { display: flex; }
+  .sidebar-container.collapsed .sidebar-footer { padding: 16px; }
+  .toggle-btn { display: none; }
+  .sidebar-header { justify-content: center; }
+}
+

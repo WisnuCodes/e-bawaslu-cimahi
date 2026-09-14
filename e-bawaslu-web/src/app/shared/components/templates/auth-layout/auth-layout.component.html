@@ -1,22 +1,64 @@
 <div class="auth-wrapper">
+  <!-- Left Visual Panel -->
   <aside class="auth-visual-side">
+    <!-- Animated Background Shapes -->
+    <div class="bg-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
+    </div>
+
     <div class="brand-lockup">
       <img src="assets/icon/icon_bawaslu.jpg" alt="Logo Bawaslu" />
       <div><strong>SIMBA CIMAHI</strong><span>Bawaslu Kota Cimahi</span></div>
     </div>
+
     <div class="visual-content">
       <p class="eyebrow">PORTAL INTERNAL</p>
       <h1>Sistem Informasi<br>Manajemen Bawaslu<br>Kota Cimahi</h1>
-      <p class="visual-description">Akses presensi, arsip, dan laporan pengawasan dalam satu sistem.</p>
-      <div class="module-list"><span>01 <b>Presensi & Kinerja</b></span><span>02 <b>Persuratan & Arsip</b></span><span>03 <b>Pengawasan Pemilu & Pilkada</b></span></div>
+      <p class="visual-description">Akses presensi, arsip, dan laporan pengawasan dalam satu sistem terpadu.</p>
+
+      <div class="module-list">
+        <div class="module-item">
+          <span class="module-number">01</span>
+          <div class="module-detail">
+            <b>Presensi & Kinerja</b>
+            <small>Monitoring WFH & worklog harian</small>
+          </div>
+        </div>
+        <div class="module-item">
+          <span class="module-number">02</span>
+          <div class="module-detail">
+            <b>Persuratan & Arsip</b>
+            <small>Manajemen dokumen digital terpusat</small>
+          </div>
+        </div>
+        <div class="module-item">
+          <span class="module-number">03</span>
+          <div class="module-detail">
+            <b>Pengawasan Pemilu & Pilkada</b>
+            <small>Rekapitulasi C1 & laporan pengawasan</small>
+          </div>
+        </div>
+      </div>
     </div>
-    <p class="institution">BADAN PENGAWAS PEMILIHAN UMUM<br>KOTA CIMAHI</p>
+
+    <div class="visual-footer">
+      <p class="institution">BADAN PENGAWAS PEMILIHAN UMUM<br>KOTA CIMAHI</p>
+    </div>
   </aside>
+
+  <!-- Right Form Panel -->
   <main class="auth-form-side">
     <div class="auth-container">
-      <div class="mobile-brand"><img src="assets/icon/icon_bawaslu.jpg" alt="Logo Bawaslu"><strong>SIMBA CIMAHI</strong></div>
+      <div class="mobile-brand">
+        <img src="assets/icon/icon_bawaslu.jpg" alt="Logo Bawaslu">
+        <strong>SIMBA CIMAHI</strong>
+      </div>
       <router-outlet></router-outlet>
-      <footer class="auth-footer">&copy; 2026 Bawaslu Kota Cimahi</footer>
+      <footer class="auth-footer">
+        <span>&copy; 2026 Badan Pengawas Pemilihan Umum Kota Cimahi</span>
+      </footer>
     </div>
   </main>
 </div>

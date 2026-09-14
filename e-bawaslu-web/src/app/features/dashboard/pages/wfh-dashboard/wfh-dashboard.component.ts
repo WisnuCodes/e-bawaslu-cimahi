@@ -20,6 +20,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { ConfirmDialogComponent } from '../../../../shared/components/molecules/confirm-dialog/confirm-dialog.component';
 import * as _ from 'lodash';
 
@@ -44,7 +46,9 @@ import * as _ from 'lodash';
     MatSelectModule,
     MatPaginatorModule,
     MatSnackBarModule,
-    MatDialogModule
+    MatDialogModule,
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
   templateUrl: './wfh-dashboard.component.html',
   styleUrl: './wfh-dashboard.component.css'
@@ -67,6 +71,7 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
   @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
   @ViewChild('canvasElement') canvasElement!: ElementRef<HTMLCanvasElement>;
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('izinFileInput') izinFileInput!: ElementRef<HTMLInputElement>;
   
   @ViewChild('worklogPaginator') worklogPaginator!: MatPaginator;
   @ViewChild('presensiPaginator') presensiPaginator!: MatPaginator;
@@ -127,6 +132,24 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
   worklogForm: FormGroup = this.fb.group({
     activity: ['', Validators.required]
   });
+
+  // Izin State
+  showIzinForm = false;
+  isSubmittingIzin = false;
+  izinForm: FormGroup = this.fb.group({
+    jenis_izin: ['Sakit', Validators.required],
+    keterangan_izin: ['', Validators.required]
+  });
+  selectedIzinFile: File | null = null;
+
+  // Date Filters
+  startDatePresensi: Date | null = new Date();
+  endDatePresensi: Date | null = new Date();
+  originalPresensiData: any[] = [];
+
+  startDateWorklog: Date | null = new Date();
+  endDateWorklog: Date | null = new Date();
+  originalWorklogData: any[] = [];
 
 
 
@@ -198,21 +221,30 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
   }
 
   loadWorklogs() {
-    this.wfhService.getWorklogs().subscribe({
+    let startStr = this.startDateWorklog ? this.startDateWorklog.toISOString().split('T')[0] : undefined;
+    let endStr = this.endDateWorklog ? this.endDateWorklog.toISOString().split('T')[0] : undefined;
+
+    this.wfhService.getWorklogs(startStr, endStr).subscribe({
       next: (res) => {
-        this.worklogs.data = res.data || [];
+        this.originalWorklogData = res.data || [];
+        this.worklogs.data = [...this.originalWorklogData];
         this.worklogs.paginator = this.worklogPaginator;
       },
       error: () => {
+        this.originalWorklogData = [];
         this.worklogs.data = [];
       }
     });
   }
 
   loadPresensi() {
-    this.wfhService.getPresensi().subscribe({
+    let startStr = this.startDatePresensi ? this.startDatePresensi.toISOString().split('T')[0] : undefined;
+    let endStr = this.endDatePresensi ? this.endDatePresensi.toISOString().split('T')[0] : undefined;
+
+    this.wfhService.getPresensi(startStr, endStr).subscribe({
       next: (res) => {
         const data = res.data || [];
+        this.originalPresensiData = [...data];
         this.presensiList.data = data;
         this.presensiList.paginator = this.presensiPaginator;
         
@@ -233,9 +265,20 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
         }
       },
       error: () => {
+        this.originalPresensiData = [];
         this.presensiList.data = [];
       }
     });
+  }
+
+  filterDatePresensi() {
+    // Memanggil ulang data dari server dengan parameter tanggal
+    this.loadPresensi();
+  }
+
+  filterDateWorklog() {
+    // Memanggil ulang data dari server dengan parameter tanggal
+    this.loadWorklogs();
   }
 
 
@@ -304,20 +347,58 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
     const video = this.videoElement.nativeElement;
     const canvas = this.canvasElement.nativeElement;
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    // Maksimal lebar foto untuk kompresi
+    const MAX_WIDTH = 600;
+    let width = video.videoWidth;
+    let height = video.videoHeight;
+
+    // Hitung proporsi dimensi baru
+    if (width > MAX_WIDTH) {
+      height = Math.round((height * MAX_WIDTH) / width);
+      width = MAX_WIDTH;
+    }
+
+    canvas.width = width;
+    canvas.height = height;
     
     const ctx = canvas.getContext('2d');
     if (ctx) {
+      // Gambar dengan dimensi yang sudah diperkecil
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       
+      // --- Watermark Timestamp ---
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' });
+      const timeStr = now.toLocaleTimeString('id-ID');
+      const timestampText = `${dateStr} ${timeStr}`;
+
+      ctx.font = 'bold 14px Arial';
+      const padding = 8;
+      const textWidth = ctx.measureText(timestampText).width;
+      const rectHeight = 24;
+      
+      // Posisi di pojok kanan bawah
+      const x = canvas.width - textWidth - (padding * 2) - 10;
+      const y = canvas.height - rectHeight - 10;
+
+      // Kotak background semi-transparan
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      ctx.roundRect ? ctx.roundRect(x, y, textWidth + (padding * 2), rectHeight, 4) : ctx.fillRect(x, y, textWidth + (padding * 2), rectHeight);
+      ctx.fill();
+
+      // Teks timestamp
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(timestampText, x + padding, y + 17);
+      // -----------------------------
+
+      // Kompres ke JPEG dengan kualitas 0.7 (biasanya menghasilkan file ~100kb - 250kb)
       canvas.toBlob((blob) => {
         if (blob) {
           const file = new File([blob], 'selfie.jpg', { type: 'image/jpeg' });
           this.stopCamera();
           this.processPresensi(file);
         }
-      }, 'image/jpeg', 0.9);
+      }, 'image/jpeg', 0.7);
     }
   }
 
@@ -477,6 +558,52 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
+  toggleIzinForm() {
+    this.showIzinForm = !this.showIzinForm;
+    if (!this.showIzinForm) {
+      this.cancelIzin();
+    }
+  }
+
+  cancelIzin() {
+    this.showIzinForm = false;
+    this.izinForm.reset({ jenis_izin: 'Sakit' });
+    this.selectedIzinFile = null;
+    if (this.izinFileInput) this.izinFileInput.nativeElement.value = '';
+  }
+
+  onIzinFileSelected(event: any) {
+    if (event.target.files.length > 0) {
+      this.selectedIzinFile = event.target.files[0];
+    }
+  }
+
+  submitIzin() {
+    if (this.izinForm.invalid || !this.selectedIzinFile) {
+      this.showMessage('Harap lengkapi semua data dan unggah lampiran.');
+      return;
+    }
+    
+    this.isSubmittingIzin = true;
+    const formData = new FormData();
+    formData.append('jenis_izin', this.izinForm.value.jenis_izin);
+    formData.append('keterangan_izin', this.izinForm.value.keterangan_izin);
+    formData.append('file_lampiran', this.selectedIzinFile);
+
+    this.wfhService.submitIzin(formData).subscribe({
+      next: (res) => {
+        this.isSubmittingIzin = false;
+        this.showMessage(res.message || 'Pengajuan izin berhasil dicatat.');
+        this.cancelIzin();
+        this.loadPresensi();
+      },
+      error: (err) => {
+        this.isSubmittingIzin = false;
+        this.showMessage(err.error?.message || 'Gagal mengajukan izin.');
+      }
+    });
+  }
+
   editPresensi(presensi: any) {
     this.editingPresensiId = presensi.presensi_id;
     this.editPresensiStatusCI = presensi.status_ci || 'Hadir';
@@ -525,5 +652,63 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
         });
       }
     });
+  }
+
+  exportToCSV(type: 'presensi' | 'worklog') {
+    let csvData = '';
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0];
+    let filename = '';
+
+    if (type === 'presensi') {
+      filename = `Laporan_Presensi_${dateStr}.csv`;
+      const data = this.presensiList.data;
+      if (!data || data.length === 0) {
+        this.showMessage('Tidak ada data presensi untuk diekspor.');
+        return;
+      }
+      // Header
+      csvData += 'Nama Pegawai,Waktu Check-In,Status CI,Waktu Check-Out,Status CO,Koordinat GPS\n';
+      // Rows
+      data.forEach((p: any) => {
+        const nama = `"${p.nama_pegawai || 'Anda'}"`;
+        const ci = `"${p.timestamp_checkin || '-'}"`;
+        const stCI = `"${p.status_ci || 'Hadir'}"`;
+        const co = `"${p.timestamp_checkout || '-'}"`;
+        const stCO = `"${p.status_co || '-'}"`;
+        const gps = `"${p.gps_koordinat || '-'}"`;
+        csvData += `${nama},${ci},${stCI},${co},${stCO},${gps}\n`;
+      });
+    } else if (type === 'worklog') {
+      filename = `Laporan_Worklog_${dateStr}.csv`;
+      const data = this.worklogs.data;
+      if (!data || data.length === 0) {
+        this.showMessage('Tidak ada data worklog untuk diekspor.');
+        return;
+      }
+      // Header
+      csvData += 'Nama Pegawai,Tanggal,Aktivitas,Status\n';
+      // Rows
+      data.forEach((log: any) => {
+        const nama = `"${log.nama_pegawai || 'Anda'}"`;
+        const tgl = `"${log.created_at || '-'}"`;
+        const aktivitas = `"${(log.rincian_aktivitas || log.activity || '').replace(/"/g, '""')}"`;
+        const status = `"${log.status_approval || 'Pending'}"`;
+        csvData += `${nama},${tgl},${aktivitas},${status}\n`;
+      });
+    }
+
+    // Create Blob and trigger download
+    const blob = new Blob(['\ufeff' + csvData], { type: 'text/csv;charset=utf-8;' }); // \ufeff is BOM for Excel UTF-8 support
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    }, 0);
   }
 }

@@ -47,9 +47,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // WFH Module Routes
     Route::prefix('wfh')->group(function () {
         Route::get('/presensi', [PresensiController::class, 'index']);
-        Route::put('/presensi/{id}', [PresensiController::class, 'update']);
-        Route::delete('/presensi/{id}', [PresensiController::class, 'destroy']);
-        Route::post('/checkin', [PresensiController::class, 'checkIn']);
+        Route::post('/presensi/check-in', [PresensiController::class, 'checkIn']);
+        Route::post('/presensi/check-out', [PresensiController::class, 'checkOut']);
+        Route::post('/izin', [PresensiController::class, 'submitIzin']);
+
+        Route::get('/worklog', [WorklogController::class, 'index']);
         Route::post('/checkout', [PresensiController::class, 'checkOut']);
         
         // Worklog Routes

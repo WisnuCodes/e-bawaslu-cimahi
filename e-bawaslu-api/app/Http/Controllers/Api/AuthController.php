@@ -20,7 +20,7 @@ class AuthController extends Controller
     {
         // Dalam skenario nyata, ini akan me-redirect ke Keycloak login page
         // return redirect()->away('https://keycloak.bawaslu.go.id/auth/...');
-        
+
         // Untuk simulasi, kita langsung menerima kredensial dasar dan mengembalikan OTP requirement
         $request->validate([
             'email' => 'required|email',
@@ -41,7 +41,7 @@ class AuthController extends Controller
         $user->otp_code = $otpCode;
         $user->otp_expires_at = Carbon::now()->addMinutes(5);
         $user->save();
-        
+
         Log::info("OTP untuk user {$user->email} adalah: {$otpCode}");
 
         // Send OTP via Fonnte WhatsApp Service
@@ -73,7 +73,7 @@ class AuthController extends Controller
         ]);
 
         $user = User::findOrFail($request->user_id);
-        
+
         // Validasi OTP
         if (!$user->otp_code || $request->otp !== $user->otp_code) {
             return response()->json([
@@ -93,7 +93,7 @@ class AuthController extends Controller
         $user->otp_code = null;
         $user->otp_expires_at = null;
         $user->save();
-        
+
         // Menerbitkan token Sanctum (mensimulasikan JWT behavior)
         $token = $user->createToken('bawaslu-enterprise-token', ['*'])->plainTextToken;
 
@@ -111,7 +111,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Sesi Keycloak & Token lokal berhasil dicabut (Logged out)'

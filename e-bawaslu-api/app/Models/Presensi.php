@@ -21,6 +21,7 @@ class Presensi extends Model
         'timestamp_checkout',
         'selfie_keluar_url',
         'gps_koordinat',
-        'liveness_score'
+        'liveness_score',
+        'keterangan_izin'
     ];
 }

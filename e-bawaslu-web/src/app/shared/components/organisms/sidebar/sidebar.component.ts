@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -15,18 +15,27 @@ import { MatButtonModule } from '@angular/material/button';
   standalone: true,
   imports: [CommonModule, RouterModule, MatIconModule, MatListModule, MatRippleModule, MatDividerModule, MatExpansionModule, MatButtonModule],
   templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.css'
+  styleUrl: './sidebar.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SidebarComponent {
   public authService = inject(AuthService);
   private router = inject(Router);
 
-  isCollapsed = false;
+  private _isCollapsed = false;
   isPemiluOpen = true;
   isPilkadaOpen = true;
 
+  /** Di mobile (≤768px), sidebar selalu expanded karena menggunakan mat-sidenav overlay. */
+  get isCollapsed(): boolean {
+    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+      return false;
+    }
+    return this._isCollapsed;
+  }
+
   toggleSidebar() {
-    this.isCollapsed = !this.isCollapsed;
+    this._isCollapsed = !this._isCollapsed;
   }
 
   togglePemilu() {

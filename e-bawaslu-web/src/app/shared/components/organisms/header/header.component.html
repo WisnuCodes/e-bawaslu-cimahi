@@ -4,28 +4,41 @@
       <mat-icon>menu</mat-icon>
     </button>
     <div class="brand-group">
-      <h2 class="page-title">SIMBA CIMAHI</h2>
+      <div class="brand-text">
+        <h2 class="page-title">SIMBA CIMAHI</h2>
+        <span class="page-subtitle">Sistem Informasi Manajemen Bawaslu</span>
+      </div>
     </div>
   </div>
 
   <div class="header-right">
+    <!-- Bagan Struktur Link -->
     <a routerLink="/dashboard/struktur-organisasi" class="struktur-link hide-mobile">
-      <mat-icon style="font-size: 18px; width: 18px; height: 18px;">account_tree</mat-icon>
-      Bagan Struktur
+      <mat-icon>account_tree</mat-icon>
+      <span>Bagan Struktur</span>
     </a>
 
+    <!-- Divider -->
+    <div class="header-divider hide-mobile"></div>
+
+    <!-- User Profile -->
     <div class="user-profile">
       <div class="avatar">
-        {{ userInitial() }}
+        <span class="avatar-text">{{ userInitial() }}</span>
+        <span class="status-dot"></span>
       </div>
       <div class="user-info hide-mobile">
         <span class="user-name">
           {{ userName() | slice:0:16 }}{{ (userName().length) > 16 ? '...' : '' }}
         </span>
         <span class="user-role-label">
+          <span class="role-dot"></span>
           {{ userRole() }}
         </span>
       </div>
     </div>
   </div>
+
+  <!-- Accent Line -->
+  <div class="header-accent"></div>
 </header>

@@ -9,15 +9,24 @@ export class WfhService {
   private api = inject(ApiService);
 
   checkIn(data: any): Observable<any> {
-    return this.api.post<any>('/wfh/checkin', data);
+    return this.api.post<any>('/wfh/presensi/check-in', data);
+  }
+
+  submitIzin(data: FormData): Observable<any> {
+    return this.api.post<any>('/wfh/izin', data);
   }
 
   checkOut(data: any): Observable<any> {
     return this.api.post<any>('/wfh/checkout', data);
   }
 
-  getPresensi(): Observable<any> {
-    return this.api.get<any>('/wfh/presensi');
+  getPresensi(startDate?: string, endDate?: string): Observable<any> {
+    let params = new URLSearchParams();
+    if (startDate) params.append('start_date', startDate);
+    if (endDate) params.append('end_date', endDate);
+    
+    const queryString = params.toString();
+    return this.api.get<any>(`/wfh/presensi${queryString ? '?' + queryString : ''}`);
   }
 
   updatePresensi(id: string, data: any): Observable<any> {
@@ -28,8 +37,13 @@ export class WfhService {
     return this.api.delete<any>(`/wfh/presensi/${id}`);
   }
 
-  getWorklogs(): Observable<any> {
-    return this.api.get<any>('/wfh/worklogs');
+  getWorklogs(startDate?: string, endDate?: string): Observable<any> {
+    let params = new URLSearchParams();
+    if (startDate) params.append('start_date', startDate);
+    if (endDate) params.append('end_date', endDate);
+    
+    const queryString = params.toString();
+    return this.api.get<any>(`/wfh/worklogs${queryString ? '?' + queryString : ''}`);
   }
 
   submitWorklog(data: FormData | any): Observable<any> {
