@@ -163,7 +163,12 @@ export class ArsipFacade {
       },
       error: (err: any) => {
         this.updateState({ isUploading: false });
-        this.showNotification(err.error?.message || 'Gagal mengunggah arsip.', 'error');
+        let msg = err.error?.message || 'Gagal mengunggah arsip.';
+        if (err.error?.errors) {
+            const errorDetails = Object.values(err.error.errors).flat().join(' ');
+            msg += ` Detail: ${errorDetails}`;
+        }
+        this.showNotification(msg, 'error');
       }
     });
   }
@@ -179,7 +184,12 @@ export class ArsipFacade {
       },
       error: (err: any) => {
         this.updateState({ isSubmittingRevisi: false });
-        this.showNotification(err.error?.message || 'Gagal mengunggah revisi.', 'error');
+        let msg = err.error?.message || 'Gagal mengunggah revisi.';
+        if (err.error?.errors) {
+            const errorDetails = Object.values(err.error.errors).flat().join(' ');
+            msg += ` Detail: ${errorDetails}`;
+        }
+        this.showNotification(msg, 'error');
       }
     });
   }
@@ -243,7 +253,12 @@ export class ArsipFacade {
       },
       error: (err: any) => {
         this.updateState({ isDeleting: false });
-        this.showNotification(err.error?.message || 'Gagal menghapus dokumen.', 'error');
+        let msg = err.error?.message || 'Gagal menghapus dokumen.';
+        if (err.error?.errors) {
+            const errorDetails = Object.values(err.error.errors).flat().join(' ');
+            msg += ` Detail: ${errorDetails}`;
+        }
+        this.showNotification(msg, 'error');
       }
     });
   }
