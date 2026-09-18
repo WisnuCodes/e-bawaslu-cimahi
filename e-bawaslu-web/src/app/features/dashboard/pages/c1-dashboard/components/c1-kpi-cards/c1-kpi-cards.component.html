@@ -1,0 +1,81 @@
+<!-- PROGRESS BAR KOTA CIMAHI -->
+<div class="clean-card">
+  <div class="progress-header">
+    <div class="progress-title">
+      <mat-icon class="progress-icon">show_chart</mat-icon>
+      <strong class="progress-title-text">Live Progress Form C1 Kota Cimahi</strong>
+    </div>
+    <div class="progress-stats">
+      Total Berkas Masuk: <strong>{{ c1ListLength }}</strong> dari <strong>{{ totalTpsPilot }} TPS</strong> ({{ progressPercentage }}%)
+    </div>
+  </div>
+
+  <mat-progress-bar mode="determinate" [value]="progressPercentage" class="progress-bar-el"></mat-progress-bar>
+
+  <div class="progress-footer">
+    <span class="progress-status">
+      <mat-icon class="progress-status-icon">{{ progressPercentage === 100 ? 'done_all' : 'hourglass_empty' }}</mat-icon>
+      {{ progressPercentage === 100 ? 'Seluruh TPS Terekapitulasi' : 'Menunggu Unggahan Petugas Lapangan/TPS' }}
+    </span>
+    <span>Tervalidasi & Approved: <strong>{{ verifiedProgressPercentage }}%</strong></span>
+  </div>
+</div>
+
+<!-- KPI GRID -->
+<div class="kpi-grid">
+
+  <!-- Total Suara Sah -->
+  <div class="kpi-card">
+    <div class="kpi-title">TOTAL SUARA SAH (KOTA)</div>
+    <div class="kpi-value text-success">
+      {{ totalSuaraSahKota | number }}
+    </div>
+    <div class="kpi-desc">Akumulasi dari {{ c1ListLength }} TPS</div>
+  </div>
+
+  <!-- Total Suara Tidak Sah -->
+  <div class="kpi-card">
+    <div class="kpi-title">TOTAL SUARA TIDAK SAH</div>
+    <div class="kpi-value" class="kpi-value-warning">
+      {{ totalSuaraTidakSahKota | number }}
+    </div>
+    <div class="kpi-desc">Surat suara batal/rusak</div>
+  </div>
+
+  <!-- Total Pemilih Hadir -->
+  <div class="kpi-card">
+    <div class="kpi-title">TOTAL PEMILIH HADIR</div>
+    <div class="kpi-value text-primary">
+      {{ totalPemilihKota | number }}
+    </div>
+    <div class="kpi-desc">Tingkat partisipasi tercatat</div>
+  </div>
+
+  <!-- Red Flag Mismatch Alerts -->
+  <div class="kpi-card" [class.border-error]="totalMismatchCount > 0" [class.border-default]="totalMismatchCount === 0">
+    <div class="kpi-title">INDIKASI MISMATCH</div>
+    <div class="kpi-value" [class.text-error]="totalMismatchCount > 0">
+      {{ totalMismatchCount }} TPS
+    </div>
+    <div class="kpi-desc progress-status" [class.text-error]="totalMismatchCount > 0">
+      <mat-icon class="kpi-icon-small">{{ totalMismatchCount > 0 ? 'error_outline' : 'check_circle_outline' }}</mat-icon>
+      {{ totalMismatchCount > 0 ? 'Butuh Verifikasi Ulang' : 'Seluruh Rumus Sinkron' }}
+    </div>
+  </div>
+
+</div>
+
+<!-- SUMMARY PASLON -->
+<div *ngIf="totalSuaraPaslonKota.length > 0" class="clean-card paslon-summary-card">
+  <h3 class="paslon-summary-title">
+    <mat-icon class="paslon-summary-icon">how_to_vote</mat-icon>
+    REKAPITULASI PEROLEHAN SUARA PASLON
+  </h3>
+  <div class="paslon-grid">
+    <div *ngFor="let paslon of totalSuaraPaslonKota" class="paslon-item">
+      <span class="paslon-item-title">PASANGAN CALON {{ paslon.key }}</span>
+      <span class="paslon-item-value">{{ paslon.val | number }}</span>
+      <span class="paslon-item-desc">Suara Sah</span>
+    </div>
+  </div>
+</div>

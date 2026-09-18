@@ -1,0 +1,171 @@
+<mat-card class="table-card">
+  <mat-card-header class="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full mb-4">
+    <mat-card-title>Riwayat Presensi</mat-card-title>
+    
+    <div class="table-actions flex flex-col sm:flex-row gap-4 w-full sm:w-auto mt-4 sm:mt-0">
+      
+      <!-- Date Filter -->
+      <mat-form-field appearance="outline" class="date-filter mb-0">
+        <mat-label>Filter Tanggal</mat-label>
+        <mat-date-range-input [rangePicker]="pickerPresensi">
+          <input matStartDate [(ngModel)]="startDate" placeholder="Mulai">
+          <input matEndDate [(ngModel)]="endDate" placeholder="Selesai" (dateChange)="onFilterDate()">
+        </mat-date-range-input>
+        <mat-datepicker-toggle matIconSuffix [for]="pickerPresensi"></mat-datepicker-toggle>
+        <mat-date-range-picker #pickerPresensi></mat-date-range-picker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="search-input mb-0">
+        <mat-label>Cari Presensi</mat-label>
+        <input matInput (keyup)="applyFilter($event)" placeholder="Ketik nama atau status..." title="Pencarian Data Presensi">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <button mat-stroked-button color="primary" (click)="onExport()" *ngIf="canViewOthers">
+        <mat-icon>download</mat-icon> Export CSV
+      </button>
+    </div>
+  </mat-card-header>
+
+  <mat-card-content class="p-0">
+    <div class="table-responsive">
+      <table mat-table [dataSource]="dataSource" class="w-full">
+        
+        <!-- Pegawai Column (Admin Only) -->
+        <ng-container matColumnDef="nama">
+          <th mat-header-cell *matHeaderCellDef> Nama Pegawai </th>
+          <td mat-cell *matCellDef="let element"> {{ element.nama_pegawai || 'Anda' }} </td>
+        </ng-container>
+
+        <!-- Waktu Check In -->
+        <ng-container matColumnDef="waktu_masuk">
+          <th mat-header-cell *matHeaderCellDef> Check In </th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.timestamp_checkin ? (element.timestamp_checkin | date:'dd MMM yyyy, HH:mm':'':'id-ID') : '-' }}
+          </td>
+        </ng-container>
+
+        <!-- Foto Masuk -->
+        <ng-container matColumnDef="foto_masuk">
+          <th mat-header-cell *matHeaderCellDef> Foto CI </th>
+          <td mat-cell *matCellDef="let element">
+            <a *ngIf="element.foto_masuk" [href]="getAttachmentUrl(element.foto_masuk)" target="_blank">
+              <img [src]="getAttachmentUrl(element.foto_masuk)" alt="Foto Masuk" class="w-12 h-12 object-cover rounded shadow-sm border border-gray-200">
+            </a>
+            <span *ngIf="!element.foto_masuk" class="text-gray-400">-</span>
+          </td>
+        </ng-container>
+
+        <!-- Status Masuk -->
+        <ng-container matColumnDef="status_ci">
+          <th mat-header-cell *matHeaderCellDef> Status CI </th>
+          <td mat-cell *matCellDef="let element">
+            <ng-container *ngIf="editingPresensiId === element.presensi_id; else displayStatusCI">
+              <mat-form-field appearance="outline" class="dense-select">
+                <mat-select [(ngModel)]="editPresensiStatusCI" title="Pilih Status CI">
+                  <mat-option value="Hadir">Hadir</mat-option>
+                  <mat-option value="Terlambat">Terlambat</mat-option>
+                  <mat-option value="Sakit">Sakit</mat-option>
+                  <mat-option value="Izin">Izin</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </ng-container>
+            <ng-template #displayStatusCI>
+              <span class="status-chip" [ngClass]="element.status_ci ? 'status-' + element.status_ci.toLowerCase() : 'status-hadir'">
+                {{ element.status_ci || 'Hadir' }}
+              </span>
+            </ng-template>
+          </td>
+        </ng-container>
+
+        <!-- Waktu Check Out -->
+        <ng-container matColumnDef="waktu_keluar">
+          <th mat-header-cell *matHeaderCellDef> Check Out </th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.timestamp_checkout ? (element.timestamp_checkout | date:'dd MMM yyyy, HH:mm':'':'id-ID') : '-' }}
+          </td>
+        </ng-container>
+
+        <!-- Foto Keluar -->
+        <ng-container matColumnDef="foto_keluar">
+          <th mat-header-cell *matHeaderCellDef> Foto CO </th>
+          <td mat-cell *matCellDef="let element">
+            <a *ngIf="element.foto_keluar" [href]="getAttachmentUrl(element.foto_keluar)" target="_blank">
+              <img [src]="getAttachmentUrl(element.foto_keluar)" alt="Foto Keluar" class="w-12 h-12 object-cover rounded shadow-sm border border-gray-200">
+            </a>
+            <span *ngIf="!element.foto_keluar" class="text-gray-400">-</span>
+          </td>
+        </ng-container>
+
+        <!-- Status Keluar -->
+        <ng-container matColumnDef="status_co">
+          <th mat-header-cell *matHeaderCellDef> Status CO </th>
+          <td mat-cell *matCellDef="let element">
+            <ng-container *ngIf="editingPresensiId === element.presensi_id; else displayStatusCO">
+              <mat-form-field appearance="outline" class="dense-select">
+                <mat-select [(ngModel)]="editPresensiStatusCO" title="Pilih Status CO">
+                  <mat-option value="Hadir">Hadir</mat-option>
+                  <mat-option value="Pulang Cepat">Pulang Cepat</mat-option>
+                  <mat-option value="Sakit">Sakit</mat-option>
+                  <mat-option value="Izin">Izin</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </ng-container>
+            <ng-template #displayStatusCO>
+              <span *ngIf="element.status_co" class="status-chip" [ngClass]="'status-' + element.status_co.toLowerCase().replace(' ', '-')">
+                {{ element.status_co }}
+              </span>
+              <span *ngIf="!element.status_co" class="text-gray-400">-</span>
+            </ng-template>
+          </td>
+        </ng-container>
+
+        <!-- Lokasi -->
+        <ng-container matColumnDef="lokasi">
+          <th mat-header-cell *matHeaderCellDef> Lokasi GPS </th>
+          <td mat-cell *matCellDef="let element">
+            <a *ngIf="element.gps_koordinat" [href]="'https://maps.google.com/?q=' + element.gps_koordinat" target="_blank" class="text-primary-600 hover:underline text-sm flex items-center">
+              <mat-icon class="text-sm mr-1">location_on</mat-icon> Maps
+            </a>
+            <span *ngIf="!element.gps_koordinat">-</span>
+          </td>
+        </ng-container>
+
+        <!-- Aksi Admin -->
+        <ng-container matColumnDef="aksi">
+          <th mat-header-cell *matHeaderCellDef> Aksi </th>
+          <td mat-cell *matCellDef="let element">
+            <div class="flex gap-2" *ngIf="editingPresensiId === element.presensi_id">
+              <button mat-icon-button color="primary" matTooltip="Simpan Perubahan" (click)="onSave(element.presensi_id)">
+                <mat-icon>check</mat-icon>
+              </button>
+              <button mat-icon-button matTooltip="Batal" (click)="onCancel()">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+            
+            <div class="flex gap-2" *ngIf="editingPresensiId !== element.presensi_id">
+              <button mat-icon-button color="primary" matTooltip="Edit Status" (click)="onEdit(element)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" matTooltip="Hapus" (click)="onDelete(element.presensi_id)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50 transition-colors"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell p-8 text-center text-gray-500" [attr.colspan]="displayedColumns.length">
+            Tidak ada data presensi yang ditemukan.
+          </td>
+        </tr>
+      </table>
+    </div>
+    
+    <mat-paginator #presensiPaginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of presensi"></mat-paginator>
+  </mat-card-content>
+</mat-card>

@@ -1,0 +1,307 @@
+<p *ngIf="!facade.authService.canWriteDocuments">Mode viewer: Anda dapat melihat dan mengunduh surat serta dokumen.</p>
+<mat-card class="animate-fade-in">
+  <mat-card-content>
+    <!-- Filter & Pencarian Bar -->
+    <div class="styled-f00a65" >
+      <mat-form-field class="styled-cb36c0" appearance="outline" >
+        <mat-label>Pencarian Dokumen / Full-Text OCR</mat-label>
+        <input matInput placeholder="Ketik nomor surat atau perihal..." (input)="onSearchInput($event)" title="Input field" [value]="facade.searchQuery()">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field class="styled-eb3dad" appearance="outline" >
+        <mat-label>Filter Divisi</mat-label>
+        <mat-select [value]="facade.selectedDivisiFilter()" (selectionChange)="facade.setFilter('selectedDivisiFilter', $event.value)" title="Select field" placeholder="Pilih...">
+          <mat-option value="">Semua Divisi</mat-option>
+          <mat-option *ngFor="let div of facade.divisiList()" [value]="div.divisi_id">{{ div.nama_divisi }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field class="styled-4ccb94" appearance="outline" >
+        <mat-label>Filter Tahun</mat-label>
+        <mat-select [value]="facade.selectedYearFilter()" (selectionChange)="facade.setFilter('selectedYearFilter', $event.value)" title="Select field" placeholder="Pilih...">
+          <mat-option value="">Semua Tahun</mat-option>
+          <mat-option *ngFor="let year of facade.availableYears()" [value]="year">{{ year }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline"><mat-label>Jenjang Pengawas</mat-label><mat-select [value]="facade.selectedJenjang()" (selectionChange)="facade.setFilter('selectedJenjang', $event.value)" title="Select field" placeholder="Pilih..."><mat-option value="">Semua Jenjang</mat-option><mat-option *ngFor="let jenjang of jenjangList" [value]="jenjang">{{ jenjang }}</mat-option></mat-select></mat-form-field>
+    <!-- Tabel Dokumen Arsip -->
+    <div class="styled-a7b5bf" >
+      <table class="styled-4e711f" mat-table [dataSource]="dataSource" >
+
+        <!-- No Surat -->
+        <ng-container matColumnDef="no_surat">
+          <th mat-header-cell *matHeaderCellDef> No. Surat </th>
+          <td class="styled-157891" mat-cell *matCellDef="let doc" >
+            {{ doc.no_surat }}
+          </td>
+        </ng-container>
+
+        <!-- Perihal -->
+        <ng-container matColumnDef="perihal">
+          <th mat-header-cell *matHeaderCellDef> Perihal & Divisi </th>
+          <td mat-cell *matCellDef="let doc">
+            <div class="styled-d975aa" >{{ doc.perihal }}</div><div>{{ doc.jenjang_pengawas || 'Internal' }}</div>
+            <small class="styled-7848d1" >Divisi: {{ getDivisiName(doc.divisi_id) }}</small>
+          </td>
+        </ng-container>
+
+        <!-- Kategori -->
+        <ng-container matColumnDef="kategori">
+          <th mat-header-cell *matHeaderCellDef> Kategori </th>
+          <td mat-cell *matCellDef="let doc">
+            <span class="styled-9eb888" >
+              {{ doc.kategori }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Klasifikasi -->
+        <ng-container matColumnDef="klasifikasi">
+          <th mat-header-cell *matHeaderCellDef> Klasifikasi </th>
+          <td mat-cell *matCellDef="let doc">
+            <span [ngStyle]="{
+              'padding': '4px 8px', 'border-radius': '6px', 'font-size': '0.8rem', 'font-weight': '600',
+              'background-color': doc.klasifikasi === 'Rahasia' || doc.klasifikasi === 'Sangat Rahasia' ? '#fee2e2' : (doc.klasifikasi === 'Penting' ? '#fef3c7' : '#e0f2fe'),
+              'color': doc.klasifikasi === 'Rahasia' || doc.klasifikasi === 'Sangat Rahasia' ? '#991b1b' : (doc.klasifikasi === 'Penting' ? '#92400e' : '#0369a1')
+            }">
+              {{ doc.klasifikasi }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Versi -->
+        <ng-container matColumnDef="versi">
+          <th mat-header-cell *matHeaderCellDef> Versi </th>
+          <td mat-cell *matCellDef="let doc">
+            <button class="styled-11c546" mat-stroked-button color="primary"  (click)="facade.loadVersions(doc)">
+              <mat-icon class="styled-8c722f" >history</mat-icon>
+              {{ doc.version || 'v1.0' }}
+            </button>
+          </td>
+        </ng-container>
+
+        <!-- Tanggal -->
+        <ng-container matColumnDef="tanggal">
+          <th mat-header-cell *matHeaderCellDef> Tgl Surat </th>
+          <td mat-cell *matCellDef="let doc"> {{ doc.tgl_surat | date:'dd MMM yyyy' }} </td>
+        </ng-container>
+
+        <!-- Aksi -->
+        <ng-container matColumnDef="aksi">
+          <th class="styled-6fe335" mat-header-cell *matHeaderCellDef > Aksi </th>
+          <td class="styled-f46139" mat-cell *matCellDef="let doc" >
+            <!-- Download Watermarked -->
+            <button mat-icon-button color="primary" matTooltip="Unduh Berkas dengan Dynamic Watermark" [disabled]="facade.isDownloading()[doc.id]" (click)="facade.downloadDocument(doc)">
+              <mat-icon *ngIf="!facade.isDownloading()[doc.id]">file_download</mat-icon>
+              <mat-progress-spinner *ngIf="facade.isDownloading()[doc.id]" diameter="18" mode="indeterminate"></mat-progress-spinner>
+            </button>
+
+            <!-- Upload Revisi -->
+            <button mat-icon-button color="accent" matTooltip="Unggah Revisi Dokumen" *ngIf="facade.authService.canWriteDocuments" (click)="openRevisiModal(doc)" [disabled]="doc.is_locked">
+              <mat-icon>upgrade</mat-icon>
+            </button>
+
+            <!-- Soft Delete (Khusus Kepala Divisi / Super Admin) -->
+            <button *ngIf="facade.authService.canDeleteArsip" mat-icon-button color="warn" matTooltip="Hapus Dokumen (Soft Delete)" (click)="openDeleteModal(doc)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr class="styled-43c160" mat-row *matRowDef="let row; columns: displayedColumns;" ></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="styled-9bd273 mat-cell" colspan="7" >
+            Tidak ada arsip dokumen yang sesuai dengan filter atau pencarian.
+          </td>
+        </tr>
+      </table>
+      <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Pilih Halaman Arsip"></mat-paginator>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<!-- Tabel Audit Log Aktivitas -->
+<mat-card class="styled-d53076 animate-fade-in"  *ngIf="facade.canViewLogs()">
+  <mat-card-header class="styled-92f4b2" >
+    <mat-card-title class="styled-2a59c6" >
+      <mat-icon color="primary">receipt_long</mat-icon> Log Aktivitas E-Arsip
+    </mat-card-title>
+    <mat-card-subtitle>
+      Riwayat unggah, unduh, revisi, dan penghapusan dokumen.
+    </mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="styled-380c74" >
+      <table class="styled-dd96fd" mat-table [dataSource]="facade.arsipLogs()" >
+
+        <ng-container matColumnDef="waktu">
+          <th mat-header-cell *matHeaderCellDef> Waktu </th>
+          <td mat-cell *matCellDef="let log"> {{ log.timestamp | date:'dd MMM yyyy, HH:mm' }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="aksi">
+          <th mat-header-cell *matHeaderCellDef> Aksi </th>
+          <td mat-cell *matCellDef="let log">
+            <span [ngStyle]="{
+              'padding': '4px 8px', 'border-radius': '6px', 'font-size': '0.8rem', 'font-weight': '600',
+              'background-color': log.action === 'DELETE_ARSIP' ? '#fee2e2' : (log.action === 'EDIT_ARSIP' ? '#fef3c7' : '#e0f2fe'),
+              'color': log.action === 'DELETE_ARSIP' ? '#991b1b' : (log.action === 'EDIT_ARSIP' ? '#92400e' : '#0369a1')
+            }">
+              {{ log.action.replace('_ARSIP', '') }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="user">
+          <th mat-header-cell *matHeaderCellDef> User (Nama & Email) </th>
+          <td mat-cell *matCellDef="let log">
+            <div class="styled-717151" >{{ log.user?.username || 'Unknown User' }}</div>
+            <small class="styled-38aef7" >{{ log.user?.email || '-' }}</small>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="role">
+          <th mat-header-cell *matHeaderCellDef> Role </th>
+          <td mat-cell *matCellDef="let log"> {{ log.user?.role || '-' }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="keterangan">
+          <th mat-header-cell *matHeaderCellDef> Keterangan </th>
+          <td class="styled-ae8dd1" mat-cell *matCellDef="let log" > {{ log.reason }} </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="['waktu', 'aksi', 'user', 'role', 'keterangan']"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['waktu', 'aksi', 'user', 'role', 'keterangan'];"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="styled-de4a82 mat-cell" colspan="5" >
+            Belum ada aktivitas dokumen arsip yang tercatat.
+          </td>
+        </tr>
+      </table>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<!-- Modal: Revisi Dokumen -->
+<div class="styled-ec1315" *ngIf="facade.showRevisiModal()" >
+  <div class="styled-6e9d07" >
+    <div class="styled-b5c2bd" >
+      <h3 class="styled-1ca0ee" >Unggah Revisi Dokumen</h3>
+      <button mat-icon-button (click)="facade.setModal('showRevisiModal', false)">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <p class="styled-670512" >
+      Menaikkan nomor versi untuk nomor surat: <strong>{{ facade.selectedArsip()?.no_surat }}</strong>
+    </p>
+
+    <div class="styled-47ddaa" >
+      <mat-form-field appearance="outline">
+        <mat-label>Catatan Alasan Revisi</mat-label>
+        <textarea matInput [(ngModel)]="revisiCatatan" rows="3" placeholder="Jelaskan perubahan yang dibuat pada versi baru ini..."></textarea>
+      </mat-form-field>
+
+      <div>
+        <label class="styled-83cc18" >Pilih Berkas Baru (.pdf, .docx)</label>
+        <div class="styled-9ccc79" >
+          <button type="button" mat-stroked-button color="primary" (click)="revisiFileInput.click()">
+            <mat-icon>attach_file</mat-icon> Pilih Berkas
+          </button>
+          <span class="styled-b7f061" >
+            {{ revisiFile ? revisiFile.name : 'Belum ada file dipilih' }}
+          </span>
+          <input class="styled-5d57ee" type="file" #revisiFileInput (change)="onRevisiFileSelected($event)" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"  title="Input field" placeholder="...">
+        </div>
+        <app-file-preview [file]="revisiFile"></app-file-preview>
+      </div>
+
+      <div class="styled-98fa16" >
+        <button mat-stroked-button (click)="facade.setModal('showRevisiModal', false)">Batal</button>
+        <button mat-flat-button color="primary" [disabled]="!revisiFile || !revisiCatatan.trim() || facade.isSubmittingRevisi()" (click)="submitRevisi()">
+          <mat-icon *ngIf="!facade.isSubmittingRevisi()">upgrade</mat-icon>
+          <mat-progress-spinner class="styled-69af64" *ngIf="facade.isSubmittingRevisi()" diameter="18" mode="indeterminate" ></mat-progress-spinner>
+          {{ facade.isSubmittingRevisi() ? 'Memproses...' : 'Kirim Revisi' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Riwayat Versi -->
+<div class="styled-1664bf" *ngIf="facade.showVersionModal()" >
+  <div class="styled-a64739" >
+    <div class="styled-123243" >
+      <h3 class="styled-b5dadb" >Riwayat Versi Dokumen</h3>
+      <button mat-icon-button (click)="facade.setModal('showVersionModal', false)">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <p class="styled-00ae35" >
+      Dokumen: <strong>{{ facade.selectedArsip()?.no_surat }}</strong> - Versi Terkini: <span class="styled-4f2005" >{{ facade.selectedArsip()?.version }}</span>
+    </p>
+
+    <div class="styled-8a3ed8" *ngIf="facade.isLoadingVersions()" >
+      <mat-progress-spinner class="styled-de9e65" diameter="32" mode="indeterminate" ></mat-progress-spinner>
+      <p class="styled-a16ba5" >Memuat riwayat versi...</p>
+    </div>
+
+    <div class="styled-f96156" *ngIf="!facade.isLoadingVersions() && facade.versionHistory().length === 0" >
+      <mat-icon class="styled-8e700e" >history_toggle_off</mat-icon>
+      <p class="styled-032a0c" >Dokumen ini belum memiliki riwayat revisi (masih versi awal).</p>
+    </div>
+
+    <div *ngIf="!facade.isLoadingVersions() && facade.versionHistory().length > 0" class="flex flex-col gap-4">
+      <div class="styled-053e61" *ngFor="let ver of facade.versionHistory()" >
+        <div class="styled-81d653" >
+          <span class="styled-8eaea4" >Versi {{ ver.version_name }}</span>
+          <span class="styled-56a563" >{{ ver.created_at | date:'dd MMM yyyy, HH:mm' }}</span>
+        </div>
+        <p class="styled-a79d60" >
+          <strong>Catatan:</strong> {{ ver.catatan_revisi }}
+        </p>
+      </div>
+    </div>
+
+    <div class="styled-b1f987" >
+      <button mat-stroked-button (click)="facade.setModal('showVersionModal', false)">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Soft Delete dengan Alasan -->
+<div class="styled-4baec7" *ngIf="facade.showDeleteModal()" >
+  <div class="styled-883682" >
+    <div class="styled-e9c0ba" >
+      <h3 class="styled-dbbe4b" >Hapus Arsip (Soft Delete)</h3>
+      <button mat-icon-button (click)="facade.setModal('showDeleteModal', false)">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <p class="styled-4a0f84" >
+      Dokumen <strong>{{ facade.selectedArsip()?.no_surat }}</strong> akan dinonaktifkan dari publik. Sesuai regulasi audit Bawaslu, Anda <strong>wajib</strong> menyertakan alasan penghapusan.
+    </p>
+
+    <mat-form-field class="styled-b9ed05" appearance="outline" >
+      <mat-label>Alasan Penghapusan (Minimal 10 karakter)</mat-label>
+      <textarea matInput [(ngModel)]="deleteReason" rows="3" placeholder="Contoh: Dokumen dibatalkan berdasarkan SK nomor..."></textarea>
+    </mat-form-field>
+
+    <div class="styled-04f2a3" >
+      <button mat-stroked-button (click)="facade.setModal('showDeleteModal', false)">Batal</button>
+      <button mat-flat-button color="warn" [disabled]="deleteReason.trim().length < 10 || facade.isDeleting()" (click)="submitDelete()">
+        <mat-icon *ngIf="!facade.isDeleting()">delete</mat-icon>
+        <mat-progress-spinner class="styled-4a495b" *ngIf="facade.isDeleting()" diameter="18" mode="indeterminate" ></mat-progress-spinner>
+        {{ facade.isDeleting() ? 'Menghapus...' : 'Konfirmasi Hapus' }}
+      </button>
+    </div>
+  </div>
+</div>

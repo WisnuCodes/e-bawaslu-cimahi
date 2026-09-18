@@ -3,30 +3,28 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Http\Requests\UserRequest;
+use App\Services\UserService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Hash;
+use Exception;
 
 class UserController extends Controller
 {
-    private function isAdminOrKetua($user)
+    protected $userService;
+
+    public function __construct(UserService $userService)
     {
-        $role = strtolower($user->role);
-        return str_contains($role, 'admin') || str_contains($role, 'superadmin') || str_contains($role, 'ketua');
+        $this->userService = $userService;
     }
 
     public function index(Request $request)
     {
-        if (!$this->isAdminOrKetua($request->user())) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
+        // Authorization handled by middleware/gates in a real app,
+        // but here we can just do a simple check or rely on FormRequest if it was a FormRequest.
+        // For simple GET, we can keep the check or move it to a Request class.
+        $this->authorizeAction($request);
 
-        // Include divisi name if possible
-        $users = User::leftJoin('divisi', 'users.divisi_id', '=', 'divisi.divisi_id')
-            ->select('users.*', 'divisi.nama_divisi')
-            ->orderBy('users.created_at', 'desc')
-            ->get();
+        $users = $this->userService->getAllUsers();
 
         return response()->json([
             'success' => true,
@@ -36,11 +34,9 @@ class UserController extends Controller
 
     public function show(Request $request, $id)
     {
-        if (!$this->isAdminOrKetua($request->user())) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
+        $this->authorizeAction($request);
 
-        $user = User::findOrFail($id);
+        $user = $this->userService->getUserById($id);
 
         return response()->json([
             'success' => true,
@@ -48,45 +44,9 @@ class UserController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(UserRequest $request)
     {
-        if (!$this->isAdminOrKetua($request->user())) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        // Konversi empty string ke null untuk field nullable
-        $nullableFields = ['divisi_id', 'tps_id', 'whatsapp_number'];
-        foreach ($nullableFields as $field) {
-            if ($request->has($field) && $request->$field === '') {
-                $request->merge([$field => null]);
-            }
-        }
-
-        $request->validate([
-            'username' => 'required|string|max:50|unique:users',
-            'email' => 'required|email|max:100|unique:users',
-            'whatsapp_number' => 'nullable|string|max:20',
-            'password' => 'nullable|string|min:6',
-            'role' => 'required|string|max:30',
-            'divisi_id' => 'nullable|uuid|exists:divisi,divisi_id',
-            'tps_id' => 'nullable|uuid|exists:wilayah_tps,tps_id',
-            'status_aktif' => 'nullable|boolean'
-        ]);
-
-        $password = $request->password ? $request->password : 'Bawaslu123';
-
-        $user = User::create([
-            'user_id' => (string) Str::uuid(),
-            'username' => $request->username,
-            'email' => $request->email,
-            'whatsapp_number' => $request->whatsapp_number,
-            'password_hash' => Hash::make($password),
-            'role' => $request->role,
-            'divisi_id' => $request->divisi_id,
-            'tps_id' => $request->tps_id,
-            'status_aktif' => $request->status_aktif ?? true,
-            'mfa_enabled' => false
-        ]);
+        $user = $this->userService->createUser($request->validated());
 
         return response()->json([
             'success' => true,
@@ -95,50 +55,9 @@ class UserController extends Controller
         ], 201);
     }
 
-    public function update(Request $request, $id)
+    public function update(UserRequest $request, $id)
     {
-        if (!$this->isAdminOrKetua($request->user())) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        $user = User::findOrFail($id);
-
-        // Konversi empty string ke null untuk field nullable
-        $nullableFields = ['divisi_id', 'tps_id', 'whatsapp_number'];
-        foreach ($nullableFields as $field) {
-            if ($request->has($field) && $request->$field === '') {
-                $request->merge([$field => null]);
-            }
-        }
-
-        $request->validate([
-            'username' => 'sometimes|string|max:50|unique:users,username,'.$id.',user_id',
-            'email' => 'sometimes|email|max:100|unique:users,email,'.$id.',user_id',
-            'whatsapp_number' => 'nullable|string|max:20',
-            'role' => 'sometimes|string|max:30',
-            'divisi_id' => 'nullable|uuid|exists:divisi,divisi_id',
-            'tps_id' => 'nullable|uuid|exists:wilayah_tps,tps_id',
-            'status_aktif' => 'nullable|boolean'
-        ]);
-
-        $updateData = [];
-
-        $optionalFields = ['username', 'email', 'whatsapp_number', 'role', 'divisi_id', 'tps_id'];
-        foreach ($optionalFields as $field) {
-            if ($request->has($field)) {
-                $updateData[$field] = $request->$field;
-            }
-        }
-
-        if ($request->has('status_aktif')) {
-            $updateData['status_aktif'] = $request->status_aktif;
-        }
-        
-        if ($request->filled('password')) {
-            $updateData['password_hash'] = Hash::make($request->password);
-        }
-
-        $user->update($updateData);
+        $user = $this->userService->updateUser($id, $request->validated());
 
         return response()->json([
             'success' => true,
@@ -149,22 +68,28 @@ class UserController extends Controller
 
     public function destroy(Request $request, $id)
     {
-        if (!$this->isAdminOrKetua($request->user())) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
+        $this->authorizeAction($request);
 
-        $user = User::findOrFail($id);
+        try {
+            $this->userService->deleteUser($id, $request->user());
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'User berhasil dihapus'
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 403);
+        }
+    }
+
+    private function authorizeAction(Request $request)
+    {
+        $role = strtolower($request->user()->role ?? '');
+        $isAuthorized = str_contains($role, 'admin') || str_contains($role, 'superadmin') || str_contains($role, 'ketua');
         
-        // Prevent deleting yourself
-        if ($request->user()->user_id === $user->user_id) {
-            return response()->json(['success' => false, 'message' => 'Tidak dapat menghapus akun sendiri.'], 403);
-        }
-
-        $user->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'User berhasil dihapus'
-        ]);
+        abort_unless($isAuthorized, 403, 'Unauthorized');
     }
 }

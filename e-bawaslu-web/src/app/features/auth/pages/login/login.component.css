@@ -22,6 +22,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  -webkit-user-select: none;
   user-select: none;
   transition: color 150ms;
 }
@@ -48,8 +49,6 @@
   max-height: 240px;
   overflow: auto;
   padding: 4px 2px;
-  scrollbar-width: thin;
-  scrollbar-color: #d0d7dd transparent;
 }
 
 .demo-btn {

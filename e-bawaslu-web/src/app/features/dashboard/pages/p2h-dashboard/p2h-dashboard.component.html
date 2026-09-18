@@ -4,7 +4,7 @@
   <div class="page-header">
     <div class="header-left">
       <div class="badge-tag">
-        <mat-icon style="font-size: 16px; width: 16px; height: 16px;">verified_user</mat-icon>
+        <mat-icon class="styled-f0dd34" >verified_user</mat-icon>
         Divisi P2H (Pencegahan, Parmas & Humas)
       </div>
       <h1 class="page-title">Dokumen Pengawasan Pemilu (LHPP)</h1>
@@ -93,14 +93,14 @@
         <!-- Nomor LHPP (Optional/Auto) -->
         <mat-form-field appearance="outline" class="form-field">
           <mat-label>Nomor Dokumen LHPP</mat-label>
-          <input matInput formControlName="nomor_lhpp" placeholder="Otomatis digenerate (contoh: LHPP/2026/08/0001)">
+          <input matInput formControlName="nomor_lhpp" placeholder="Otomatis digenerate (contoh: LHPP/2026/08/0001)" title="Input field">
           <mat-hint>Dapat dikosongkan untuk penomoran otomatis</mat-hint>
         </mat-form-field>
 
         <!-- Judul Laporan -->
         <mat-form-field appearance="outline" class="form-field span-2">
           <mat-label>Judul / Fokus Pengawasan *</mat-label>
-          <input matInput formControlName="judul_laporan" placeholder="Contoh: Pengawasan Pemungutan Suara di TPS 01">
+          <input matInput formControlName="judul_laporan" placeholder="Contoh: Pengawasan Pemungutan Suara di TPS 01" title="Input field">
           <mat-error *ngIf="lhppForm.get('judul_laporan')?.hasError('required')">
             Judul laporan wajib diisi.
           </mat-error>
@@ -111,7 +111,7 @@
         <!-- Pemilihan TPS -->
         <mat-form-field appearance="outline" class="form-field">
           <mat-label>Wilayah TPS Pengawasan *</mat-label>
-          <mat-select formControlName="tps_id">
+          <mat-select formControlName="tps_id" title="Select field" placeholder="Pilih...">
             <mat-option *ngFor="let t of tpsList" [value]="t.tps_id">
               TPS {{ t.no_tps }} - {{ t.kelurahan }} ({{ t.kecamatan }})
             </mat-option>
@@ -124,7 +124,7 @@
         <!-- Tanggal Pengawasan -->
         <mat-form-field appearance="outline" class="form-field">
           <mat-label>Tanggal Pengawasan *</mat-label>
-          <input matInput type="date" formControlName="tanggal_pengawasan">
+          <input matInput type="date" formControlName="tanggal_pengawasan" title="Input field" placeholder="...">
           <mat-error *ngIf="lhppForm.get('tanggal_pengawasan')?.hasError('required')">
             Tanggal pengawasan wajib diisi.
           </mat-error>
@@ -133,7 +133,7 @@
         <!-- Tahapan Pemilu -->
         <mat-form-field appearance="outline" class="form-field">
           <mat-label>Tahapan Pemilu *</mat-label>
-          <mat-select formControlName="tahapan_pemilu">
+          <mat-select formControlName="tahapan_pemilu" title="Select field" placeholder="Pilih...">
             <mat-option *ngFor="let tahapan of tahapanOptions" [value]="tahapan">
               {{ tahapan }}
             </mat-option>
@@ -146,7 +146,7 @@
         <!-- Status Unggahan -->
         <mat-form-field appearance="outline" class="form-field">
           <mat-label>Status Pengunggahan *</mat-label>
-          <mat-select formControlName="status_lhpp">
+          <mat-select formControlName="status_lhpp" title="Select field" placeholder="Pilih...">
             <mat-option value="Submitted">Submitted (Kirim untuk Verifikasi)</mat-option>
             <mat-option value="Draft">Draft (Simpan sebagai Draf)</mat-option>
           </mat-select>
@@ -171,11 +171,11 @@
               <mat-icon>attach_file</mat-icon>
               Pilih Berkas Dokumen (PDF / Gambar)
             </button>
-            <input type="file" (change)="onFileSelected($event)" accept="application/pdf,image/jpeg,image/png,image/jpg" class="hidden-file-input">
+            <input type="file" (change)="onFileSelected($event)" accept="application/pdf,image/jpeg,image/png,image/jpg" class="hidden-file-input" title="Input field" placeholder="...">
           </div>
           <div class="file-info-text">
             <span *ngIf="filePreviewName" class="file-selected">
-              <mat-icon style="color: #059669; vertical-align: middle; font-size: 20px; width: 20px; height: 20px;">check_circle</mat-icon>
+              <mat-icon class="styled-2a7488" >check_circle</mat-icon>
               {{ filePreviewName }}
             </span>
             <span *ngIf="!filePreviewName" class="file-hint">
@@ -191,7 +191,7 @@
           <mat-icon>close</mat-icon> Batal Edit
         </button>
         <button mat-flat-button color="primary" type="submit" [disabled]="isUploading || lhppForm.invalid || (!editingLhppId && !selectedFile)" class="submit-btn">
-          <mat-spinner *ngIf="isUploading" diameter="20" style="display: inline-block; margin-right: 8px; vertical-align: middle;"></mat-spinner>
+          <mat-spinner class="styled-93e708" *ngIf="isUploading" diameter="20" ></mat-spinner>
           <mat-icon *ngIf="!isUploading">{{ editingLhppId ? 'save' : 'cloud_upload' }}</mat-icon>
           <span>{{ editingLhppId ? 'Perbarui Dokumen LHPP' : 'Unggah Dokumen LHPP' }}</span>
         </button>
@@ -218,7 +218,7 @@
         <!-- Filter TPS -->
         <mat-form-field appearance="outline" class="filter-field">
           <mat-label>Filter TPS</mat-label>
-          <mat-select [(ngModel)]="selectedFilterTps" (selectionChange)="applyFilter()">
+          <mat-select [(ngModel)]="selectedFilterTps" (selectionChange)="applyFilter()" title="Select field" placeholder="Pilih...">
             <mat-option value="">Semua TPS</mat-option>
             <mat-option *ngFor="let t of tpsList" [value]="t.tps_id">
               TPS {{ t.no_tps }} - {{ t.kelurahan }}
@@ -229,7 +229,7 @@
         <!-- Filter Status -->
         <mat-form-field appearance="outline" class="filter-field">
           <mat-label>Filter Status</mat-label>
-          <mat-select [(ngModel)]="selectedFilterStatus" (selectionChange)="applyFilter()">
+          <mat-select [(ngModel)]="selectedFilterStatus" (selectionChange)="applyFilter()" title="Select field" placeholder="Pilih...">
             <mat-option value="">Semua Status</mat-option>
             <mat-option value="Verified">Verified (Disetujui)</mat-option>
             <mat-option value="Submitted">Submitted (Menunggu)</mat-option>
@@ -241,7 +241,7 @@
         <!-- Search Input -->
         <mat-form-field appearance="outline" class="filter-field search-field">
           <mat-label>Cari Judul / No LHPP</mat-label>
-          <input matInput [(ngModel)]="searchKeyword" (keyup.enter)="applyFilter()" placeholder="Ketik kata kunci...">
+          <input matInput [(ngModel)]="searchKeyword" (keyup.enter)="applyFilter()" placeholder="Ketik kata kunci..." title="Input field">
           <button mat-icon-button matSuffix (click)="applyFilter()">
             <mat-icon>search</mat-icon>
           </button>

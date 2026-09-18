@@ -1,0 +1,147 @@
+<!-- FORM UPLOAD C1 -->
+<div class="clean-card">
+  <div class="form-header-container">
+    <h3 class="form-header-title">
+      <mat-icon class="progress-icon">publish</mat-icon> Unggah Lembar Model C1-Hasil
+    </h3>
+    <p class="form-header-desc">
+      Sistem secara otomatis menghitung Hash SHA-256 berkas fisik dan memvalidasi rumus konsistensi suara secara real-time.
+    </p>
+  </div>
+
+  <!-- PANDUAN PENGISIAN & UPLOAD -->
+  <div class="guide-box">
+    <h4 class="guide-title">
+      <mat-icon class="guide-icon">lightbulb</mat-icon> Panduan Pengisian & Unggah Form C1
+    </h4>
+    <ul class="guide-list">
+      <li><strong>Langkah 1:</strong> Ketikkan jumlah Pasangan Calon (Paslon) terlebih dahulu pada kolom <strong>Kustom Jumlah Paslon</strong> di bawah (misal: isi angka 1, 3, 5, atau lebih).</li>
+      <li><strong>Langkah 2:</strong> Sistem akan otomatis membuatkan kotak isian Suara Paslon sebanyak angka yang Anda ketikkan.</li>
+      <li><strong>Langkah 3:</strong> Klik tombol <strong>Pilih Berkas</strong> dan unggah foto Form C1 Anda. Mesin AI (OCR) akan mencoba membaca gambar tersebut dan <strong>menyekrupkan angka-angkanya secara otomatis</strong> ke kotak Anda!</li>
+      <li><strong>Langkah 4:</strong> Selalu cek kotak peringatan validasi. Pastikan warnanya <strong class="text-success-bold">HIJAU (Validasi Berhasil)</strong> yang menandakan penjumlahan total paslon sama dengan Suara Sah.</li>
+      <li><strong>Langkah 5:</strong> Pastikan foto Form C1 yang Anda unggah <strong>terlihat jelas, tidak buram (blur), dan cahayanya cukup</strong> agar tulisan dapat terbaca akurat oleh sistem AI.</li>
+    </ul>
+  </div>
+
+  <form *ngIf="canWriteDocuments" [formGroup]="c1Form" (ngSubmit)="submitForm.emit()" class="main-form">
+
+    <div class="form-grid-3">
+      <!-- PILIH TPS -->
+      <mat-form-field appearance="outline">
+        <mat-label>Wilayah TPS</mat-label>
+        <mat-select formControlName="tps_id" title="Select field" placeholder="Pilih...">
+          <mat-option *ngFor="let t of tpsList" [value]="t.tps_id">
+            TPS {{ t.no_tps }} - {{ t.kelurahan }} (Kec. {{ t.kecamatan }})
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- TOTAL SUARA SAH -->
+        <mat-form-field appearance="outline" class="form-field-flex">
+          <mat-label>Total Suara Sah*</mat-label>
+          <input matInput type="number" formControlName="total_suara_sah" min="0" title="Input field" placeholder="...">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="form-field-flex">
+          <mat-label>Total Suara Tidak Sah*</mat-label>
+          <input matInput type="number" formControlName="total_suara_tidak_sah" min="0" title="Input field" placeholder="...">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="form-field-flex">
+          <mat-label>Total Pemilih yang Hadir*</mat-label>
+          <input matInput type="number" formControlName="total_pemilih" min="0" title="Input field" placeholder="...">
+        </mat-form-field>
+      </div>
+
+      <!-- FORM PASLON DINAMIS -->
+      <div class="paslon-form-container">
+        <div class="paslon-form-header">
+          <h3 class="paslon-form-title">Rincian Suara per Paslon</h3>
+
+          <mat-form-field appearance="outline" class="paslon-custom-input">
+            <mat-label>Kustom Jumlah Paslon</mat-label>
+            <input matInput type="number" formControlName="jumlah_paslon" min="1" (change)="jumlahPaslonChange.emit(c1Form.value.jumlah_paslon)" title="Input field" placeholder="...">
+          </mat-form-field>
+        </div>
+
+        <!-- Dynamic Array Inputs -->
+        <div formArrayName="suara_paslon" class="paslon-array-container">
+          <mat-form-field *ngFor="let ctrl of suaraPaslonControls; let i = index" appearance="outline" class="form-field-flex">
+            <mat-label>Suara Paslon {{ i + 1 }}</mat-label>
+            <input matInput type="number" [formControlName]="i" min="0" title="Input field" placeholder="...">
+          </mat-form-field>
+        </div>
+
+        <!-- Validasi Peringatan Interaktif -->
+        <div *ngIf="c1Form.value.suara_paslon && c1Form.value.total_suara_sah > 0"
+             class="validation-alert"
+             [ngStyle]="{'background-color': c1Form.value.total_suara_sah == sumSuaraPaslon ? '#ecfdf5' : '#fef2f2', 'border': '1px solid ' + (c1Form.value.total_suara_sah == sumSuaraPaslon ? '#a7f3d0' : '#fecaca'), 'color': c1Form.value.total_suara_sah == sumSuaraPaslon ? '#059669' : '#e11d48'}">
+
+          <mat-icon class="guide-icon">
+            {{ c1Form.value.total_suara_sah == sumSuaraPaslon ? 'check_circle' : 'error' }}
+          </mat-icon>
+          <span *ngIf="c1Form.value.total_suara_sah == sumSuaraPaslon">
+            Validasi Berhasil: Total Suara Paslon persis sama dengan Total Suara Sah ({{ c1Form.value.total_suara_sah }}).
+          </span>
+          <span *ngIf="c1Form.value.total_suara_sah != sumSuaraPaslon">
+            Validasi Gagal: Penjumlahan suara paslon ({{ sumSuaraPaslon }}) tidak sama dengan Total Suara Sah ({{ c1Form.value.total_suara_sah }}).
+          </span>
+        </div>
+      </div>
+
+    <!-- FR-REC-02: LIVE AUTO CROSS-CHECK VALIDATION BANNER -->
+    <div *ngIf="isMismatch" class="status-badge badge-error badge-flex-start">
+      <mat-icon>error_outline</mat-icon>
+      <div>
+        <strong class="mismatch-title">MISMATCH: Rumus Matematika Tidak Sinkron!</strong>
+        <span class="mismatch-desc">
+          (Suara Sah: {{ c1Form.value.total_suara_sah }} + Suara Tidak Sah: {{ c1Form.value.total_suara_tidak_sah }} = {{ totalSuaraMasukForm }}) â‰  (Total Pemilih: {{ c1Form.value.total_pemilih }}). Berkas akan ditandai Mismatch.
+        </span>
+      </div>
+    </div>
+
+    <div *ngIf="!isMismatch && totalSuaraMasukForm > 0" class="status-badge badge-success badge-flex-center">
+      <mat-icon class="status-icon-md">check_circle_outline</mat-icon>
+      <span class="mismatch-desc">
+        Cross-Check Valid: Jumlah Suara Masuk ({{ totalSuaraMasukForm }}) Sesuai dengan Total Pemilih ({{ c1Form.value.total_pemilih }}).
+      </span>
+    </div>
+
+    <!-- FILE SCAN UPLOAD (Material Style) -->
+    <div class="upload-section">
+      <div class="upload-container">
+        <div class="upload-label">Berkas Scan Form C1 (PDF/JPG/PNG)</div>
+
+        <div class="upload-controls">
+          <div class="file-upload-wrapper">
+            <button mat-stroked-button color="primary" type="button" class="upload-btn-fake">
+              <mat-icon>attach_file</mat-icon>
+              Pilih Berkas
+            </button>
+            <input type="file" (change)="fileSelected.emit($event)" accept="image/*,application/pdf" class="file-upload-input" title="Pilih Berkas" placeholder="...">
+          </div>
+          <span class="upload-filename">
+            {{ selectedFile ? selectedFile.name : 'Belum ada berkas dipilih' }}
+          </span>
+        </div>
+      </div>
+
+    </div>
+    <app-file-preview [file]="selectedFile"></app-file-preview>
+    <div *ngIf="isOcrScanning" class="ocr-preview-status" role="status">
+      <mat-spinner diameter="20"></mat-spinner>
+      <span>{{ ocrStatusText }}</span>
+    </div>
+    
+    <!-- SUBMIT BUTTON -->
+    <div class="form-actions">
+      <button *ngIf="editingC1Id" mat-stroked-button color="warn" type="button" (click)="cancelEdit.emit()" class="action-btn">
+        <mat-icon class="btn-icon">close</mat-icon> Batal Edit
+      </button>
+      <button mat-flat-button color="primary" type="submit" [disabled]="isUploading || isOcrScanning || c1Form.invalid || (!editingC1Id && !selectedFile)" class="action-btn">
+        <mat-spinner *ngIf="isUploading" diameter="18" class="btn-spinner"></mat-spinner>
+        <mat-icon *ngIf="!isUploading" class="btn-icon">{{ editingC1Id ? 'save_as' : 'lock' }}</mat-icon>
+        <span class="btn-text">{{ editingC1Id ? 'Perbarui Data C1' : 'Enkripsi & Simpan' }}</span>
+      </button>
+    </div>
+
+  </form>
+</div>

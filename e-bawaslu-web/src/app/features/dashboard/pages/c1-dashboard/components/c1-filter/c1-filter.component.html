@@ -1,0 +1,35 @@
+<div class="c1-filter-grid" role="group" aria-label="Filter wilayah dan tahun C1">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Kecamatan</mat-label>
+    <mat-select [ngModel]="selectedKecamatan" (ngModelChange)="onKecamatanChange($event)">
+      <mat-option value="">Semua Kecamatan</mat-option>
+      <mat-option *ngFor="let kec of kecamatanList" [value]="kec">{{ kec }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Kelurahan</mat-label>
+    <mat-select [ngModel]="selectedKelurahan" (ngModelChange)="onKelurahanChange($event)">
+      <mat-option value="">Semua Kelurahan</mat-option>
+      <mat-option *ngFor="let kel of kelurahanList" [value]="kel">{{ kel }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Filter Berdasarkan TPS</mat-label>
+    <mat-select [value]="selectedFilterTps" (selectionChange)="filterTpsChange.emit($event.value)">
+      <mat-option value="">Semua TPS Kota Cimahi</mat-option>
+      <mat-option *ngFor="let t of filteredTps" [value]="t.tps_id">
+        TPS {{ t.no_tps }} - {{ t.kelurahan }} (Kec. {{ t.kecamatan }})
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Filter Tahun</mat-label>
+    <mat-select [ngModel]="selectedFilterYear" (selectionChange)="filterYearChange.emit($event.value)">
+      <mat-option value="">Semua Tahun</mat-option>
+      <mat-option *ngFor="let year of availableYears" [value]="year">{{ year }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>

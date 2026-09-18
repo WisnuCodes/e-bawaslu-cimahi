@@ -15,19 +15,23 @@ use App\Http\Controllers\Api\SaksiController;
 use App\Http\Controllers\Api\Whatsapp\WhatsappController;
 use App\Http\Controllers\Api\TahapanController;
 use App\Http\Controllers\Api\LhpController;
+use App\Http\Controllers\Api\P2H\LhppController;
 use App\Http\Controllers\Api\UserController;
 
-// Auth Routes (MOCK SSO Keycloak)
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/verify-mfa', [AuthController::class, 'verifyMfa']);
+// Auth Routes (MOCK SSO Keycloak) with Rate Limiting (5 requests per minute)
+Route::middleware('throttle:5,1')->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/verify-mfa', [AuthController::class, 'verifyMfa']);
+});
 
 // Protected API Routes
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:api')->group(function () {
     Route::get('/me', fn (Request $request) => response()->json(['data' => $request->user()]));
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Master Data Routes
     Route::prefix('master')->group(function () {
+        Route::get('/wilayah-tps', [MasterDataController::class, 'wilayahTps']);
         Route::get('/divisi', [MasterDataController::class, 'getDivisi']);
         Route::post('/divisi', [MasterDataController::class, 'storeDivisi']);
         Route::put('/divisi/{id}', [MasterDataController::class, 'updateDivisi']);
@@ -79,8 +83,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // C1 (P2H) Module Routes
     Route::prefix('c1')->group(function () {
         Route::get('/', [C1Controller::class, 'index']);
-        Route::post('/scan', [C1Controller::class, 'scanOcr']); // High-level OCR scan
-        Route::post('/', [C1Controller::class, 'store']); // Enkripsi AES-256
+        Route::post('/scan', [C1Controller::class, 'scanOcr'])->middleware('throttle:30,1'); // High-level OCR scan
+        Route::post('/', [C1Controller::class, 'store'])->middleware('throttle:30,1'); // Enkripsi AES-256
         Route::get('/{id}/download', [C1Controller::class, 'download']);
         Route::put('/{id}/approval-divisi', [C1Controller::class, 'assignApproval']);
         Route::put('/{id}', [C1Controller::class, 'update']);
@@ -99,6 +103,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('lhp')->group(function () {
         Route::get('/', [LhpController::class, 'index']);
         Route::post('/', [LhpController::class, 'store']);
+    });
+
+    // P2H (LHPP) Module Routes
+    Route::prefix('p2h')->group(function () {
+        Route::get('/lhpp', [LhppController::class, 'index']);
+        Route::post('/lhpp', [LhppController::class, 'store']);
+        Route::get('/lhpp/{id}', [LhppController::class, 'show']);
+        Route::post('/lhpp/{id}', [LhppController::class, 'update']);
+        Route::put('/lhpp/{id}', [LhppController::class, 'update']);
+        Route::post('/lhpp/{id}/verify', [LhppController::class, 'verify']);
+        Route::delete('/lhpp/{id}', [LhppController::class, 'destroy']);
+        Route::get('/lhpp/{id}/download', [LhppController::class, 'download']);
     });
 
     // Report (Eksport BPK)

@@ -1,0 +1,146 @@
+.wfh-action-wrapper {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 992px) {
+  .wfh-action-wrapper {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.status-card-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px 20px;
+}
+
+.icon-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.icon-wrapper mat-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.status-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin: 0 0 4px;
+}
+
+.status-date {
+  font-size: 13px;
+  color: #94a3b8;
+  margin: 0 0 24px;
+}
+
+.time-display {
+  font-size: 48px;
+  font-weight: 700;
+  font-family: 'Inter', monospace;
+  color: var(--color-text);
+  letter-spacing: 2px;
+  margin: 0 0 24px;
+  line-height: 1;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.status-badge.status-none {
+  background-color: #f1f5f9;
+  color: #64748b;
+}
+
+.status-badge.status-partial {
+  background-color: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
+
+.status-badge.status-complete {
+  background-color: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.action-card-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  height: 100%;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.action-buttons button {
+  height: 54px !important;
+  font-size: 15px !important;
+  border-radius: 12px !important;
+}
+
+.camera-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.camera-frame {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 4/3;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.camera-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.camera-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}

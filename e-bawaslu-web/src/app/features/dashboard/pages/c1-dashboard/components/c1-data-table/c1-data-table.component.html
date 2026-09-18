@@ -1,0 +1,156 @@
+<div class="clean-card table-card">
+  <div class="table-header">
+    <h3 class="form-header-title">
+      <mat-icon class="progress-icon">history</mat-icon> Log Rekapitulasi Berkas C1
+    </h3>
+    <span class="status-badge badge-neutral">
+      Total: {{ dataSource.data.length }} Berkas
+    </span>
+  </div>
+
+  <div class="table-search-container">
+    <mat-form-field appearance="outline" class="table-search-input">
+      <mat-label>Pencarian Form C1...</mat-label>
+      <input matInput (input)="applyFilterC1($event)" placeholder="Ketik TPS, Kelurahan, Kecamatan, Hash, atau Status...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <div class="table-responsive table-wrapper">
+    <table mat-table [dataSource]="dataSource" class="data-table">
+
+      <!-- TPS Column -->
+      <ng-container matColumnDef="tps">
+        <th mat-header-cell *matHeaderCellDef> Wilayah TPS </th>
+        <td mat-cell *matCellDef="let element">
+          <span class="col-text-primary">{{ getTpsInfo(element.tps_id) }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Suara Sah Column -->
+      <ng-container matColumnDef="suara_sah">
+        <th mat-header-cell *matHeaderCellDef> Suara Sah </th>
+        <td mat-cell *matCellDef="let element">
+          <span class="col-text-success">{{ element.total_suara_sah | number }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Rincian Paslon Column -->
+      <ng-container matColumnDef="rincian_paslon">
+        <th mat-header-cell *matHeaderCellDef> Rincian Paslon </th>
+        <td mat-cell *matCellDef="let element">
+          <div *ngIf="getPaslonBreakdown(element).length > 0; else noBreakdown" class="paslon-breakdown-container">
+            <span *ngFor="let paslon of getPaslonBreakdown(element)" class="paslon-breakdown-item">
+              <strong class="paslon-breakdown-key">P{{paslon.key}}:</strong> <span class="paslon-breakdown-val">{{paslon.val | number}}</span>
+            </span>
+          </div>
+          <ng-template #noBreakdown>
+            <span class="paslon-breakdown-empty">Tidak ada rincian</span>
+          </ng-template>
+        </td>
+      </ng-container>
+
+      <!-- Suara Tidak Sah Column -->
+      <ng-container matColumnDef="suara_tidak_sah">
+        <th mat-header-cell *matHeaderCellDef> Tidak Sah </th>
+        <td mat-cell *matCellDef="let element">
+          <span class="col-text-warning">{{ element.total_suara_tidak_sah | number }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Total Pemilih Column -->
+      <ng-container matColumnDef="total_pemilih">
+        <th mat-header-cell *matHeaderCellDef> Total Pemilih </th>
+        <td mat-cell *matCellDef="let element">
+          <span class="col-text-info">{{ element.total_pemilih | number }}</span>
+        </td>
+      </ng-container>
+
+      <!-- SHA-256 Hash Column -->
+      <ng-container matColumnDef="hash">
+        <th mat-header-cell *matHeaderCellDef> SHA-256 Hash </th>
+        <td mat-cell *matCellDef="let element">
+          <div class="progress-status">
+            <code class="hash-code">
+              {{ element.sha256_hash }}
+            </code>
+            <button mat-icon-button color="primary" (click)="copyHash.emit(element.sha256_hash)" matTooltip="Salin Hash">
+              <mat-icon>content_copy</mat-icon>
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef> Status </th>
+        <td mat-cell *matCellDef="let element">
+          <span *ngIf="element.status_c1 === 'Approved'" class="status-badge badge-success">Approved</span>
+          <span *ngIf="element.status_c1 === 'Mismatch'" class="status-badge badge-error">Mismatch</span>
+          <span *ngIf="element.status_c1 === 'Pending'" class="status-badge badge-warning">Pending</span>
+          <span *ngIf="element.status_c1 === 'Rejected'" class="status-badge badge-neutral">Rejected</span>
+          <span *ngIf="element.status_c1 === 'Revision'" class="status-badge badge-warning badge-revision">Revision</span>
+        </td>
+      </ng-container>
+
+      <!-- Tanggal Column -->
+      <ng-container matColumnDef="tanggal">
+        <th mat-header-cell *matHeaderCellDef> Waktu Entri </th>
+        <td mat-cell *matCellDef="let element" class="date-text">
+          {{ element.created_at | bawasluDate:'dd MMM yyyy, HH:mm' }}
+        </td>
+      </ng-container>
+
+      <!-- Aksi Approval Column -->
+      <ng-container matColumnDef="aksi">
+        <th mat-header-cell *matHeaderCellDef> Tindakan </th>
+        <td mat-cell *matCellDef="let element">
+          <div class="actions-container">
+
+            <button mat-icon-button (click)="download.emit(element)" matTooltip="Unduh Dokumen C1"><mat-icon>download</mat-icon></button>
+            <mat-form-field *ngIf="isSuperAdmin" appearance="outline" class="action-select">
+              <mat-label>Divisi Approval</mat-label>
+              <mat-select [value]="element.approval_divisi_id" [disabled]="savingApproval[element.id]" (selectionChange)="assignApproval.emit({item: element, division: $event.value})">
+                <mat-option *ngFor="let div of divisiList" [value]="div.divisi_id">{{ div.nama_divisi }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <!-- Pimpinan Approval Buttons -->
+            <ng-container *ngIf="canApproveItem(element) && element.status_c1 === 'Draft'">
+              <button mat-stroked-button (click)="approve.emit({item: element, status: 'Approved'})" class="btn-approve">
+                Setujui
+              </button>
+              <button mat-stroked-button (click)="approve.emit({item: element, status: 'Rejected'})" class="btn-reject">
+                Tolak
+              </button>
+            </ng-container>
+
+            <!-- Tombol Edit -->
+            <ng-container *ngIf="canWriteDocuments && element.status_c1 !== 'Approved'">
+              <button mat-icon-button color="primary" (click)="edit.emit(element)" matTooltip="Edit & Koreksi Data">
+                <mat-icon>edit_square</mat-icon>
+              </button>
+            </ng-container>
+
+            <!-- Tombol Hapus -->
+            <ng-container *ngIf="canDeleteC1">
+              <button mat-icon-button color="warn" (click)="delete.emit(element)" matTooltip="Hapus Permanen">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </ng-container>
+
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]" aria-label="Pilih Halaman Form C1"></mat-paginator>
+
+    <div *ngIf="dataSource.data.length === 0" class="empty-table-msg">
+      Belum ada berkas scan Form C1 yang diunggah atau sesuai kriteria pencarian.
+    </div>
+  </div>
+</div>

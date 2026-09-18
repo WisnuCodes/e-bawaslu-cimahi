@@ -5,7 +5,7 @@
       <div class="welcome-title">
         <h1>Selamat Datang, {{ authService.currentUser()?.username || 'Aparatur Bawaslu' }}</h1>
         <p class="date">
-          <mat-icon style="font-size: 14px; width: 14px; height: 14px;">calendar_today</mat-icon>
+          <mat-icon class="styled-a4e791" >calendar_today</mat-icon>
           {{ today | bawasluDate:'EEEE, dd MMMM yyyy' }}
         </p>
         <p class="subtitle">
@@ -20,20 +20,20 @@
 
   <!-- FR-REP-01: EXECUTIVE LIVE PROGRESS & ALERTS -->
   <div class="progress-banner" *ngIf="authService.canAccessC1">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <mat-icon style="color: #616161;">bar_chart</mat-icon>
-        <strong style="color: #212121; font-size: 1rem; font-weight: 500;">Live Progress Form C1 Pemilu Kota Cimahi</strong>
+    <div class="styled-b73d46" >
+      <div class="styled-e4f36c" >
+        <mat-icon class="styled-636807" >bar_chart</mat-icon>
+        <strong class="styled-a2f7de" >Live Progress Form C1 Pemilu Kota Cimahi</strong>
       </div>
-      <span style="font-size: 0.9rem; color: #424242;">
+      <span class="styled-6e2641" >
         <strong>{{ totalC1 }}</strong> dari <strong>{{ totalTpsTarget }} TPS</strong> Masuk ({{ c1ProgressPercentage }}%)
       </span>
     </div>
-    <mat-progress-bar mode="determinate" [value]="c1ProgressPercentage" style="height: 6px; border-radius: 3px;"></mat-progress-bar>
-    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #757575; margin-top: 12px; align-items: center;">
+    <mat-progress-bar class="styled-bfe983" mode="determinate" [value]="c1ProgressPercentage" ></mat-progress-bar>
+    <div class="styled-c20deb" >
       <span>Cakupan: Kec. Cimahi Utara, Cimahi Tengah, Cimahi Selatan</span>
-      <a routerLink="/dashboard/c1" style="color: var(--color-primary); text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 4px;">
-        Lihat Detail Rekapitulasi <mat-icon style="font-size: 16px; width: 16px; height: 16px;">chevron_right</mat-icon>
+      <a class="styled-878db5" routerLink="/dashboard/c1" >
+        Lihat Detail Rekapitulasi <mat-icon class="styled-39bb04" >chevron_right</mat-icon>
       </a>
     </div>
   </div>
@@ -55,7 +55,7 @@
       <div class="stat-action">
         <span class="stat-subtitle">Aktivitas Harian</span>
         <a routerLink="/dashboard/wfh" class="stat-link">
-          {{ presensiTodayStatus === 'Belum Presensi' ? 'Buka Presensi' : 'Lihat Worklog' }} <mat-icon style="font-size: 16px; width: 16px; height: 16px; margin-top: 2px;">chevron_right</mat-icon>
+          {{ presensiTodayStatus === 'Belum Presensi' ? 'Buka Presensi' : 'Lihat Worklog' }} <mat-icon class="styled-725580" >chevron_right</mat-icon>
         </a>
       </div>
     </div>
@@ -74,7 +74,7 @@
       <div class="stat-action">
         <span class="stat-subtitle">Total Berkas Digital</span>
         <a routerLink="/dashboard/arsip" class="stat-link">
-          Kelola Arsip <mat-icon style="font-size: 16px; width: 16px; height: 16px; margin-top: 2px;">chevron_right</mat-icon>
+          Kelola Arsip <mat-icon class="styled-9e39ef" >chevron_right</mat-icon>
         </a>
       </div>
     </div>
@@ -93,14 +93,14 @@
       <div class="stat-action">
         <span class="stat-subtitle">
           <ng-container *ngIf="c1MismatchCount === 0">
-            <span class="text-success" style="display: flex; align-items: center; gap: 4px;"><mat-icon style="font-size: 14px; width:14px; height:14px;">check_circle_outline</mat-icon> Semua Sinkron</span>
+            <span class="styled-e760ef text-success" ><mat-icon class="styled-75b04d" >check_circle_outline</mat-icon> Semua Sinkron</span>
           </ng-container>
           <ng-container *ngIf="c1MismatchCount > 0">
-            <span class="text-error" style="display: flex; align-items: center; gap: 4px;"><mat-icon style="font-size: 14px; width:14px; height:14px;">error_outline</mat-icon> {{ c1MismatchCount }} Mismatch</span>
+            <span class="styled-1c2b3f text-error" ><mat-icon class="styled-28f7ff" >error_outline</mat-icon> {{ c1MismatchCount }} Mismatch</span>
           </ng-container>
         </span>
         <a routerLink="/dashboard/c1" class="stat-link">
-          Pantau Form <mat-icon style="font-size: 16px; width: 16px; height: 16px; margin-top: 2px;">chevron_right</mat-icon>
+          Pantau Form <mat-icon class="styled-d44811" >chevron_right</mat-icon>
         </a>
       </div>
     </div>
@@ -113,13 +113,13 @@
           <mat-icon>assignment</mat-icon>
         </div>
       </div>
-      <div class="stat-value" style="color: var(--color-primary);">
+      <div class="styled-dcfb5b stat-value" >
         Semua Divisi
       </div>
       <div class="stat-action">
         <span class="stat-subtitle">Sesuai Tahapan Pengawasan</span>
         <a routerLink="/dashboard/lhp" class="stat-link">
-          Kelola LHP <mat-icon style="font-size: 16px; width: 16px; height: 16px; margin-top: 2px;">chevron_right</mat-icon>
+          Kelola LHP <mat-icon class="styled-caba4f" >chevron_right</mat-icon>
         </a>
       </div>
     </div>
@@ -132,13 +132,13 @@
           <mat-icon>assignment_late</mat-icon>
         </div>
       </div>
-      <div class="stat-value" style="color: #f57c00;">
+      <div class="styled-cacbb4 stat-value" >
         {{ pendingApprovalWorklog }}
       </div>
       <div class="stat-action">
         <span class="stat-subtitle">Worklog Pegawai</span>
         <a routerLink="/dashboard/wfh" class="stat-link">
-          Tinjau Sekarang <mat-icon style="font-size: 16px; width: 16px; height: 16px; margin-top: 2px;">chevron_right</mat-icon>
+          Tinjau Sekarang <mat-icon class="styled-4b461e" >chevron_right</mat-icon>
         </a>
       </div>
     </div>
@@ -196,11 +196,11 @@
 
       <!-- C1 Pilkada -->
       <a routerLink="/dashboard/c1" [queryParams]="{kamar: 'Pilkada'}" class="action-tile-modern" *ngIf="authService.canAccessC1">
-        <div class="action-tile-icon" style="background-color: #e0e0e0; color: #757575;">
+        <div class="styled-9ccc00 action-tile-icon" >
           <mat-icon>how_to_vote</mat-icon>
         </div>
         <div class="action-tile-content">
-          <span class="action-tile-title" style="color: #757575;">Live Form C1 (Pilkada)</span>
+          <span class="styled-9c44da action-tile-title" >Live Form C1 (Pilkada)</span>
           <span class="action-tile-desc">Pengawasan Pemilihan Kepala Daerah / Wali Kota</span>
         </div>
       </a>

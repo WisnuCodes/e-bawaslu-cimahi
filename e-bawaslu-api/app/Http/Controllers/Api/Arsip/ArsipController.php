@@ -11,9 +11,16 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use App\Services\ArsipService;
 
 class ArsipController extends Controller
 {
+    protected $arsipService;
+
+    public function __construct(ArsipService $arsipService)
+    {
+        $this->arsipService = $arsipService;
+    }
     public function index(Request $request)
     {
         $query = Arsip::query();
@@ -105,37 +112,12 @@ class ArsipController extends Controller
             ], 403);
         }
 
-        $path = $request->file('file_dokumen')->store('arsip', 'public');
-
-        $arsip = Arsip::create([
-            'id' => (string) Str::uuid(),
-            'divisi_id' => $request->divisi_id,
-            'created_by' => $userId,
-            'no_surat' => $request->no_surat,
-            'tgl_surat' => $request->tgl_surat,
-            'perihal' => $request->perihal,
-            'kategori' => in_array(strtoupper($request->kategori), ['LHP', 'LHPP']) ? 'LHP' : $request->kategori,
-            'jenis_pemilihan' => $request->jenis_pemilihan,
-            'tahapan_id' => $request->tahapan_id,
-            'klasifikasi' => $request->klasifikasi,
-            'jenjang_pengawas' => $request->jenjang_pengawas,
-            'catatan_kejadian' => $request->input('catatan_kejadian', []),
-            'kondisi_kotak_surat' => $request->kondisi_kotak_surat,
-            'file_path' => $path,
-            'version' => 'v1.0',
-            'is_locked' => false,
-            'is_deleted' => false,
-        ]);
-
-        AuditLog::create([
-            'log_id' => (string) Str::uuid(),
-            'actor_id' => $userId,
-            'action' => 'UPLOAD_ARSIP',
-            'target_entity' => 'arsip:' . $arsip->id,
-            'ip_address' => $request->ip(),
-            'reason' => 'Upload dokumen baru: ' . $arsip->no_surat,
-            'timestamp' => Carbon::now(),
-        ]);
+        $arsip = $this->arsipService->storeArsip(
+            $request->all(),
+            $request->file('file_dokumen'),
+            $user,
+            $request->ip()
+        );
 
         return response()->json([
             'success' => true,
@@ -160,43 +142,17 @@ class ArsipController extends Controller
             'catatan_revisi' => 'required|string'
         ]);
 
-        $userId = $request->user()->user_id;
-        
-        // Simpan versi lama ke history
-        VersionHistory::create([
-            'history_id' => (string) Str::uuid(),
-            'arsip_id' => $arsip->id,
-            'version_name' => $arsip->version,
-            'file_path' => $arsip->file_path,
-            'uploaded_by' => $userId,
-            'catatan_revisi' => $request->catatan_revisi,
-            'created_at' => Carbon::now()
-        ]);
-
-        // Hitung versi baru
-        $currentVersion = (float) str_replace('v', '', $arsip->version);
-        $newVersion = 'v' . number_format($currentVersion + 0.1, 1);
-
-        $path = $request->file('file_dokumen')->store('arsip', 'public');
-
-        $arsip->update([
-            'version' => $newVersion,
-            'file_path' => $path
-        ]);
-
-        AuditLog::create([
-            'log_id' => (string) Str::uuid(),
-            'actor_id' => $userId,
-            'action' => 'EDIT_ARSIP',
-            'target_entity' => 'arsip:' . $arsip->id,
-            'ip_address' => $request->ip(),
-            'reason' => 'Revisi dokumen (' . $newVersion . '): ' . $arsip->no_surat,
-            'timestamp' => Carbon::now(),
-        ]);
+        $arsip = $this->arsipService->reviseArsip(
+            $arsip,
+            $request->file('file_dokumen'),
+            $request->catatan_revisi,
+            $request->user(),
+            $request->ip()
+        );
 
         return response()->json([
             'success' => true,
-            'message' => "Revisi berhasil diunggah ($newVersion).",
+            'message' => "Revisi berhasil diunggah ({$arsip->version}).",
             'data' => $arsip
         ], 200);
     }

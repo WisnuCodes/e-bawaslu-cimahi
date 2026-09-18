@@ -94,27 +94,31 @@ class AuthController extends Controller
         $user->otp_expires_at = null;
         $user->save();
 
-        // Menerbitkan token Sanctum (mensimulasikan JWT behavior)
-        $token = $user->createToken('bawaslu-enterprise-token', ['*'])->plainTextToken;
+        // Menerbitkan token JWT
+        $token = auth('api')->tokenById($user->user_id);
+
+        $cookie = cookie('jwt_token', $token, env('JWT_TTL', 1440), '/', null, env('APP_ENV') === 'production', true, false, 'Lax');
 
         return response()->json([
             'success' => true,
             'message' => 'MFA Terverifikasi. Login berhasil.',
             'data' => [
                 'user' => $user,
-                'access_token' => $token,
+                'access_token' => $token, // Tetap dikirim sebagai fallback
                 'token_type' => 'Bearer'
             ]
-        ], 200);
+        ], 200)->cookie($cookie);
     }
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        auth('api')->logout();
+        
+        $cookie = \Illuminate\Support\Facades\Cookie::forget('jwt_token');
 
         return response()->json([
             'success' => true,
             'message' => 'Sesi Keycloak & Token lokal berhasil dicabut (Logged out)'
-        ], 200);
+        ], 200)->cookie($cookie);
     }
 }

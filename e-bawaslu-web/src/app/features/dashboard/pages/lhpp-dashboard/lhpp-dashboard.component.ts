@@ -1,12 +1,11 @@
 import { FilePreviewComponent } from '../../../../shared/components/molecules/file-preview/file-preview.component';
-import { Component, inject, ViewChild, ElementRef, OnInit } from '@angular/core';
+import { Component, inject, ViewChild, ElementRef, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, FormGroupDirective, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ArsipService, ArsipItem, VersionHistoryItem } from '../../../../core/services/arsip/arsip.service';
-import { MasterDataService, Divisi, Tahapan } from '../../../../core/services/master-data.service';
-import { AuthService } from '../../../../core/services/auth.service';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 
+// Angular Material
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -19,7 +18,12 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+
+// Models & Facade
+import { ArsipItem, VersionHistoryItem } from '../../../../core/services/arsip/arsip.service';
+import { LhppDashboardFacade } from './lhpp-dashboard.facade';
+import { Tahapan } from '../../../../core/services/master-data.service';
 import * as _ from 'lodash';
 
 @Component({
@@ -43,94 +47,130 @@ import * as _ from 'lodash';
     MatPaginatorModule,
     MatSnackBarModule
   ],
+  providers: [LhppDashboardFacade],
   templateUrl: './lhpp-dashboard.component.html',
   styleUrl: './lhpp-dashboard.component.css'
 })
-export class LhppDashboardComponent implements OnInit {
-  private arsipService = inject(ArsipService);
-  private masterDataService = inject(MasterDataService);
-  public authService = inject(AuthService);
-  private fb = inject(FormBuilder);
-  private snackBar = inject(MatSnackBar);
+export class LhppDashboardComponent implements OnInit, OnDestroy {
+  public facade = inject(LhppDashboardFacade);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-  kamar = 'Pemilu';
-  tahapanList: Tahapan[] = [];
-  selectedDivisiFilter = '';
-  selectedTahapanFilter = '';
-  tahapanForm = this.fb.nonNullable.group({ nama_tahapan: ['', Validators.required], divisi_id: ['', Validators.required] });
-  isSavingTahapan = false;
-  isLoadingTahapan = false;
-  tahapanLoadError = false;
-  showInlineTahapan = false;
-  pendingDeleteTahapan: Tahapan | null = null;
-  deletingTahapan = false;
-  @ViewChild('stageForm') stageForm?: FormGroupDirective;
 
-  deleteTahapan() {
-    const tahap = this.pendingDeleteTahapan;
-    if (!tahap || this.deletingTahapan) return;
-    this.deletingTahapan = true;
-    this.masterDataService.deleteTahapan(tahap.id).subscribe({
-      next: res => {
-        this.deletingTahapan = false; this.pendingDeleteTahapan = null;
-        this.tahapanList = this.tahapanList.filter(t => t.id !== tahap.id);
-        if (this.selectedTahapanFilter === tahap.id) { this.selectedTahapanFilter = ''; this.loadDocuments(); }
-        if (this.uploadForm.value.tahapan_id === tahap.id) this.uploadForm.patchValue({ tahapan_id: '', divisi_id: '' });
-        this.showNotification(res.message, 'success');
-      },
-      error: err => { this.deletingTahapan = false; this.pendingDeleteTahapan = null; this.showNotification(err.error?.message || 'Gagal menghapus tahapan.', 'error'); }
-    });
-  }
-
-  loadTahapan() {
-    this.isLoadingTahapan = true;
-    this.tahapanLoadError = false;
-    this.masterDataService.getTahapan().subscribe({
-      next: res => { this.tahapanList = res.data || []; this.isLoadingTahapan = false; },
-      error: () => { this.isLoadingTahapan = false; this.tahapanLoadError = true; }
-    });
-  }
-
-  saveTahapan() {
-    if (this.tahapanForm.invalid || this.isSavingTahapan) return;
-    this.isSavingTahapan = true;
-    this.masterDataService.createTahapan(this.tahapanForm.getRawValue()).subscribe({
-      next: res => {
-        this.isSavingTahapan = false;
-        this.tahapanList = [...this.tahapanList, res.data];
-        if (this.showUploadModal) {
-          this.uploadForm.patchValue({ tahapan_id: res.data.id, divisi_id: res.data.divisi_id });
-        }
-        this.showInlineTahapan = false;
-        this.tahapanLoadError = false;
-        this.tahapanForm.reset();
-        this.stageForm?.resetForm();
-        this.showNotification('Tahapan berhasil ditambahkan dan siap dipilih.');
-      },
-      error: err => { this.isSavingTahapan = false; this.showNotification(err.error?.message || 'Gagal menyimpan tahapan.', 'error'); }
-    });
-  }
-
-  selectTahapan(id: string) {
-    this.uploadForm.patchValue({ divisi_id: this.tahapanList.find(t => t.id === id)?.divisi_id || '' });
-  }
-
-  tahapanName(id?: string): string {
-    return this.tahapanList.find(t => t.id === id)?.nama_tahapan || 'Belum ditentukan';
-  }
-  
   @ViewChild('uploadFileInput') uploadFileInput!: ElementRef<HTMLInputElement>;
   @ViewChild('revisiFileInput') revisiFileInput!: ElementRef<HTMLInputElement>;
-  
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
+  // View state
   documents = new MatTableDataSource<ArsipItem>([]);
-  divisiList: Divisi[] = [];
-  searchQuery: string = '';
+  displayedColumns: string[] = ['no_surat', 'perihal', 'kategori', 'klasifikasi', 'versi', 'tanggal', 'aksi'];
+  
+  showUploadModal = false;
+  showRevisiModal = false;
+  showVersionModal = false;
+  showDeleteModal = false;
+  showInlineTahapan = false;
+
+  selectedArsip: ArsipItem | null = null;
+  deleteReason: string = '';
+  revisiCatatan: string = '';
+  pendingDeleteTahapan: Tahapan | null = null;
   
   availableYears: string[] = [];
   selectedYearFilter: string = '';
+  selectedDivisiFilter: string = '';
+  selectedTahapanFilter: string = '';
+
+  private subs = new Subscription();
+
+  // Component Getters for the Template (Mapping to Facade)
+  get kamar() { return this.facade.kamar; }
+  get authService() { return this.facade.authService; }
+  get tahapanList() { return this.facade.tahapanList; }
+  get tahapanForm() { return this.facade.tahapanForm; }
+  get divisiList() { return this.facade.divisiList; }
+  get uploadForm() { return this.facade.uploadForm; }
+  get uploadFile() { return this.facade.uploadFile; }
+  get revisiFile() { return this.facade.revisiFile; }
+  get arsipLogs() { return this.facade.arsipLogs$; }
+  get canViewLogs() { return this.authService.canAccessAuditLog; }
+  get tahapanLoadError() { return this.facade.tahapanLoadError; }
+  get isDownloading() { return this.facade.isDownloading; }
+  get versionHistory() { return this.facade.versionHistory; }
+
+  // Sync state values for the template since they don't use async pipe everywhere
+  isSavingTahapan = false;
+  isLoadingTahapan = false;
+  deletingTahapan = false;
+  isUploading = false;
+  isSubmittingRevisi = false;
+  isLoadingVersions = false;
+  isDeleting = false;
+
+  ngOnInit() {
+    if (!this.facade.authService.canAccessLhp) {
+      this.facade.showNotification('Akses Ditolak: Anda tidak memiliki akses LHP.', 'error');
+      this.router.navigate(['/dashboard']);
+      return;
+    }
+    this.facade.loadDivisi();
+    this.facade.loadTahapan();
+    
+    this.subs.add(this.route.queryParamMap.subscribe(params => {
+      this.facade.kamar = params.get('kamar') === 'Pilkada' ? 'Pilkada' : 'Pemilu';
+      this.showUploadModal = false;
+      this.facade.loadDocuments();
+    }));
+
+    this.facade.loadLogs();
+
+    // Subscribe to loading states
+    this.subs.add(this.facade.isSavingTahapan$.subscribe(val => this.isSavingTahapan = val));
+    this.subs.add(this.facade.isLoadingTahapan$.subscribe(val => this.isLoadingTahapan = val));
+    this.subs.add(this.facade.deletingTahapan$.subscribe(val => this.deletingTahapan = val));
+    this.subs.add(this.facade.isUploading$.subscribe(val => this.isUploading = val));
+    this.subs.add(this.facade.isSubmittingRevisi$.subscribe(val => this.isSubmittingRevisi = val));
+    this.subs.add(this.facade.isLoadingVersions$.subscribe(val => this.isLoadingVersions = val));
+    this.subs.add(this.facade.isDeleting$.subscribe(val => this.isDeleting = val));
+
+    // Subscribe to state updates to refresh Table DataSource
+    this.subs.add(this.facade.documents$.subscribe(docs => {
+      // Extract available years
+      const years = new Set<string>();
+      docs.forEach((doc: ArsipItem) => {
+        if (doc.tgl_surat) years.add(doc.tgl_surat.split('-')[0]);
+      });
+      this.availableYears = Array.from(years).sort().reverse();
+
+      // Apply Filters
+      let filteredDocs = docs;
+      if (this.selectedYearFilter) {
+        filteredDocs = filteredDocs.filter(doc => doc.tgl_surat?.startsWith(this.selectedYearFilter));
+      }
+      if (this.selectedDivisiFilter) {
+        filteredDocs = filteredDocs.filter(doc => doc.divisi_id === this.selectedDivisiFilter);
+      }
+      if (this.selectedTahapanFilter) {
+        filteredDocs = filteredDocs.filter(doc => doc.tahapan_id === this.selectedTahapanFilter);
+      }
+
+      this.documents.data = filteredDocs;
+      if (this.paginator) {
+        this.documents.paginator = this.paginator;
+      }
+    }));
+  }
+
+  ngOnDestroy() {
+    this.subs.unsubscribe();
+  }
+
+  loadTahapan() {
+    this.facade.loadTahapan();
+  }
+
+  loadDocuments() {
+    this.facade.loadDocuments();
+  }
 
   applyFilterArsip = _.debounce((event: Event) => {
     const filterValue = (event.target as HTMLInputElement).value;
@@ -140,276 +180,117 @@ export class LhppDashboardComponent implements OnInit {
     }
   }, 300);
 
-  displayedColumns: string[] = ['no_surat', 'perihal', 'kategori', 'klasifikasi', 'versi', 'tanggal', 'aksi'];
-  
-  // Modals & Panels
-  showUploadModal = false;
-  showRevisiModal = false;
-  showVersionModal = false;
-  showDeleteModal = false;
-
-  // Selected Target for Modal Actions
-  selectedArsip: ArsipItem | null = null;
-  versionHistory: VersionHistoryItem[] = [];
-  isLoadingVersions = false;
-
-  // Loading flags
-  isUploading = false;
-  isSubmittingRevisi = false;
-  isDeleting = false;
-  isDownloading: { [id: string]: boolean } = {};
-
-  arsipLogs: any[] = [];
-
-
-  // Form Upload Arsip
-  uploadForm: FormGroup = this.fb.group({
-    divisi_id: ['', Validators.required],
-    no_surat: ['', Validators.required],
-    tgl_surat: [new Date().toISOString().split('T')[0], Validators.required],
-    perihal: ['', Validators.required],
-    kategori: ['LHP', Validators.required],
-    kejadian_1: ['', Validators.maxLength(2000)],
-    kejadian_2: ['', Validators.maxLength(2000)],
-    kejadian_3: ['', Validators.maxLength(2000)],
-    kondisi_kotak_surat: ['', Validators.maxLength(2000)],
-    tahapan_id: ['', Validators.required],
-    klasifikasi: ['Rahasia', Validators.required]
-  });
-  uploadFile: File | null = null;
-
-  // Form Revisi
-  revisiCatatan: string = '';
-  revisiFile: File | null = null;
-
-  // Form Soft Delete
-  deleteReason: string = '';
-
-  kategoriList = ['Surat Keputusan', 'Surat Masuk', 'Surat Keluar', 'Berita Acara', 'Nota Dinas', 'Laporan Pengawasan'];
-  klasifikasiList = ['Biasa', 'Penting', 'Rahasia', 'Sangat Rahasia'];
-
-  ngOnInit() {
-    if (!this.authService.canAccessLhp) {
-      this.showNotification('Akses Ditolak: Anda tidak memiliki akses LHP.', 'error');
-      this.router.navigate(['/dashboard']);
-      return;
-    }
-    this.loadDivisi();
-    this.loadTahapan();
-    this.route.queryParamMap.subscribe(params => {
-      this.kamar = params.get('kamar') === 'Pilkada' ? 'Pilkada' : 'Pemilu';
-      this.showUploadModal = false;
-      this.loadDocuments();
-    });
-    if (this.canViewLogs) {
-      this.loadLogs();
-    }
-  }
-
-  loadDivisi() {
-    this.masterDataService.getDivisi().subscribe({
-      next: (res) => this.divisiList = res.data || [],
-      error: () => this.divisiList = []
-    });
-  }
-
-  loadDocuments() {
-    this.arsipService.getArsip().subscribe({
-      next: (res) => {
-        let lhppDocs = (res.data || []).filter((doc: ArsipItem) => ['LHP', 'LHPP'].includes(doc.kategori) && (doc.jenis_pemilihan || 'Pemilu') === this.kamar);
-        
-        // Ekstrak tahun unik
-        const years = new Set<string>();
-        lhppDocs.forEach((doc: ArsipItem) => {
-          if (doc.tgl_surat) {
-            years.add(doc.tgl_surat.split('-')[0]);
-          }
-        });
-        this.availableYears = Array.from(years).sort().reverse();
-        
-        // Filter berdasarkan tahun jika dipilih
-        if (this.selectedYearFilter) {
-          lhppDocs = lhppDocs.filter((doc: ArsipItem) => doc.tgl_surat?.startsWith(this.selectedYearFilter));
-        }
-
-        this.documents.data = lhppDocs.filter(doc => (!this.selectedDivisiFilter || doc.divisi_id === this.selectedDivisiFilter) && (!this.selectedTahapanFilter || doc.tahapan_id === this.selectedTahapanFilter));
-        this.documents.paginator = this.paginator;
-      },
-      error: () => {
-        this.documents.data = [];
-      }
-    });
-  }
-
-  loadLogs() {
-    this.arsipService.getArsipLogs().subscribe({
-      next: (res) => {
-        this.arsipLogs = res.data || [];
-      },
-      error: () => {
-        this.arsipLogs = [];
-      }
-    });
-  }
-
-  get canViewLogs(): boolean {
-    return this.authService.canAccessAuditLog;
-  }
-
   onFilterYearChange(year: string) {
     this.selectedYearFilter = year;
     this.loadDocuments();
   }
 
-  // Upload Arsip Baru
-  openUploadModal() {
-    this.showInlineTahapan = false;
-    this.loadTahapan();
-    this.uploadForm.reset({
-      divisi_id: '',
-      tahapan_id: '',
-      no_surat: '',
-      tgl_surat: new Date().toISOString().split('T')[0],
-      perihal: '',
-      kategori: 'LHP',
-      kejadian_1: '', kejadian_2: '', kejadian_3: '', kondisi_kotak_surat: '',
-      klasifikasi: 'Rahasia'
+  // Tahapan Handlers
+  saveTahapan() {
+    this.facade.saveTahapan().subscribe(success => {
+      if (success) {
+        this.showInlineTahapan = false;
+      }
     });
-    this.uploadFile = null;
+  }
+
+  deleteTahapan() {
+    if (this.pendingDeleteTahapan) {
+      this.facade.deleteTahapan(this.pendingDeleteTahapan.id).subscribe(success => {
+        if (success) this.pendingDeleteTahapan = null;
+      });
+    }
+  }
+
+  selectTahapan(id: string) {
+    const tahap = this.facade.tahapanList.find(t => t.id === id);
+    if (tahap) {
+      this.facade.uploadForm.patchValue({ divisi_id: tahap.divisi_id });
+    }
+  }
+
+  getDivisiName(divisiId?: string | null): string {
+    if (!divisiId) return '-';
+    const div = this.facade.divisiList.find(d => d.divisi_id === divisiId);
+    return div ? div.nama_divisi : 'Divisi tidak ditemukan';
+  }
+
+  tahapanName(tahapanId?: string): string {
+    if (!tahapanId) return '';
+    const thp = this.facade.tahapanList.find(t => t.id === tahapanId);
+    return thp ? thp.nama_tahapan : '';
+  }
+
+  // Upload Handlers
+  openUploadModal() {
+    this.facade.loadTahapan();
+    this.facade.uploadForm.reset({
+      divisi_id: '', tahapan_id: '', no_surat: '', tgl_surat: new Date().toISOString().split('T')[0],
+      perihal: '', kategori: 'LHP', klasifikasi: 'Rahasia'
+    });
+    this.facade.uploadFile = null;
     this.showUploadModal = true;
+    this.showInlineTahapan = false;
   }
 
   onUploadFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0] || null;
-    this.uploadFile = null;
+    this.facade.uploadFile = null;
     if (!file) return;
     if (file.size > 5 * 1024 * 1024 || !/\.(pdf|doc|docx|jpg|jpeg|png)$/i.test(file.name)) {
       input.value = '';
-      this.showNotification('Gunakan PDF, DOC, DOCX, JPG, atau PNG maksimal 5 MB.', 'error');
+      this.facade.showNotification('Gunakan PDF, DOC, DOCX, JPG, atau PNG maksimal 5 MB.', 'error');
       return;
     }
-    this.uploadFile = file;
-
+    this.facade.uploadFile = file;
   }
 
   submitUpload() {
-    if (this.uploadForm.invalid || !this.uploadFile) {
-      this.showNotification('Mohon lengkapi semua field dan sertakan file dokumen.', 'error');
-      return;
-    }
-
-    this.isUploading = true;
-    const formData = new FormData();
-    formData.append('divisi_id', this.uploadForm.value.divisi_id);
-    formData.append('no_surat', this.uploadForm.value.no_surat);
-    formData.append('tgl_surat', this.uploadForm.value.tgl_surat);
-    formData.append('perihal', this.uploadForm.value.perihal);
-    formData.append('kategori', 'LHP');
-    formData.append('jenis_pemilihan', this.kamar);
-    formData.append('tahapan_id', this.uploadForm.value.tahapan_id);
-    formData.append('klasifikasi', this.uploadForm.value.klasifikasi);
-    ['kejadian_1', 'kejadian_2', 'kejadian_3'].map(key => (this.uploadForm.value[key] || '').trim()).filter(Boolean).forEach((note, index) => formData.append(`catatan_kejadian[${index}]`, note));
-    formData.append('kondisi_kotak_surat', (this.uploadForm.value.kondisi_kotak_surat || '').trim());
-    formData.append('file_dokumen', this.uploadFile);
-
-    this.arsipService.uploadArsip(formData).subscribe({
-      next: (res) => {
-        this.isUploading = false;
+    this.facade.submitUpload().subscribe(success => {
+      if (success) {
         this.showUploadModal = false;
-        this.showNotification(res.message || 'LHP berhasil diunggah.', 'success');
-        this.loadDocuments();
-        if (this.canViewLogs) this.loadLogs();
-      },
-      error: (err) => {
-        this.isUploading = false;
-        this.showNotification(err.error?.message || 'Gagal mengunggah arsip.', 'error');
       }
     });
   }
 
-  // Revisi Dokumen
+  // Revisi Handlers
   openRevisiModal(doc: ArsipItem) {
     this.selectedArsip = doc;
+    this.facade.revisiFile = null;
     this.revisiCatatan = '';
-    this.revisiFile = null;
     this.showRevisiModal = true;
   }
 
-  onRevisiFileSelected(event: any) {
-    if (event.target.files.length > 0) {
-      this.revisiFile = event.target.files[0];
+  onRevisiFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] || null;
+    this.facade.revisiFile = null;
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024 || !/\.(pdf|doc|docx|jpg|jpeg|png)$/i.test(file.name)) {
+      input.value = '';
+      this.facade.showNotification('Gunakan PDF, DOC, DOCX, JPG, atau PNG maksimal 5 MB.', 'error');
+      return;
     }
+    this.facade.revisiFile = file;
   }
 
   submitRevisi() {
-    if (!this.selectedArsip || !this.revisiFile || !this.revisiCatatan.trim()) {
-      this.showNotification('Mohon pilih berkas revisi dan berikan catatan alasan revisi.', 'error');
-      return;
+    if (this.selectedArsip) {
+      this.facade.submitRevisi(this.selectedArsip.id, this.revisiCatatan).subscribe(success => {
+        if (success) this.showRevisiModal = false;
+      });
     }
-
-    this.isSubmittingRevisi = true;
-    const formData = new FormData();
-    formData.append('file_dokumen', this.revisiFile);
-    formData.append('catatan_revisi', this.revisiCatatan);
-
-    this.arsipService.uploadRevisi(this.selectedArsip.id, formData).subscribe({
-      next: (res) => {
-        this.isSubmittingRevisi = false;
-        this.showRevisiModal = false;
-        this.showNotification(`Revisi berhasil diunggah (${res.data?.version})!`, 'success');
-        this.loadDocuments();
-        if (this.canViewLogs) this.loadLogs();
-      },
-      error: (err) => {
-        this.isSubmittingRevisi = false;
-        this.showNotification(err.error?.message || 'Gagal mengunggah revisi.', 'error');
-      }
-    });
   }
 
-  // Riwayat Versi
+  // Version History
   openVersionModal(doc: ArsipItem) {
     this.selectedArsip = doc;
-    this.versionHistory = [];
-    this.isLoadingVersions = true;
+    this.facade.loadVersionHistory(doc.id);
     this.showVersionModal = true;
-
-    this.arsipService.getVersions(doc.id).subscribe({
-      next: (res) => {
-        this.isLoadingVersions = false;
-        this.versionHistory = res.data?.history || [];
-      },
-      error: () => {
-        this.isLoadingVersions = false;
-        this.showNotification('Gagal mengambil riwayat revisi.', 'error');
-      }
-    });
   }
 
-  // Download dengan Watermark
-  downloadDocument(doc: ArsipItem) {
-    this.isDownloading[doc.id] = true;
-    this.arsipService.downloadWatermarked(doc.id).subscribe({
-      next: (blob: Blob) => {
-        this.isDownloading[doc.id] = false;
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        const ext = doc.file_path.split('.').pop() || 'pdf';
-        a.download = `${doc.no_surat.replace(/\//g, '_')}.${ext}`;
-        a.click();
-        window.URL.revokeObjectURL(url);
-        if (this.canViewLogs) this.loadLogs();
-      },
-      error: () => {
-        this.isDownloading[doc.id] = false;
-        this.showNotification('Gagal mengunduh berkas dengan dynamic watermark.', 'error');
-      }
-    });
-  }
-
-  // Soft Delete dengan Alasan
+  // Delete
   openDeleteModal(doc: ArsipItem) {
     this.selectedArsip = doc;
     this.deleteReason = '';
@@ -418,37 +299,16 @@ export class LhppDashboardComponent implements OnInit {
 
   submitDelete() {
     if (!this.selectedArsip || this.deleteReason.trim().length < 10) {
-      this.showNotification('Alasan wajib diisi minimal 10 karakter untuk Audit Trail.', 'error');
+      this.facade.showNotification('Alasan wajib diisi minimal 10 karakter.', 'error');
       return;
     }
-
-    this.isDeleting = true;
-    this.arsipService.deleteArsip(this.selectedArsip.id, this.deleteReason).subscribe({
-      next: () => {
-        this.isDeleting = false;
-        this.showDeleteModal = false;
-        this.showNotification('✅ Dokumen telah berhasil dihapus secara aman. (Jejak digital tersimpan di Audit Log).', 'success');
-        this.loadDocuments();
-        if (this.canViewLogs) this.loadLogs();
-      },
-      error: (err) => {
-        this.isDeleting = false;
-        this.showNotification(err.error?.message || 'Gagal menghapus dokumen.', 'error');
-      }
+    this.facade.deleteArsip(this.selectedArsip.id, this.deleteReason).subscribe(success => {
+      if (success) this.showDeleteModal = false;
     });
   }
 
-  getDivisiName(divisiId: string): string {
-    const found = this.divisiList.find(d => d.divisi_id === divisiId);
-    return found ? found.nama_divisi : '-';
-  }
-
-  showNotification(message: string, type: 'success' | 'error' | 'info' = 'info') {
-    this.snackBar.open(message, 'Tutup', {
-      duration: 5000,
-      horizontalPosition: 'right',
-      verticalPosition: 'bottom',
-      panelClass: type === 'error' ? ['bg-red-600', 'text-white'] : (type === 'success' ? ['bg-green-600', 'text-white'] : [])
-    });
+  // Download
+  downloadDocument(doc: ArsipItem) {
+    this.facade.downloadDocument(doc);
   }
 }

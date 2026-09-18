@@ -1,64 +1,64 @@
-<div class="page-header animate-fade-in" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+<div class="audit-page-header page-header animate-fade-in">
   <div>
-    <h1 style="margin: 0; color: #1e293b; font-weight: 700; font-size: 1.5rem; display: flex; align-items: center; gap: 8px;">
-      <mat-icon style="color: #64748b;">manage_history</mat-icon>
+    <h1 class="audit-title">
+      <mat-icon class="audit-header-icon">manage_history</mat-icon>
       Audit Trail & Log Aktivitas
     </h1>
-    <p style="margin: 4px 0 0 32px; color: #64748b; font-size: 0.9rem;">
+    <p class="audit-subtitle">
       Memantau seluruh aktivitas pengguna dan perubahan data dalam sistem
     </p>
   </div>
-  <button mat-stroked-button color="primary" (click)="loadLogs(currentPage)" [disabled]="isLoading" style="height: 40px; border-radius: 8px;">
+  <button class="audit-refresh-btn" mat-stroked-button color="primary" (click)="loadLogs(currentPage)" [disabled]="isLoading">
     <mat-icon *ngIf="!isLoading">refresh</mat-icon>
-    <mat-progress-spinner *ngIf="isLoading" diameter="16" mode="indeterminate" style="display: inline-block; margin-right: 6px;"></mat-progress-spinner>
+    <mat-progress-spinner class="audit-spinner" *ngIf="isLoading" diameter="16" mode="indeterminate"></mat-progress-spinner>
     Muat Ulang
   </button>
 </div>
 
 <!-- Summary Card -->
-<div style="margin-bottom: 1.5rem;">
-  <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);">
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
-      <h3 style="margin: 0; font-size: 0.875rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Total Log Aktivitas</h3>
-      <mat-icon style="color: #cbd5e1; font-size: 24px; width: 24px; height: 24px;">receipt_long</mat-icon>
+<div class="audit-summary-wrapper">
+  <div class="audit-summary-card">
+    <div class="audit-summary-header">
+      <h3 class="audit-summary-title">Total Log Aktivitas</h3>
+      <mat-icon class="audit-summary-icon">receipt_long</mat-icon>
     </div>
-    <div style="font-size: 1.5rem; font-weight: 700; color: #0f172a;">{{ logs.length }} <span style="font-size: 0.875rem; font-weight: 500; color: #94a3b8; text-transform: none; letter-spacing: normal;">Aktivitas</span></div>
+    <div class="audit-summary-value">{{ logs.length }} <span class="audit-summary-unit">Aktivitas</span></div>
   </div>
 </div>
 
 <!-- Filters -->
-<div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);">
-  <mat-form-field appearance="outline" style="flex: 1; min-width: 250px; margin-bottom: -1.25em;">
+<div class="audit-filters-bar">
+  <mat-form-field class="audit-search-field" appearance="outline">
     <mat-label>Cari Aktivitas...</mat-label>
-    <input matInput [(ngModel)]="searchKeyword" (keyup.enter)="applyFilter()" placeholder="Kata kunci...">
+    <input matInput [(ngModel)]="searchKeyword" (keyup.enter)="applyFilter()" placeholder="Kata kunci..." title="Input field">
     <mat-icon matSuffix>search</mat-icon>
   </mat-form-field>
 
-  <mat-form-field appearance="outline" style="width: 280px; margin-bottom: -1.25em;">
+  <mat-form-field class="audit-date-field" appearance="outline">
     <mat-label>Rentang Waktu</mat-label>
     <mat-date-range-input [rangePicker]="picker">
-      <input matStartDate [(ngModel)]="startDate" placeholder="Mulai">
-      <input matEndDate [(ngModel)]="endDate" placeholder="Sampai">
+      <input matStartDate [(ngModel)]="startDate" placeholder="Mulai" title="Input field">
+      <input matEndDate [(ngModel)]="endDate" placeholder="Sampai" title="Input field">
     </mat-date-range-input>
     <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
     <mat-date-range-picker #picker></mat-date-range-picker>
   </mat-form-field>
 
-  <div style="display: flex; gap: 8px;">
-    <button mat-flat-button color="primary" (click)="applyFilter()" style="height: 48px; border-radius: 6px;">Filter</button>
-    <button mat-stroked-button (click)="resetFilter()" style="height: 48px; border-radius: 6px;">Reset</button>
+  <div class="audit-filter-actions">
+    <button class="audit-btn-filter" mat-flat-button color="primary" (click)="applyFilter()">Filter</button>
+    <button class="audit-btn-reset" mat-stroked-button (click)="resetFilter()">Reset</button>
   </div>
 </div>
 
 <!-- Table -->
-<mat-card class="animate-fade-in" style="background: white; border: 1px solid #f1f5f9; border-radius: 12px; padding: 1.25rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);">
-  <div style="border-radius: 8px; overflow: auto; border: 1px solid #e2e8f0;">
-    <table mat-table [dataSource]="logs" style="width: 100%;">
+<mat-card class="audit-table-card animate-fade-in">
+  <div class="audit-table-container">
+    <table class="audit-table" mat-table [dataSource]="logs">
       
       <!-- Waktu -->
       <ng-container matColumnDef="timestamp">
         <th mat-header-cell *matHeaderCellDef> Waktu </th>
-        <td mat-cell *matCellDef="let log" style="font-size: 0.85rem; color: #475569;">
+        <td class="audit-cell-timestamp" mat-cell *matCellDef="let log">
           {{ log.timestamp | date:'dd/MM/yyyy HH:mm' }}
         </td>
       </ng-container>
@@ -67,8 +67,8 @@
       <ng-container matColumnDef="actor">
         <th mat-header-cell *matHeaderCellDef> Pengguna </th>
         <td mat-cell *matCellDef="let log">
-          <div style="font-weight: 600; color: #334155;">{{ log.user ? log.user.username : (log.actor_id ? log.actor_id.substring(0, 8) + '...' : 'Sistem') }}</div>
-          <small style="color: #64748b;" *ngIf="log.user">{{ log.user.role }}</small>
+          <div class="audit-actor-name">{{ log.user ? log.user.username : (log.actor_id ? log.actor_id.substring(0, 8) + '...' : 'Sistem') }}</div>
+          <small class="audit-actor-role" *ngIf="log.user">{{ log.user.role }}</small>
         </td>
       </ng-container>
 
@@ -76,11 +76,7 @@
       <ng-container matColumnDef="action">
         <th mat-header-cell *matHeaderCellDef> Aksi </th>
         <td mat-cell *matCellDef="let log">
-          <span [ngStyle]="{
-            'padding': '4px 10px',
-            'border-radius': '6px',
-            'font-size': '0.75rem',
-            'font-weight': '600',
+          <span class="action-badge" [ngStyle]="{
             'background-color': getActionBadgeColor(log.action).bg,
             'color': getActionBadgeColor(log.action).text
           }">
@@ -92,7 +88,7 @@
       <!-- Target Entity -->
       <ng-container matColumnDef="target">
         <th mat-header-cell *matHeaderCellDef> Target Data </th>
-        <td mat-cell *matCellDef="let log" style="font-size: 0.85rem; color: #475569; font-weight: 500;">
+        <td class="audit-cell-target" mat-cell *matCellDef="let log">
           {{ formatTargetData(log.target_entity) }}
         </td>
       </ng-container>
@@ -100,7 +96,7 @@
       <!-- IP Address -->
       <ng-container matColumnDef="ip">
         <th mat-header-cell *matHeaderCellDef> Alamat IP </th>
-        <td mat-cell *matCellDef="let log" style="font-family: monospace; font-size: 0.85rem; color: #64748b;">
+        <td class="audit-cell-ip" mat-cell *matCellDef="let log">
           {{ log.ip_address || '127.0.0.1' }}
         </td>
       </ng-container>
@@ -108,18 +104,18 @@
       <!-- Alasan / Payload Snippet -->
       <ng-container matColumnDef="reason">
         <th mat-header-cell *matHeaderCellDef> Keterangan </th>
-        <td mat-cell *matCellDef="let log" style="font-size: 0.85rem; color: #64748b; max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" [matTooltip]="formatReason(log.reason)">
+        <td class="audit-cell-reason" mat-cell *matCellDef="let log" [matTooltip]="formatReason(log.reason)">
           {{ formatReason(log.reason) }}
         </td>
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;" style="transition: background 0.2s;"></tr>
+      <tr class="audit-row" mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 
       <tr class="mat-row" *matNoDataRow>
-        <td class="mat-cell" colspan="6" style="text-align: center; padding: 4rem 2rem; color: #94a3b8;">
-          <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #cbd5e1; margin-bottom: 12px; display: block; margin-left: auto; margin-right: auto;">inbox</mat-icon>
-          <div style="font-size: 0.95rem;">Belum ada catatan log aktivitas yang terekam.</div>
+        <td class="audit-no-data mat-cell" colspan="6">
+          <mat-icon class="audit-no-data-icon">inbox</mat-icon>
+          <div class="audit-no-data-text">Belum ada catatan log aktivitas yang terekam.</div>
         </td>
       </tr>
     </table>

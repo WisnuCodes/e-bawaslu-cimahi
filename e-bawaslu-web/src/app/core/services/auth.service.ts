@@ -20,18 +20,48 @@ export class AuthService {
   readonly currentUser = this.currentUserSignal.asReadonly();
   readonly isAuthenticated = this.isAuthenticatedSignal.asReadonly();
 
+  private sessionTimeout: any;
+  private readonly TIMEOUT_MS = 60 * 60 * 1000; // 1 Jam Inaktivitas
+
   constructor() {
     this.checkToken();
+    this.setupAutoLogout();
     // Menggunakan setTimeout (macrotask) agar perubahan signal dari refreshProfile()
     // terjadi di siklus change detection baru — mencegah NG0100 di SidebarComponent.
-    if (this.getToken()) setTimeout(() => this.refreshProfile());
+    if (this.isAuthenticatedSignal()) setTimeout(() => this.refreshProfile());
+  }
+
+  private setupAutoLogout() {
+    if (typeof window !== 'undefined') {
+      const reset = () => this.resetTimer();
+      window.addEventListener('mousemove', reset);
+      window.addEventListener('click', reset);
+      window.addEventListener('keypress', reset);
+      this.resetTimer();
+    }
+  }
+
+  private resetTimer() {
+    if (this.sessionTimeout) clearTimeout(this.sessionTimeout);
+    if (this.isAuthenticatedSignal()) {
+      this.sessionTimeout = setTimeout(() => {
+        this.clearAuth();
+        // Optional: redirect to login or show alert
+        if (typeof window !== 'undefined') {
+          window.location.href = '/auth/login';
+        }
+      }, this.TIMEOUT_MS);
+    }
   }
 
   private checkToken() {
     const token = localStorage.getItem('auth_token');
-    if (token) {
+    const userStr = localStorage.getItem('auth_user');
+    
+    // Walaupun auth_token kosong (karena HttpOnly Cookie), kita bisa cek auth_user
+    // Validasi sesungguhnya terjadi di endpoint /me
+    if (token || userStr) {
       this.isAuthenticatedSignal.set(true);
-      const userStr = localStorage.getItem('auth_user');
       if (userStr) {
         try {
           this.currentUserSignal.set(JSON.parse(userStr));
@@ -57,13 +87,14 @@ export class AuthService {
       tap(response => {
         if (response && response.data && response.data.user_id) {
           this.tempUserIdSignal.set(response.data.user_id);
+          sessionStorage.setItem('temp_user_id', response.data.user_id);
         }
       })
     );
   }
 
   verifyMfa(otp: string) {
-    const userId = this.tempUserIdSignal();
+    const userId = this.tempUserIdSignal() || sessionStorage.getItem('temp_user_id');
     return this.api.post<any>('/verify-mfa', { user_id: userId, otp }).pipe(
       tap(response => {
         if (response && response.data && response.data.access_token) {
@@ -75,6 +106,7 @@ export class AuthService {
           this.isAuthenticatedSignal.set(true);
           this.currentUserSignal.set(user);
           this.tempUserIdSignal.set(null);
+          sessionStorage.removeItem('temp_user_id');
         }
       })
     );

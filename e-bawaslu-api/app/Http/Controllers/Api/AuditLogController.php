@@ -14,6 +14,14 @@ class AuditLogController extends Controller
      */
     public function index(Request $request)
     {
+        $user = $request->user();
+        if (!$user || !$user->canAccessAuditLog()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akses Ditolak: Anda tidak memiliki wewenang untuk melihat Audit Log.'
+            ], 403);
+        }
+
         $query = AuditLog::with('user');
 
         if ($request->filled('search')) {

@@ -9,7 +9,10 @@
 .toggle-btn { color: #cad4db; }
 .toggle-btn:hover { color: white; }
 .toggle-btn.centered { margin: 0 auto; }
-.sidebar-content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 12px 8px; scrollbar-width: thin; scrollbar-color: #536876 transparent; }
+.sidebar-content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 12px 8px; }
+.sidebar-content::-webkit-scrollbar { width: 6px; }
+.sidebar-content::-webkit-scrollbar-track { background: transparent; }
+.sidebar-content::-webkit-scrollbar-thumb { background-color: #536876; border-radius: 10px; }
 :host ::ng-deep .premium-accordion .mat-expansion-panel { background: transparent; box-shadow: none; border-radius: 0; color: #cad4db; }
 :host ::ng-deep .premium-accordion .mat-expansion-panel-header { padding: 0 12px; height: 48px; border-radius: 6px; }
 :host ::ng-deep .premium-accordion .mat-expansion-panel-header:hover { background: #263f50; }

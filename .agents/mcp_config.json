@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "google-developer-knowledge": {
+      "serverUrl": "https://developerknowledge.googleapis.com/mcp",
+      "headers": {
+        "X-Goog-Api-Key": "TULIS_API_KEY_ANDA_DI_SINI"
+      }
+    }
+  }
+}

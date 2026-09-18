@@ -5,11 +5,21 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Divisi;
 use App\Models\WilayahTps;
+use App\Repositories\DivisiRepository;
+use App\Repositories\WilayahTpsRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class MasterDataController extends Controller
 {
+    protected $divisiRepo;
+    protected $tpsRepo;
+
+    public function __construct(DivisiRepository $divisiRepo, WilayahTpsRepository $tpsRepo)
+    {
+        $this->divisiRepo = $divisiRepo;
+        $this->tpsRepo = $tpsRepo;
+    }
     private function isAdminOrKetua($user)
     {
         $role = strtolower($user->role);
@@ -17,7 +27,7 @@ class MasterDataController extends Controller
     }
     public function getDivisi()
     {
-        $divisi = Divisi::all();
+        $divisi = $this->divisiRepo->getAllCached();
         return response()->json([
             'success' => true,
             'message' => 'Data Divisi berhasil diambil',
@@ -27,7 +37,7 @@ class MasterDataController extends Controller
 
     public function getTps()
     {
-        $tps = WilayahTps::all();
+        $tps = $this->tpsRepo->getAllCached();
         return response()->json([
             'success' => true,
             'message' => 'Data Wilayah TPS berhasil diambil',
@@ -51,6 +61,8 @@ class MasterDataController extends Controller
             'nama_divisi' => $request->nama_divisi,
             'deskripsi' => $request->deskripsi
         ]);
+
+        $this->divisiRepo->invalidateCache();
 
         return response()->json([
             'success' => true,
@@ -76,6 +88,8 @@ class MasterDataController extends Controller
             'deskripsi' => $request->deskripsi
         ]);
 
+        $this->divisiRepo->invalidateCache();
+
         return response()->json([
             'success' => true,
             'message' => 'Divisi berhasil diupdate',
@@ -91,6 +105,8 @@ class MasterDataController extends Controller
 
         $divisi = Divisi::findOrFail($id);
         $divisi->delete();
+
+        $this->divisiRepo->invalidateCache();
 
         return response()->json([
             'success' => true,

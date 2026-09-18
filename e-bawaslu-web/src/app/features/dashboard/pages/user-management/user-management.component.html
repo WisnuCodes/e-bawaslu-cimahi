@@ -1,32 +1,32 @@
 <div class="user-management-container animate-fade-in">
-  <div class="page-header" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+  <div class="styled-cdfdfe page-header" >
     <div>
-      <h2 style="margin: 0; color: var(--color-text); font-weight: 600;">Konfigurasi User</h2>
-      <p style="margin: 0; color: var(--color-text-muted);">Manajemen akun pengguna dan hak akses sistem.</p>
+      <h2 class="styled-e824d7" >Konfigurasi User</h2>
+      <p class="styled-c2e034" >Manajemen akun pengguna dan hak akses sistem.</p>
     </div>
-    <button mat-flat-button color="primary" (click)="openUserDialog()" style="height: 44px;">
+    <button class="styled-2612c6" mat-flat-button color="primary" (click)="openUserDialog()" >
       <mat-icon>person_add</mat-icon> Tambah User Baru
     </button>
   </div>
 
-  <div class="table-container" style="background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden;">
-    <div *ngIf="isLoading" style="padding: 2rem; text-align: center; color: #64748b;">
+  <div class="styled-2084c1 table-container" >
+    <div class="styled-137581" *ngIf="isLoading" >
       Memuat data pengguna...
     </div>
     
-    <table mat-table [dataSource]="users" *ngIf="!isLoading" style="width: 100%;">
+    <table class="styled-e06dc6" mat-table [dataSource]="users" *ngIf="!isLoading" >
       <!-- Username Column -->
       <ng-container matColumnDef="username">
         <th mat-header-cell *matHeaderCellDef> Username </th>
         <td mat-cell *matCellDef="let user"> 
-          <div style="font-weight: 500; color: #1e293b;">{{user.username}}</div>
+          <div class="styled-980fde" >{{user.username}}</div>
         </td>
       </ng-container>
 
       <!-- Email Column -->
       <ng-container matColumnDef="email">
         <th mat-header-cell *matHeaderCellDef> Email </th>
-        <td mat-cell *matCellDef="let user"> <span style="color: #64748b;">{{user.email}}</span> </td>
+        <td mat-cell *matCellDef="let user"> <span class="styled-94d0f2" >{{user.email}}</span> </td>
       </ng-container>
 
       <!-- Role Column -->
@@ -34,7 +34,7 @@
         <th mat-header-cell *matHeaderCellDef> Role </th>
         <td mat-cell *matCellDef="let user">
           <mat-chip-set>
-            <mat-chip [style.backgroundColor]="'#e0f2fe'" [style.color]="'#0369a1'" style="font-weight: 600; font-size: 0.75rem;">
+            <mat-chip class="styled-bee91a" >
               {{user.role | uppercase}}
             </mat-chip>
           </mat-chip-set>
@@ -51,19 +51,19 @@
       <ng-container matColumnDef="status_aktif">
         <th mat-header-cell *matHeaderCellDef> Status </th>
         <td mat-cell *matCellDef="let user"> 
-          <span *ngIf="user.status_aktif" style="color: #16a34a; font-weight: 500; display: flex; align-items: center; gap: 4px;">
-            <mat-icon style="font-size: 16px; width: 16px; height: 16px;">check_circle</mat-icon> Aktif
+          <span class="styled-fb144c" *ngIf="user.status_aktif" >
+            <mat-icon class="styled-88c4ff" >check_circle</mat-icon> Aktif
           </span>
-          <span *ngIf="!user.status_aktif" style="color: #dc2626; font-weight: 500; display: flex; align-items: center; gap: 4px;">
-            <mat-icon style="font-size: 16px; width: 16px; height: 16px;">cancel</mat-icon> Nonaktif
+          <span class="styled-3b83ed" *ngIf="!user.status_aktif" >
+            <mat-icon class="styled-f4cd51" >cancel</mat-icon> Nonaktif
           </span>
         </td>
       </ng-container>
 
       <!-- Actions Column -->
       <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef style="text-align: right;"> Aksi </th>
-        <td mat-cell *matCellDef="let user" style="text-align: right;">
+        <th class="styled-c8dfc8" mat-header-cell *matHeaderCellDef > Aksi </th>
+        <td class="styled-ef4142" mat-cell *matCellDef="let user" >
           <button mat-icon-button color="primary" (click)="openUserDialog(user)" title="Edit User">
             <mat-icon>edit</mat-icon>
           </button>
@@ -78,7 +78,7 @@
       
       <!-- Row shown when there is no matching data. -->
       <tr class="mat-row" *matNoDataRow>
-        <td class="mat-cell" colspan="6" style="text-align: center; padding: 2rem; color: #64748b;">
+        <td class="styled-fee69a mat-cell" colspan="6" >
           Tidak ada data pengguna yang ditemukan.
         </td>
       </tr>

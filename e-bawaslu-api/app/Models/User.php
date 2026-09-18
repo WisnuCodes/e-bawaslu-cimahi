@@ -9,12 +9,12 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasFactory, Notifiable;
 
     protected $hidden = ['password_hash', 'otp_code', 'otp_expires_at'];
 
@@ -54,5 +54,77 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Get the identifier that will be stored in the subject claim of the JWT.
+     *
+     * @return mixed
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     *
+     * @return array
+     */
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        $role = strtolower($this->role ?? '');
+        return str_contains($role, 'admin') || str_contains($role, 'superadmin');
+    }
+
+    public function isPimpinan(): bool
+    {
+        $role = strtolower($this->role ?? '');
+        return str_contains($role, 'ketua') || str_contains($role, 'pimpinan') || str_contains($role, 'koordinator sekretariat');
+    }
+
+    public function isKepalaDivisi(): bool
+    {
+        $role = strtolower($this->role ?? '');
+        return str_contains($role, 'kordiv') || str_contains($role, 'kepala divisi') || str_contains($role, 'kasubag') || str_contains($role, 'kabag') || str_contains($role, 'bendahara');
+    }
+
+    public function isPengawasTps(): bool
+    {
+        $role = strtolower($this->role ?? '');
+        return str_contains($role, 'pengawas tps') || str_contains($role, 'saksi') || str_contains($role, 'ptps');
+    }
+
+    public function isAdminKordiv(): bool
+    {
+        return $this->isSuperAdmin() || $this->isPimpinan() || $this->isKepalaDivisi();
+    }
+
+    public function canAccessP2H(): bool
+    {
+        $role = strtolower($this->role ?? '');
+        return str_contains($role, 'p2h')
+            || $this->isSuperAdmin()
+            || $this->isPimpinan()
+            || $this->isKepalaDivisi()
+            || $this->isPengawasTps()
+            || !empty($this->divisi_id);
+    }
+
+    public function canDeleteLhpp(): bool
+    {
+        $role = strtolower($this->role ?? '');
+        $isKadivP2H = str_contains($role, 'p2h') && ($this->isKepalaDivisi());
+        return $this->isSuperAdmin() || $this->isPimpinan() || $isKadivP2H;
+    }
+
+    public function canAccessAuditLog(): bool
+    {
+        return $this->isSuperAdmin() || $this->isPimpinan() || $this->isKepalaDivisi();
     }
 }

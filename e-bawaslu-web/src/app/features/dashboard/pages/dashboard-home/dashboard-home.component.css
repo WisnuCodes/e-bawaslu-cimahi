@@ -34,3 +34,144 @@
   .welcome-logo { display: none; }
   .stats-grid, .quick-actions-grid { grid-template-columns: 1fr; }
 }
+
+.styled-a4e791 {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+.styled-b73d46 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.styled-e4f36c {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.styled-636807 {
+  color: #616161;
+}
+
+.styled-a2f7de {
+  color: #212121;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.styled-6e2641 {
+  font-size: 0.9rem;
+  color: #424242;
+}
+
+.styled-bfe983 {
+  height: 6px;
+  border-radius: 3px;
+}
+
+.styled-c20deb {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #757575;
+  margin-top: 12px;
+  align-items: center;
+}
+
+.styled-878db5 {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.styled-39bb04 {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.styled-725580 {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+}
+
+.styled-9e39ef {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+}
+
+.styled-e760ef {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.styled-75b04d {
+  font-size: 14px;
+  width:14px;
+  height:14px;
+}
+
+.styled-1c2b3f {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.styled-28f7ff {
+  font-size: 14px;
+  width:14px;
+  height:14px;
+}
+
+.styled-d44811 {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+}
+
+.styled-dcfb5b {
+  color: var(--color-primary);
+}
+
+.styled-caba4f {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+}
+
+.styled-cacbb4 {
+  color: #f57c00;
+}
+
+.styled-4b461e {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+}
+
+.styled-9ccc00 {
+  background-color: #e0e0e0;
+  color: #757575;
+}
+
+.styled-9c44da {
+  color: #757575;
+}

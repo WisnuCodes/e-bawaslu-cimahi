@@ -1,0 +1,75 @@
+<div class="wfh-action-wrapper">
+  <!-- Status Card -->
+  <mat-card class="clean-card">
+    <mat-card-content class="status-card-inner">
+      <div class="icon-wrapper">
+        <mat-icon>access_time</mat-icon>
+      </div>
+      <h3 class="status-title">Status Presensi</h3>
+      <p class="status-date">{{ currentTime | date:'EEEE, dd MMMM yyyy':'':'id-ID' }}</p>
+      
+      <div class="time-display">
+        {{ currentTime | date:'HH:mm:ss' }}
+      </div>
+      
+      <div class="status-badge" [ngClass]="{
+          'status-none': !isCheckedIn,
+          'status-partial': isCheckedIn && !isCheckedOut,
+          'status-complete': isCheckedIn && isCheckedOut
+        }">
+        <mat-icon>{{ isCheckedOut ? 'check_circle' : (isCheckedIn ? 'pending' : 'error_outline') }}</mat-icon>
+        <span>
+          {{ isCheckedOut ? 'Selesai' : (isCheckedIn ? 'Sedang Bekerja' : 'Belum Check In') }}
+        </span>
+      </div>
+      <p class="text-xs text-orange-500 mt-4" *ngIf="isCheckoutDisabled && isCheckedIn && !isCheckedOut">
+        Tombol Check-Out akan aktif setelah jam 16:00
+      </p>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Action Card (Camera / Buttons) -->
+  <mat-card class="clean-card">
+    <mat-card-content class="action-card-inner">
+      <!-- State: Loading Location -->
+      <div class="flex flex-col items-center justify-center text-gray-500" *ngIf="isGettingLocation">
+        <mat-spinner diameter="40" class="mb-4"></mat-spinner>
+        <p>Mendapatkan koordinat lokasi...</p>
+      </div>
+
+      <!-- State: Camera View -->
+      <div class="camera-container" *ngIf="isCameraOpen && !isGettingLocation">
+        <h3 class="mb-4 text-center font-medium">{{ captureMode === 'checkin' ? 'Foto Check In' : 'Foto Check Out' }}</h3>
+        
+        <div class="camera-frame">
+          <video #videoElement autoplay class="camera-video"></video>
+        </div>
+
+        <canvas #canvasElement class="hidden"></canvas>
+        
+        <div class="camera-actions mt-4 w-full">
+          <button mat-stroked-button color="warn" (click)="onStopCamera()">
+            <mat-icon>close</mat-icon> Batal
+          </button>
+          
+          <button mat-flat-button color="primary" (click)="onCapturePhoto()" [disabled]="isCheckingIn || isCheckingOut">
+            <mat-spinner diameter="20" *ngIf="isCheckingIn || isCheckingOut" class="mr-2"></mat-spinner>
+            <mat-icon *ngIf="!isCheckingIn && !isCheckingOut">camera_alt</mat-icon>
+            {{ captureMode === 'checkin' ? (isCheckingIn ? 'Mengirim...' : 'Ambil Foto & Check In') : (isCheckingOut ? 'Mengirim...' : 'Ambil Foto & Check Out') }}
+          </button>
+        </div>
+      </div>
+
+      <!-- State: Action Buttons -->
+      <div class="action-buttons" *ngIf="!isCameraOpen && !isGettingLocation">
+        <button mat-flat-button color="primary" [disabled]="isCheckedIn" (click)="onOpenCamera('checkin')">
+          <mat-icon>login</mat-icon> {{ isCheckedIn ? 'Sudah Check In' : 'Check In Sekarang' }}
+        </button>
+
+        <button mat-stroked-button [disabled]="!isCheckedIn || isCheckedOut || isCheckoutDisabled" (click)="onOpenCamera('checkout')">
+          <mat-icon>logout</mat-icon> {{ isCheckedOut ? 'Sudah Check Out' : 'Check Out Sekarang' }}
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

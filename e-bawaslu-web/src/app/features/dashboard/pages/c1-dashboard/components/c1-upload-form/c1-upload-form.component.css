@@ -1,0 +1,266 @@
+/* File Upload Button styling */
+.file-upload-wrapper {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.file-upload-input {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+/* Form Area */
+.form-header-container {
+  margin-bottom: 1.5rem;
+}
+
+.form-header-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #212121;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-header-icon {
+  color: #616161;
+}
+
+.form-header-desc {
+  margin: 6px 0 0;
+  font-size: 0.9rem;
+  color: #757575;
+}
+
+/* Guide Box */
+.guide-box {
+  background-color: #f5f7f9;
+  border: 1px solid #dfe5ea;
+  border-left: 4px solid #d9b968;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.guide-title {
+  margin: 0 0 0.5rem 0;
+  color: #172b3a;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.guide-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.guide-list {
+  margin: 0;
+  padding-left: 1.5rem;
+  color: #455562;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.text-success-bold {
+  color: #059669;
+  font-weight: bold;
+}
+
+.main-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.form-field-flex {
+  flex: 1 1 30%;
+}
+
+/* Dynamic Paslon Form */
+.paslon-form-container {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.paslon-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.paslon-form-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.paslon-custom-input {
+  width: 200px;
+}
+
+.paslon-array-container {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.validation-alert {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+}
+
+.validation-success {
+  background-color: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #059669;
+}
+
+.validation-error {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #e11d48;
+}
+
+.validation-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* Status Badges Ext */
+.badge-flex-start {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.mismatch-title {
+  font-size: 0.9rem;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.mismatch-desc {
+  font-size: 0.85rem;
+}
+
+.badge-flex-center {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+}
+
+.status-icon-md {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+/* Upload Section */
+.upload-section {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.upload-container {
+  flex: 1;
+  min-width: min(250px, 100%);
+}
+
+.upload-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #424242;
+  margin-bottom: 8px;
+}
+
+.upload-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.upload-btn-fake {
+  pointer-events: none;
+}
+
+.upload-filename {
+  font-size: 0.85rem;
+  color: #616161;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+/* Submit Actions */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eeeeee;
+  gap: 16px;
+}
+
+.action-btn {
+  padding: 0 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.btn-icon {
+  margin-right: 4px;
+}
+
+.btn-spinner {
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.btn-text {
+  vertical-align: middle;
+}
+
+.ocr-preview-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0 20px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}

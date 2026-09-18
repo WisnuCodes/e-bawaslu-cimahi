@@ -19,6 +19,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (config('app.env') !== 'local') {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
+        \App\Models\Divisi::observe(\App\Observers\DivisiObserver::class);
+        \App\Models\WilayahTps::observe(\App\Observers\WilayahTpsObserver::class);
+
         \Illuminate\Support\Facades\Gate::define('is-super-admin', function ($user) {
             return $user->role && $user->role->code === 'SAD';
         });

@@ -1,436 +1,161 @@
-<p class="location-notice">
-  Radius presensi: <strong>500 meter</strong> dari Kantor Bawaslu Kota Cimahi (-6.8716, 107.5445). Lokasi otomatis diaktifkan saat check-in/out.
-</p>
-<!-- Page Header -->
-<div class="wfh-header animate-fade-in">
-  <h2>WFH & Presensi</h2>
-  <p>Catat kehadiran dan kelola log kerja.</p>
-</div>
-
-<!-- TOP GRID: Presensi (left) + Worklog Form (right) -->
-<div class="wfh-top-grid animate-fade-in">
-
-  <!-- LEFT: Presensi Card -->
-  <div class="section-card">
-    <div class="card-header">
-      <mat-icon class="card-icon">fingerprint</mat-icon>
-      <h3>Presensi Hari Ini</h3>
+<div class="dashboard-container max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6 animate-fade-in pb-20">
+  
+  <!-- Header -->
+  <div class="wfh-hero-header">
+    <div class="relative z-10">
+      <h1>E-WFH Bawaslu</h1>
+      <p>
+        Sistem Manajemen Work From Home & Pelaporan Kinerja.
+        {{ facade.canApprove() ? 'Kelola persetujuan laporan staf Anda di sini.' : 'Lakukan presensi dan catat aktivitas kerja Anda.' }}
+      </p>
     </div>
-    <div class="card-body">
-      <!-- Jam Digital -->
-      <div class="clock-box">
-        <div class="clock-time">{{ currentTime | date:'HH:mm:ss' }}</div>
-        <div class="clock-date">{{ currentTime | date:'EEEE, dd MMMM yyyy' }}</div>
-      </div>
+    <!-- Decorative elements -->
+    <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white opacity-10 rounded-full blur-2xl"></div>
+    <div class="absolute bottom-0 right-20 -mb-10 w-32 h-32 bg-white opacity-20 rounded-full blur-xl pointer-events-none"></div>
+  </div>
 
-      <!-- Status -->
-      <div class="status-indicator" [ngClass]="{ 'selesai': isCheckedOut, 'hadir': isCheckedIn && !isCheckedOut, 'belum': !isCheckedIn }">
-        <mat-icon>
-          {{ isCheckedOut ? 'done_all' : (isCheckedIn ? 'check_circle' : 'radio_button_unchecked') }}
-        </mat-icon>
-        <span>
-          {{ isCheckedOut ? 'Selesai (Sudah Check Out)' : (isCheckedIn ? 'Sedang Bekerja (Sudah Check In)' : 'Belum Check In') }}
-        </span>
-      </div>
+  <div class="main-content">
+    
+    <!-- TABS -->
+    <mat-tab-group animationDuration="400ms" color="primary" class="wfh-tabs">
+      
+      <!-- TAB 1: PRESENSI -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="mr-2">how_to_reg</mat-icon> Presensi & Izin
+        </ng-template>
 
-      <!-- Buttons -->
-      <div *ngIf="!isGettingLocation && !isCameraOpen && !showIzinForm" style="display: flex; flex-direction: column; gap: 10px;">
-        <button mat-flat-button color="primary" class="action-btn" [disabled]="isCheckedIn || isCheckingIn" (click)="openCamera('checkin')">
-          <mat-icon>photo_camera</mat-icon>&nbsp; Check In
-        </button>
-        <button mat-stroked-button color="warn" class="action-btn" [disabled]="!isCheckedIn || isCheckedOut || isCheckingOut || isCheckoutDisabled" (click)="openCamera('checkout')">
-          <mat-icon>logout</mat-icon>&nbsp; Check Out
-        </button>
-        
-        <mat-divider style="margin: 8px 0;"></mat-divider>
-        <button mat-stroked-button class="action-btn" style="color: #64748b; border-color: #cbd5e1;" [disabled]="isCheckedIn || isCheckingIn" (click)="toggleIzinForm()">
-          <mat-icon>sick</mat-icon>&nbsp; Ajukan Izin / Sakit / Cuti
-        </button>
-
-        <div *ngIf="isCheckedIn && !isCheckedOut && isCheckoutDisabled" style="font-size: 0.8rem; color: #dc2626; text-align: center; background-color: #fee2e2; padding: 6px; border-radius: 4px;">
-          Sistem Check-Out ditutup dari pukul 08:00 s.d 16:00.
-        </div>
-      </div>
-
-      <!-- Izin Form -->
-      <div *ngIf="showIzinForm" style="margin-top: 16px;">
-        <form [formGroup]="izinForm" (ngSubmit)="submitIzin()" style="display: flex; flex-direction: column; gap: 12px; background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
-          <h4 style="margin: 0 0 8px 0; color: #334155; font-size: 1rem; display: flex; align-items: center; gap: 6px;">
-            <mat-icon style="font-size: 20px; width: 20px; height: 20px;">edit_document</mat-icon> Form Pengajuan Izin
-          </h4>
+        <div class="tab-content pt-6 space-y-6">
           
-          <mat-form-field appearance="outline" style="width: 100%; margin-bottom: -1em;">
-            <mat-label>Jenis Izin</mat-label>
-            <mat-select formControlName="jenis_izin">
-              <mat-option value="Sakit">Sakit</mat-option>
-              <mat-option value="Izin">Izin</mat-option>
-              <mat-option value="Cuti">Cuti</mat-option>
-            </mat-select>
-          </mat-form-field>
+          <!-- Presensi Action Component -->
+          <app-wfh-presensi-action
+            [isCheckedIn]="facade.isCheckedIn()"
+            [isCheckedOut]="facade.isCheckedOut()"
+            [currentTime]="currentTime"
+            [isCheckingIn]="facade.isCheckingIn()"
+            [isCheckingOut]="facade.isCheckingOut()"
+            [isGettingLocation]="facade.isGettingLocation()"
+            [isCameraOpen]="isCameraOpen"
+            [captureMode]="captureMode"
+            [isCheckoutDisabled]="isCheckoutDisabled"
+            (openCamera)="onOpenCamera($event)"
+            (stopCamera)="onStopCamera()"
+            (capturePhotoEvent)="onCapturePhoto($event)" 
+          ></app-wfh-presensi-action>
+          <!-- NOTE: We need the camera logic inside wfh-presensi-action to emit the file + coords. I will modify wfh-presensi-action next to include the geolocation and canvas. Wait, the WfhDashboardComponent doesn't have the canvas/video logic anymore. I need to move processCheckin to the child component or let child emit (File, Coords). Let's fix wfh-presensi-action to do the camera capture. -->
 
-          <mat-form-field appearance="outline" style="width: 100%; margin-bottom: -1em;">
-            <mat-label>Keterangan</mat-label>
-            <textarea matInput formControlName="keterangan_izin" rows="2" placeholder="Tuliskan keterangan detail..."></textarea>
-          </mat-form-field>
-
-          <div>
-            <label style="display: block; font-size: 0.8rem; color: #64748b; margin-bottom: 6px; font-weight: 500;">Surat Keterangan Dokter / Lampiran (Wajib)</label>
-            <div style="display: flex; align-items: center; gap: 12px; border: 1px dashed #cbd5e1; padding: 10px 14px; border-radius: 6px; background: #ffffff;">
-              <button type="button" mat-stroked-button color="primary" (click)="izinFileInput.click()" style="background: white;">
-                <mat-icon>upload_file</mat-icon> Pilih Surat
-              </button>
-              <span style="font-size: 0.85rem; color: #64748b; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                {{ selectedIzinFile ? selectedIzinFile.name : 'Belum ada file dipilih' }}
-              </span>
-              <button type="button" mat-icon-button color="warn" *ngIf="selectedIzinFile" (click)="selectedIzinFile = null; izinFileInput.value = ''" matTooltip="Batalkan">
-                <mat-icon>close</mat-icon>
-              </button>
-              <input type="file" #izinFileInput (change)="onIzinFileSelected($event)" accept=".pdf,image/jpeg,image/png" style="display: none;">
-            </div>
+          <!-- Pengajuan Izin Button -->
+          <div class="flex justify-end my-4" *ngIf="!showIzinForm && !facade.isAdmin()">
+            <app-button variant="secondary" icon="assignment_late" (onClick)="toggleIzinForm()">
+              Pengajuan Sakit / Izin
+            </app-button>
           </div>
 
-          <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px;">
-            <button mat-stroked-button type="button" (click)="toggleIzinForm()">Batal</button>
-            <button mat-flat-button color="primary" type="submit" [disabled]="izinForm.invalid || !selectedIzinFile || isSubmittingIzin">
-              <mat-icon>send</mat-icon> Kirim
-            </button>
-          </div>
-        </form>
-      </div>
+          <!-- Form Izin -->
+          <mat-card class="izin-form-card mb-6 animate-slide-down" *ngIf="showIzinForm">
+            <mat-card-header>
+              <mat-card-title>Formulir Sakit / Izin</mat-card-title>
+              <mat-card-subtitle>Ajukan izin jika Anda berhalangan bekerja.</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <form [formGroup]="izinForm" (ngSubmit)="submitIzin()" class="flex flex-col gap-4 mt-4">
+                <mat-form-field appearance="outline">
+                  <mat-label>Jenis Ketidakhadiran</mat-label>
+                  <mat-select formControlName="jenis_izin" title="Pilih Jenis Izin">
+                    <mat-option value="Sakit">Sakit</mat-option>
+                    <mat-option value="Izin">Izin</mat-option>
+                  </mat-select>
+                </mat-form-field>
 
-      <!-- Camera Modal -->
-      <div *ngIf="isCameraOpen" style="margin-top: 16px; background: #000; border-radius: 8px; overflow: hidden; position: relative;">
-        <video #videoElement autoplay playsinline style="width: 100%; height: auto; max-height: 300px; object-fit: cover;"></video>
-        <canvas #canvasElement style="display: none;"></canvas>
-        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); padding: 12px; display: flex; justify-content: center; gap: 12px;">
-          <button mat-flat-button color="primary" (click)="capturePhoto()">
-            <mat-icon>camera</mat-icon> Jepret & Simpan
-          </button>
-          <button mat-stroked-button style="background: white;" (click)="stopCamera()">
-            Batal
-          </button>
+                <mat-form-field appearance="outline">
+                  <mat-label>Keterangan Lengkap</mat-label>
+                  <textarea matInput formControlName="keterangan_izin" rows="3" placeholder="Jelaskan alasan izin Anda..." title="Keterangan Izin"></textarea>
+                </mat-form-field>
+
+                <div class="file-upload-container mb-2">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Surat Keterangan / Bukti (PDF/JPG) <span class="text-red-500">*Wajib</span>
+                  </label>
+                  <div class="flex items-center gap-4">
+                    <button type="button" mat-stroked-button color="primary" (click)="izinFileInput.click()">
+                      <mat-icon>attach_file</mat-icon> Pilih Surat
+                    </button>
+                    <span class="text-sm text-gray-600 truncate max-w-[200px]" *ngIf="selectedIzinFile">
+                      {{ selectedIzinFile.name }}
+                    </span>
+                  </div>
+                  <input type="file" #izinFileInput (change)="onIzinFileSelected($event)" accept=".pdf,image/*" class="hidden" title="Upload Surat Izin" placeholder="Pilih Surat">
+                </div>
+
+                <div class="flex gap-2 justify-end">
+                  <button mat-button type="button" (click)="toggleIzinForm()" [disabled]="facade.isSubmittingIzin()">Batal</button>
+                  <button mat-raised-button color="primary" type="submit" [disabled]="izinForm.invalid || !selectedIzinFile || facade.isSubmittingIzin()">
+                    <mat-spinner diameter="20" *ngIf="facade.isSubmittingIzin()" class="mr-2"></mat-spinner>
+                    <mat-icon *ngIf="!facade.isSubmittingIzin()">send</mat-icon> Ajukan
+                  </button>
+                </div>
+              </form>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Presensi Table Component -->
+          <app-wfh-presensi-table
+            [data]="facade.presensiData()"
+            [displayedColumns]="presensiDisplayedColumns"
+            [isAdmin]="facade.isAdmin()"
+            [canViewOthers]="facade.canViewOthersPresensi()"
+            [startDate]="facade.startDatePresensi()"
+            [endDate]="facade.endDatePresensi()"
+            [editingPresensiId]="editingPresensiId"
+            [editPresensiStatusCI]="editPresensiStatusCI"
+            [editPresensiStatusCO]="editPresensiStatusCO"
+            (filterDate)="facade.loadPresensi($event.startDate, $event.endDate)"
+            (exportToCSV)="exportPresensi()"
+            (editPresensi)="onEditPresensi($event)"
+            (deletePresensi)="facade.deletePresensi($event).subscribe({next: facade.loadPresensi.bind(facade)})"
+            (savePresensiEvent)="onSavePresensi($event)"
+            (cancelEditEvent)="cancelEditPresensi()"
+          ></app-wfh-presensi-table>
+
         </div>
-      </div>
-    </div>
-  </div>
+      </mat-tab>
 
-  <!-- RIGHT: Worklog Form -->
-  <div class="section-card" *ngIf="!isPTPS">
-    <div class="card-header">
-      <mat-icon class="card-icon">edit_note</mat-icon>
-      <h3>Worklogs (Laporan Harian)</h3>
-    </div>
-    <div class="card-body">
-      <form [formGroup]="worklogForm" (ngSubmit)="onSubmitWorklog()" style="display: flex; flex-direction: column; gap: 12px;">
-        <mat-form-field appearance="outline" style="width: 100%;">
-          <mat-label>Aktivitas</mat-label>
-          <textarea matInput formControlName="activity" rows="3" placeholder="Deskripsikan pekerjaan Anda hari ini..."></textarea>
-          <mat-error *ngIf="worklogForm.get('activity')?.hasError('required')">Aktivitas wajib diisi</mat-error>
-        </mat-form-field>
+      <!-- TAB 2: WORKLOG -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="mr-2">assignment</mat-icon> Laporan Kinerja
+        </ng-template>
 
-        <div>
-          <label style="display: block; font-size: 0.8rem; color: #64748b; margin-bottom: 6px; font-weight: 500;">Lampiran Bukti Kerja (Opsional)</label>
-          <div style="display: flex; align-items: center; gap: 12px; border: 1px dashed #cbd5e1; padding: 10px 14px; border-radius: 6px; background: #fafafa;">
-            <button type="button" mat-stroked-button color="primary" (click)="fileInput.click()" style="background: white;">
-              <mat-icon>upload_file</mat-icon> Pilih File
-            </button>
-            <span style="font-size: 0.85rem; color: #64748b; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-              {{ selectedFile ? selectedFile.name : 'Belum ada file dipilih' }}
-            </span>
-            <button type="button" mat-icon-button color="warn" *ngIf="selectedFile" (click)="selectedFile = null; fileInput.value = ''" matTooltip="Batalkan">
-              <mat-icon>close</mat-icon>
-            </button>
-            <input type="file" #fileInput (change)="onFileSelected($event)" accept=".pdf,image/jpeg,image/png" style="display: none;">
-          </div>
-        <app-file-preview [file]="selectedFile"></app-file-preview>
+        <div class="tab-content pt-6 space-y-6">
+          
+          <!-- Worklog Form Component -->
+          <app-wfh-worklog-form
+            *ngIf="!facade.isAdmin() && !facade.canApprove()"
+            [isSubmittingLog]="facade.isSubmittingWorklog()"
+            [isEditMode]="isEditMode"
+            [initialActivity]="editWorklogActivity"
+            (submitWorklog)="onSubmitWorklog($event)"
+            (cancelEditEvent)="cancelEditWorklog()"
+          ></app-wfh-worklog-form>
+
+          <!-- Worklog Table Component -->
+          <app-wfh-worklog-table
+            [data]="facade.worklogData()"
+            [displayedColumns]="worklogDisplayedColumns"
+            [canApprove]="facade.canApprove()"
+            [canViewOthers]="facade.canViewOthersPresensi()"
+            [startDate]="facade.startDateWorklog()"
+            [endDate]="facade.endDateWorklog()"
+            (filterDate)="facade.loadWorklogs($event.startDate, $event.endDate)"
+            (exportToCSV)="exportWorklog()"
+            (editWorklog)="onEditWorklog($event)"
+            (deleteWorklog)="facade.deleteWorklog($event).subscribe({next: facade.loadWorklogs.bind(facade)})"
+            (approveWorklog)="facade.approveWorklog($event.id, $event.status).subscribe({next: facade.loadWorklogs.bind(facade)})"
+          ></app-wfh-worklog-table>
+
         </div>
+      </mat-tab>
 
-        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px;">
-          <button *ngIf="isEditMode" mat-stroked-button type="button" (click)="cancelEdit()">Batal</button>
-          <button mat-flat-button color="primary" type="submit" [disabled]="worklogForm.invalid || isSubmittingLog">
-            <mat-icon>{{ isEditMode ? 'update' : 'save' }}</mat-icon> {{ isEditMode ? 'Perbarui Laporan' : 'Simpan Laporan' }}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-</div>
-
-<!-- TABEL RIWAYAT WORKLOG -->
-<div class="section-card animate-fade-in" style="margin-bottom: 1.5rem;" *ngIf="!isPTPS">
-  <div class="table-section-header">
-    <h3>
-      <mat-icon class="card-icon">history</mat-icon>
-      Riwayat Worklog
-    </h3>
-    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-      <mat-form-field appearance="outline" class="search-field" style="margin-bottom: -1.25em;">
-        <mat-label>Cari Worklog...</mat-label>
-        <input matInput (input)="applyFilterWorklogs($event)" placeholder="Ketik kata kunci...">
-        <mat-icon matSuffix>search</mat-icon>
-      </mat-form-field>
-      
-      <ng-container *ngIf="canApprove">
-        <mat-form-field appearance="outline" style="margin-bottom: -1.25em; width: 280px;">
-          <mat-label>Pilih Rentang Tanggal</mat-label>
-          <mat-date-range-input [rangePicker]="pickerWorklog">
-            <input matStartDate [(ngModel)]="startDateWorklog" (dateChange)="filterDateWorklog()" placeholder="Mulai">
-            <input matEndDate [(ngModel)]="endDateWorklog" (dateChange)="filterDateWorklog()" placeholder="Selesai">
-          </mat-date-range-input>
-          <mat-datepicker-toggle matIconSuffix [for]="pickerWorklog"></mat-datepicker-toggle>
-          <mat-date-range-picker #pickerWorklog></mat-date-range-picker>
-        </mat-form-field>
-        <button mat-flat-button color="primary" (click)="exportToCSV('worklog')" style="height: 48px;">
-          <mat-icon>download</mat-icon> Export CSV
-        </button>
-      </ng-container>
-    </div>
-  </div>
-
-  <div class="table-responsive-wrapper">
-    <table mat-table [dataSource]="worklogs" style="width: 100%;">
-      <ng-container matColumnDef="nama" *ngIf="canApprove">
-        <th mat-header-cell *matHeaderCellDef> Nama </th>
-        <td mat-cell *matCellDef="let log" style="font-weight: 500;"> {{ log.nama_pegawai || 'Anda' }} </td>
-      </ng-container>
-
-      <ng-container matColumnDef="tanggal">
-        <th mat-header-cell *matHeaderCellDef> Tanggal </th>
-        <td mat-cell *matCellDef="let log"> {{ log.created_at | date:'dd MMM yyyy, HH:mm' }} </td>
-      </ng-container>
-
-      <ng-container matColumnDef="aktivitas">
-        <th mat-header-cell *matHeaderCellDef> Aktivitas </th>
-        <td mat-cell *matCellDef="let log"> {{ log.rincian_aktivitas || log.activity }} </td>
-      </ng-container>
-
-      <ng-container matColumnDef="lampiran">
-        <th mat-header-cell *matHeaderCellDef> Lampiran </th>
-        <td mat-cell *matCellDef="let log">
-          <a *ngIf="log.attachment_url" [href]="getAttachmentUrl(log.attachment_url)" target="_blank" style="color: #3b82f6; text-decoration: none; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 4px;">
-            <mat-icon style="font-size: 16px; width: 16px; height: 16px;">attachment</mat-icon> Lihat
-          </a>
-          <span *ngIf="!log.attachment_url" style="color: #94a3b8; font-size: 0.85rem;">-</span>
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef> Status </th>
-        <td mat-cell *matCellDef="let log">
-          <span [ngStyle]="{
-              'padding': '4px 10px',
-              'border-radius': '4px',
-              'font-size': '0.75rem',
-              'font-weight': '600',
-              'background-color': (log.status_approval === 'Approved' || log.status_approval === 'Disetujui') ? '#dcfce7' : (log.status_approval === 'Revised' ? '#fee2e2' : '#fef9c3'),
-              'color': (log.status_approval === 'Approved' || log.status_approval === 'Disetujui') ? '#166534' : (log.status_approval === 'Revised' ? '#991b1b' : '#854d0e')
-            }">
-            {{ log.status_approval || 'Pending' }}
-          </span>
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="aksi">
-        <th mat-header-cell *matHeaderCellDef style="text-align: right; width: 150px;"> Aksi </th>
-        <td mat-cell *matCellDef="let log" style="text-align: right;">
-          <ng-container *ngIf="canApprove && log.status_approval !== 'Approved'">
-            <button mat-icon-button color="primary" matTooltip="Setujui" (click)="approveWorklog(log.worklog_id, 'Approved')">
-              <mat-icon>check_circle</mat-icon>
-            </button>
-            <button mat-icon-button color="warn" matTooltip="Revisi" (click)="approveWorklog(log.worklog_id, 'Revised')">
-              <mat-icon>cancel</mat-icon>
-            </button>
-          </ng-container>
-          <ng-container *ngIf="canApprove || log.status_approval !== 'Approved'">
-            <button mat-icon-button matTooltip="Edit" (click)="editWorklog(log)" style="color: #64748b;">
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button mat-icon-button color="warn" matTooltip="Hapus" (click)="deleteWorklog(log.worklog_id)">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </ng-container>
-        </td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-      <tr class="mat-row" *matNoDataRow>
-        <td class="mat-cell" colspan="6" style="text-align: center; padding: 2rem; color: #94a3b8;">Belum ada riwayat worklog.</td>
-      </tr>
-    </table>
-    <mat-paginator #worklogPaginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of worklogs"></mat-paginator>
+    </mat-tab-group>
   </div>
 </div>
-
-<!-- TABEL RIWAYAT PRESENSI -->
-<div class="section-card animate-fade-in" style="margin-bottom: 1.5rem;">
-  <div class="table-section-header">
-    <h3>
-      <mat-icon class="card-icon">badge</mat-icon>
-      Riwayat Presensi
-    </h3>
-    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-      <mat-form-field appearance="outline" class="search-field" style="margin-bottom: -1.25em;">
-        <mat-label>Cari Presensi...</mat-label>
-        <input matInput (input)="applyFilterPresensi($event)" placeholder="Ketik nama atau status...">
-        <mat-icon matSuffix>search</mat-icon>
-      </mat-form-field>
-      
-      <ng-container *ngIf="canViewOthersPresensi">
-        <mat-form-field appearance="outline" style="margin-bottom: -1.25em; width: 280px;">
-          <mat-label>Pilih Rentang Tanggal</mat-label>
-          <mat-date-range-input [rangePicker]="pickerPresensi">
-            <input matStartDate [(ngModel)]="startDatePresensi" (dateChange)="filterDatePresensi()" placeholder="Mulai">
-            <input matEndDate [(ngModel)]="endDatePresensi" (dateChange)="filterDatePresensi()" placeholder="Selesai">
-          </mat-date-range-input>
-          <mat-datepicker-toggle matIconSuffix [for]="pickerPresensi"></mat-datepicker-toggle>
-          <mat-date-range-picker #pickerPresensi></mat-date-range-picker>
-        </mat-form-field>
-        <button mat-flat-button color="primary" (click)="exportToCSV('presensi')" style="height: 48px;">
-          <mat-icon>download</mat-icon> Export CSV
-        </button>
-      </ng-container>
-    </div>
-  </div>
-
-  <div class="table-responsive-wrapper">
-    <table mat-table [dataSource]="presensiList" style="width: 100%;">
-      <ng-container matColumnDef="nama" *ngIf="canViewOthersPresensi">
-        <th mat-header-cell *matHeaderCellDef> Nama </th>
-        <td mat-cell *matCellDef="let p" style="font-weight: 500;"> {{ p.nama_pegawai || 'Anda' }} </td>
-      </ng-container>
-
-      <ng-container matColumnDef="waktu_masuk">
-        <th mat-header-cell *matHeaderCellDef> Waktu Check-In </th>
-        <td mat-cell *matCellDef="let p"> {{ p.timestamp_checkin | date:'dd MMM yyyy, HH:mm' }} </td>
-      </ng-container>
-
-      <ng-container matColumnDef="foto_masuk">
-        <th mat-header-cell *matHeaderCellDef> Lampiran / Foto </th>
-        <td mat-cell *matCellDef="let p">
-          <a *ngIf="p.selfie_masuk_url" [href]="getAttachmentUrl(p.selfie_masuk_url)" target="_blank">
-            <ng-container *ngIf="p.status_ci === 'Sakit' || p.status_ci === 'Izin' || p.status_ci === 'Cuti'; else photoIn">
-              <span style="color: #3b82f6; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 4px;">
-                <mat-icon style="font-size: 16px; width: 16px; height: 16px;">description</mat-icon> Lihat Surat
-              </span>
-            </ng-container>
-            <ng-template #photoIn>
-              <img [src]="getAttachmentUrl(p.selfie_masuk_url)" alt="Check In" style="width: 36px; height: 36px; border-radius: 4px; object-fit: cover; border: 1px solid #e2e8f0;">
-            </ng-template>
-          </a>
-          <span *ngIf="!p.selfie_masuk_url" style="color: #94a3b8;">-</span>
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="waktu_keluar">
-        <th mat-header-cell *matHeaderCellDef> Waktu Check-Out </th>
-        <td mat-cell *matCellDef="let p"> {{ p.timestamp_checkout ? (p.timestamp_checkout | date:'dd MMM yyyy, HH:mm') : '-' }} </td>
-      </ng-container>
-
-      <ng-container matColumnDef="foto_keluar">
-        <th mat-header-cell *matHeaderCellDef> Foto Keluar </th>
-        <td mat-cell *matCellDef="let p">
-          <a *ngIf="p.selfie_keluar_url" [href]="getAttachmentUrl(p.selfie_keluar_url)" target="_blank">
-            <img [src]="getAttachmentUrl(p.selfie_keluar_url)" alt="Check Out" style="width: 36px; height: 36px; border-radius: 4px; object-fit: cover; border: 1px solid #e2e8f0;">
-          </a>
-          <span *ngIf="!p.selfie_keluar_url" style="color: #94a3b8;">-</span>
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="lokasi">
-        <th mat-header-cell *matHeaderCellDef> Koordinat </th>
-        <td mat-cell *matCellDef="let p">
-          <a *ngIf="p.gps_koordinat" [href]="'https://www.google.com/maps/search/?api=1&query=' + p.gps_koordinat" target="_blank" style="color: #3b82f6; text-decoration: none; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 4px;">
-            <mat-icon style="font-size: 16px; width: 16px; height: 16px;">location_on</mat-icon> Peta
-          </a>
-          <span *ngIf="!p.gps_koordinat" style="color: #94a3b8;">â€”</span>
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="status_ci">
-        <th mat-header-cell *matHeaderCellDef> Status CI </th>
-        <td mat-cell *matCellDef="let p">
-          <ng-container *ngIf="editingPresensiId !== p.presensi_id">
-            <span [ngStyle]="{
-              'padding': '4px 10px', 'border-radius': '4px', 'font-size': '0.75rem', 'font-weight': '600',
-              'background-color': p.status_ci === 'Hadir' ? '#dcfce7' : (p.status_ci === 'Terlambat' ? '#fef9c3' : '#fee2e2'),
-              'color': p.status_ci === 'Hadir' ? '#166534' : (p.status_ci === 'Terlambat' ? '#854d0e' : '#991b1b')
-            }">
-              {{ p.status_ci || 'Hadir' }}
-            </span>
-          </ng-container>
-          <ng-container *ngIf="editingPresensiId === p.presensi_id">
-            <mat-form-field appearance="outline" style="width: 140px; margin-bottom: -1.25em;">
-              <mat-select [(value)]="editPresensiStatusCI">
-                <mat-option value="Hadir">Hadir</mat-option>
-                <mat-option value="Terlambat">Terlambat</mat-option>
-                <mat-option value="Izin">Izin</mat-option>
-                <mat-option value="Sakit">Sakit</mat-option>
-                <mat-option value="Alpa">Alpa</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </ng-container>
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="status_co">
-        <th mat-header-cell *matHeaderCellDef> Status CO </th>
-        <td mat-cell *matCellDef="let p">
-          <ng-container *ngIf="editingPresensiId !== p.presensi_id">
-            <span *ngIf="p.status_co" [ngStyle]="{
-              'padding': '4px 10px', 'border-radius': '4px', 'font-size': '0.75rem', 'font-weight': '600',
-              'background-color': p.status_co === 'Hadir' ? '#dcfce7' : (p.status_co === 'Terlambat' ? '#fef9c3' : '#fee2e2'),
-              'color': p.status_co === 'Hadir' ? '#166534' : (p.status_co === 'Terlambat' ? '#854d0e' : '#991b1b')
-            }">
-              {{ p.status_co }}
-            </span>
-            <span *ngIf="!p.status_co" style="color: #94a3b8;">-</span>
-          </ng-container>
-          <ng-container *ngIf="editingPresensiId === p.presensi_id">
-            <mat-form-field appearance="outline" style="width: 140px; margin-bottom: -1.25em;">
-              <mat-select [(value)]="editPresensiStatusCO">
-                <mat-option value="Hadir">Hadir</mat-option>
-                <mat-option value="Terlambat">Terlambat</mat-option>
-                <mat-option value="Belum CO">Belum CO</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </ng-container>
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="aksi" *ngIf="isAdmin">
-        <th mat-header-cell *matHeaderCellDef style="text-align: right; width: 120px;"> Aksi </th>
-        <td mat-cell *matCellDef="let p" style="text-align: right;">
-          <ng-container *ngIf="editingPresensiId !== p.presensi_id">
-            <button mat-icon-button matTooltip="Edit" (click)="editPresensi(p)" style="color: #64748b;">
-              <mat-icon style="font-size: 20px;">edit</mat-icon>
-            </button>
-            <button mat-icon-button color="warn" matTooltip="Hapus" (click)="deletePresensi(p.presensi_id)">
-              <mat-icon style="font-size: 20px;">delete</mat-icon>
-            </button>
-          </ng-container>
-          <ng-container *ngIf="editingPresensiId === p.presensi_id">
-            <button mat-icon-button color="primary" matTooltip="Simpan" (click)="savePresensi(p.presensi_id)">
-              <mat-icon style="font-size: 20px;">check</mat-icon>
-            </button>
-            <button mat-icon-button color="warn" matTooltip="Batal" (click)="cancelEditPresensi()">
-              <mat-icon style="font-size: 20px;">close</mat-icon>
-            </button>
-          </ng-container>
-        </td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="presensiDisplayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: presensiDisplayedColumns;"></tr>
-      <tr class="mat-row" *matNoDataRow>
-        <td class="mat-cell" [attr.colspan]="presensiDisplayedColumns.length" style="text-align: center; padding: 2rem; color: #94a3b8;">
-          Belum ada riwayat presensi.
-        </td>
-      </tr>
-    </table>
-    <mat-paginator #presensiPaginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of presensi"></mat-paginator>
-  </div>
-</div>
-
-
