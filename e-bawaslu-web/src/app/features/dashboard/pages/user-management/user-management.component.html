@@ -15,8 +15,8 @@
     </div>
 
     <!-- Error State -->
-    <div class="error-container" *ngIf="isError" style="padding: 2rem; text-align: center; color: #f44336; display: flex; flex-direction: column; align-items: center; gap: 8px;">
-      <mat-icon style="font-size: 48px; height: 48px; width: 48px;">error_outline</mat-icon>
+    <div class="error-container" *ngIf="isError">
+      <mat-icon class="error-icon">error_outline</mat-icon>
       <h3>Gagal Memuat Data</h3>
       <p>Terjadi kesalahan saat memuat data pengguna dari server.</p>
       <button mat-stroked-button color="warn" (click)="loadUsers()">Coba Lagi</button>

@@ -34,7 +34,8 @@ class UserRequest extends FormRequest
      */
     public function rules(): array
     {
-        $userId = $this->route('user'); // asumsikan nama route parameternya adalah 'user'
+        // Parameter in routes/api.php is usually 'id', so we check for 'id' first
+        $userId = $this->route('id') ?? $this->route('user');
 
         if ($this->isMethod('post')) {
             return [

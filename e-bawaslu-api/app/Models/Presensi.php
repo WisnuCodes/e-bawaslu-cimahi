@@ -35,7 +35,7 @@ class Presensi extends Model
     /**
      * Calculate distance between two coordinates using Haversine formula and check if within radius.
      */
-    public static function isWithinGeofence($lat1, $lon1, $lat2, $lon2, $maxRadius = 1000): bool
+    public static function isWithinGeofence(float $lat1, float $lon1, float $lat2, float $lon2, float $maxRadius = 1000): bool
     {
         $earthRadius = 6371000; // meters
 

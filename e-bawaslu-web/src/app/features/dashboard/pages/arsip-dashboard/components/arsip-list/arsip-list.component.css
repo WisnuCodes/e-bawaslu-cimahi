@@ -34,3 +34,7 @@
  .archive-filters { grid-template-columns: minmax(0, 1fr); padding: 0 16px 16px; }
  .audit-card { margin-top: 16px; }
 }
+
+.text-medium { font-weight: 500; }
+.perihal-title { margin-bottom: 4px; }
+

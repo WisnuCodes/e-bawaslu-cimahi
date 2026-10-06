@@ -20,7 +20,7 @@
 
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Tanggal Surat</mat-label>
-          <input matInput type="date" formControlName="tgl_surat">
+          <input matInput type="date" formControlName="tgl_surat" title="Tanggal Surat" placeholder="Tanggal Surat">
         </mat-form-field>
       </div>
 
@@ -89,7 +89,7 @@
           <input class="file-hidden" type="file" #uploadFileInput (change)="onUploadFileSelected($event)" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"  placeholder="...">
         </div>
         <!-- Pesan Error Custom untuk Berkas -->
-        <p *ngIf="fileError" class="muted-text" style="color: var(--color-error); margin-top: 4px;">{{ fileError }}</p>
+        <p *ngIf="fileError" class="muted-text file-error-text">{{ fileError }}</p>
         
         <app-file-preview [file]="uploadFile"></app-file-preview>
       </div>

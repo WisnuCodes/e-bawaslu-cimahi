@@ -122,3 +122,83 @@
     padding: 1rem;
   }
 }
+
+/* ========== LHP DASHBOARD (moved from inline styles) ========== */
+.lhp-header { margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+.lhp-title { margin: 0; color: var(--color-text); font-weight: 600; }
+.lhp-subtitle { margin: 0; color: var(--color-text-muted); }
+.btn-tall { height: 44px; }
+
+.filter-bar { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.filter-search { flex: 1; min-width: 250px; margin-bottom: -1.25em; }
+.filter-year { min-width: 150px; margin-bottom: -1.25em; }
+
+.table-wrapper { border-radius: var(--radius-md); overflow: auto; border: 1px solid var(--color-border); }
+.full-width { width: 100%; }
+.text-right { text-align: right; }
+.text-medium { font-weight: 500; }
+.text-muted { color: var(--color-text-muted); }
+.cell-no-surat { font-weight: 600; color: var(--color-primary); }
+.cell-keterangan { font-size: 0.85rem; color: #475569; }
+.col-aksi { text-align: right; width: 180px; }
+.row-hover { transition: background 0.2s; }
+.empty-cell { text-align: center; padding: 2rem; color: var(--color-text-muted); }
+
+.chip { padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 500; }
+.chip-bold { font-weight: 600; }
+.chip-neutral { background: #f1f5f9; color: #475569; }
+.chip-danger { background-color: #fee2e2; color: #991b1b; }
+.chip-warning { background-color: #fef3c7; color: #92400e; }
+.chip-info { background-color: #e0f2fe; color: #0369a1; }
+
+.btn-version { font-size: 0.75rem; height: 28px; line-height: 28px; padding: 0 8px; }
+.btn-version-icon { font-size: 14px; width: 14px; height: 14px; margin-right: 4px; }
+
+.log-card { margin-top: 1.5rem; }
+.log-card-header { margin-bottom: 1rem; }
+.log-card-title { font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+
+.lhp-modal-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 999; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.lhp-modal { background: white; border-radius: var(--radius-lg); width: 100%; padding: 1.5rem; box-shadow: var(--shadow-xl); }
+.lhp-modal-sm { max-width: 480px; }
+.lhp-modal-md { max-width: 500px; }
+.lhp-modal-lg { max-width: 600px; }
+.lhp-modal-scroll { max-height: 90vh; overflow-y: auto; }
+.lhp-modal-scroll-sm { max-height: 80vh; overflow-y: auto; }
+.lhp-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.lhp-modal-header-lg { margin-bottom: 1.5rem; }
+.lhp-modal-title { margin: 0; font-size: 1.1rem; font-weight: 600; }
+.lhp-modal-title-lg { font-size: 1.2rem; }
+.lhp-modal-title-danger { color: #dc2626; }
+.modal-desc { margin: 0 0 1rem; color: #64748b; font-size: 0.9rem; }
+.modal-desc-lg { margin-bottom: 1.5rem; }
+.modal-desc-dark { color: #475569; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1rem; }
+.modal-actions-lg { margin-top: 1.5rem; }
+
+.stack { display: flex; flex-direction: column; gap: 1rem; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+.file-label { display: block; font-size: 0.85rem; font-weight: 500; color: #475569; margin-bottom: 6px; }
+.file-dropzone { display: flex; align-items: center; gap: 1rem; border: 1px dashed #cbd5e1; padding: 12px; border-radius: var(--radius-md); background: #f8fafc; }
+.file-name { font-size: 0.85rem; color: #64748b; flex: 1; overflow: hidden; text-overflow: ellipsis; }
+.hidden-input { display: none; }
+.btn-spinner { display: inline-block; margin-right: 8px; }
+
+.center-block { text-align: center; padding: 2rem; }
+.spinner-center { margin: 0 auto; }
+.loading-text { color: #64748b; font-size: 0.85rem; margin-top: 8px; }
+.empty-versions { color: #64748b; }
+.empty-versions-icon { font-size: 32px; width: 32px; height: 32px; color: #cbd5e1; }
+.empty-versions-text { margin: 8px 0 0; }
+
+.version-current { color: var(--color-primary); font-weight: 700; }
+.version-item { border-left: 3px solid var(--color-primary); background: #f8fafc; padding: 12px; border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+.version-item-header { display: flex; justify-content: space-between; align-items: center; }
+.version-name { font-weight: 700; color: var(--color-primary); }
+.version-date { font-size: 0.8rem; color: #64748b; }
+.version-note { margin: 6px 0 0; font-size: 0.85rem; color: #334155; }
+
+@media (max-width: 768px) {
+  .grid-2 { grid-template-columns: 1fr; }
+}

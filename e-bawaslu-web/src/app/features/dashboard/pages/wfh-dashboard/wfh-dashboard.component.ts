@@ -18,7 +18,6 @@ import { WfhPresensiActionComponent } from './components/wfh-presensi-action/wfh
 import { WfhPresensiTableComponent } from './components/wfh-presensi-table/wfh-presensi-table.component';
 import { WfhWorklogFormComponent } from './components/wfh-worklog-form/wfh-worklog-form.component';
 import { WfhWorklogTableComponent } from './components/wfh-worklog-table/wfh-worklog-table.component';
-import { ButtonComponent } from '../../../../shared/components/atoms/button/button.component';
 
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -39,7 +38,6 @@ import { PromptDialogComponent } from '../../../../shared/components/molecules/p
     MatSelectModule,
     MatProgressSpinnerModule,
     MatDialogModule,
-    ButtonComponent,
     WfhPresensiActionComponent,
     WfhWorklogFormComponent,
     WfhPresensiTableComponent,

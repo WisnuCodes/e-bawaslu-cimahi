@@ -35,7 +35,7 @@
         <ng-container matColumnDef="no_surat">
           <th mat-header-cell *matHeaderCellDef> No. Surat </th>
           <td mat-cell *matCellDef="let doc" >
-            <span style="font-weight: 500;">{{ doc.no_surat || '-' }}</span>
+            <span class="text-medium">{{ doc.no_surat || '-' }}</span>
           </td>
         </ng-container>
 
@@ -43,7 +43,7 @@
         <ng-container matColumnDef="perihal">
           <th mat-header-cell *matHeaderCellDef> Perihal & Detail </th>
           <td mat-cell *matCellDef="let doc">
-            <div style="font-weight: 500; margin-bottom: 4px;">{{ doc.perihal || 'Tanpa perihal' }}</div>
+            <div class="text-medium perihal-title">{{ doc.perihal || 'Tanpa perihal' }}</div>
             <div class="document-meta">{{ doc.jenjang_pengawas || 'Internal' }}</div>
             <small class="document-meta">Pengelola: {{ getDivisiName(doc.divisi_id) }}</small>
             <small class="document-meta" *ngIf="doc.pengirim"> | Pengirim: {{ doc.pengirim }}</small>

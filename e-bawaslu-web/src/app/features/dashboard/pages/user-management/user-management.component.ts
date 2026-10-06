@@ -9,7 +9,6 @@ import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { UserService, User } from '../../../../core/services/user/user.service';
 import { UserFormDialogComponent } from './user-form-dialog/user-form-dialog.component';
 import { MatChipsModule } from '@angular/material/chips';
-import { DateFormatPipe } from '../../../../shared/pipes/date-format.pipe';
 
 @Component({
   selector: 'app-user-management',
@@ -22,8 +21,7 @@ import { DateFormatPipe } from '../../../../shared/pipes/date-format.pipe';
     MatIconModule,
     MatDialogModule,
     MatSnackBarModule,
-    MatChipsModule,
-    DateFormatPipe
+    MatChipsModule
   ],
   templateUrl: './user-management.component.html',
   styleUrl: './user-management.component.css'
