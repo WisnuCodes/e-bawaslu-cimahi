@@ -36,7 +36,8 @@ class WorklogController extends Controller
         if ($request->has('start_date') && $request->has('end_date')) {
             $startDate = Carbon::parse($request->start_date)->startOfDay();
             $endDate = Carbon::parse($request->end_date)->endOfDay();
-            $query->whereBetween('daily_worklog.tgl_kerja', [$startDate, $endDate]);
+            $query->whereDate('daily_worklog.tgl_kerja', '>=', $startDate->toDateString())
+                ->whereDate('daily_worklog.tgl_kerja', '<=', $endDate->toDateString());
         } else {
             $today = Carbon::today();
             $query->whereDate('daily_worklog.tgl_kerja', $today);
@@ -54,8 +55,8 @@ class WorklogController extends Controller
     {
         $request->validate([
             'tgl_kerja' => 'required|date',
-            'rincian_aktivitas' => 'required|string',
-            'file_lampiran' => 'nullable|file|mimes:pdf,jpeg,png,jpg'
+            'rincian_aktivitas' => 'required|string|max:10000',
+            'file_lampiran' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:2048'
         ]);
 
         $path = null;
@@ -117,9 +118,9 @@ class WorklogController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'tgl_kerja' => 'required|date',
-            'rincian_aktivitas' => 'required|string',
-            'file_lampiran' => 'nullable|file|mimes:pdf,jpeg,png,jpg'
+            'tgl_kerja' => 'sometimes|required|date',
+            'rincian_aktivitas' => 'required|string|max:10000',
+            'file_lampiran' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:2048'
         ]);
 
         $worklog = Worklog::findOrFail($id);
@@ -142,7 +143,7 @@ class WorklogController extends Controller
         }
 
         $worklog->update([
-            'tgl_kerja' => $request->tgl_kerja,
+            'tgl_kerja' => $request->input('tgl_kerja', $worklog->tgl_kerja),
             'rincian_aktivitas' => $request->rincian_aktivitas,
             'attachment_url' => $path,
             'status_approval' => 'Pending Approval' // Reset to pending after edit

@@ -22,6 +22,7 @@ export interface ArsipState {
   selectedArsip: ArsipItem | null;
   versionHistory: VersionHistoryItem[];
   
+  uploadError: string;
   isLoadingVersions: boolean;
   isUploading: boolean;
   isSubmittingRevisi: boolean;
@@ -54,6 +55,7 @@ export class ArsipFacade {
     showDeleteModal: false,
     selectedArsip: null,
     versionHistory: [],
+    uploadError: '',
     isLoadingVersions: false,
     isUploading: false,
     isSubmittingRevisi: false,
@@ -63,6 +65,7 @@ export class ArsipFacade {
   });
 
   // Selectors
+  readonly uploadError = computed(() => this.state().uploadError);
   readonly documents = computed(() => this.state().documents);
   readonly divisiList = computed(() => this.state().divisiList);
   readonly availableYears = computed(() => this.state().availableYears);
@@ -145,7 +148,7 @@ export class ArsipFacade {
   }
 
   setModal(key: 'showUploadModal' | 'showRevisiModal' | 'showVersionModal' | 'showDeleteModal', value: boolean) {
-    this.updateState({ [key]: value });
+    this.updateState({ [key]: value, ...(key === 'showUploadModal' ? { uploadError: '' } : {}) });
   }
 
   setSelectedArsip(doc: ArsipItem | null) {
@@ -153,7 +156,7 @@ export class ArsipFacade {
   }
 
   uploadArsip(formData: FormData) {
-    this.updateState({ isUploading: true });
+    this.updateState({ isUploading: true, uploadError: '' });
     this.arsipService.uploadArsip(formData).subscribe({
       next: () => {
         this.updateState({ isUploading: false, showUploadModal: false });
@@ -168,6 +171,7 @@ export class ArsipFacade {
             const errorDetails = Object.values(err.error.errors).flat().join(' ');
             msg += ` Detail: ${errorDetails}`;
         }
+        this.updateState({ uploadError: msg });
         this.showNotification(msg, 'error');
       }
     });

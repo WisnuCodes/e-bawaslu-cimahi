@@ -1,0 +1,7 @@
+.date-cell { display: flex; flex-direction: column; gap: 4px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.date-secondary, .approved-by { font-size: 12px; color: var(--color-text-muted); }
+.approved-by { margin-top: 6px; }
+.activity-cell { min-width: 260px; max-width: 480px; }
+.activity-text { margin: 0; white-space: pre-line; overflow-wrap: anywhere; line-height: 1.65; }
+.menu-icon-approve { color: var(--color-success); }
+.menu-icon-revise { color: var(--color-warning); }

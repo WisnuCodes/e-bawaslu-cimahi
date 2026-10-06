@@ -1,0 +1,4 @@
+.photo-thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid var(--color-border); }
+.inline-select { width: 140px; }
+
+.absence-reason { min-width: 180px; max-width: 320px; margin: 0 0 6px; white-space: pre-line; overflow-wrap: anywhere; }

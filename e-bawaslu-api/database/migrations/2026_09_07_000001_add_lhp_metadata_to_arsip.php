@@ -8,9 +8,13 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('arsip_dokumen', function (Blueprint $table) {
-            $table->string('jenis_pemilihan')->nullable();
-            $table->uuid('tahapan_id')->nullable();
-            $table->foreign('tahapan_id')->references('id')->on('tahapan');
+            if (!Schema::hasColumn('arsip_dokumen', 'jenis_pemilihan')) {
+                $table->string('jenis_pemilihan')->nullable();
+            }
+            if (!Schema::hasColumn('arsip_dokumen', 'tahapan_id')) {
+                $table->uuid('tahapan_id')->nullable();
+                $table->foreign('tahapan_id')->references('id')->on('tahapan');
+            }
         });
     }
 

@@ -25,4 +25,9 @@ export class ArsipDashboardComponent implements OnInit {
   ngOnInit() {
     this.facade.loadDivisi();
   }
+
+  openUploadModal() {
+    console.log('Button Unggah Dokumen clicked!');
+    this.facade.setModal('showUploadModal', true);
+  }
 }

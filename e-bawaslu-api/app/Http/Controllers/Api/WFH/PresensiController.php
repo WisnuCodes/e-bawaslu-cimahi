@@ -9,6 +9,9 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class PresensiController extends Controller
 {
@@ -90,7 +93,9 @@ class PresensiController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $query->get()
+            'data' => $query->get(),
+            'today' => Presensi::where('user_id', $user->user_id)
+                ->whereDate('timestamp_checkin', Carbon::today())->first()
         ], 200);
     }
     public function update(Request $request, $id)
@@ -180,6 +185,10 @@ class PresensiController extends Controller
             ], 403);
         }
 
+        if (Presensi::where('user_id', $userId)->whereDate('timestamp_checkin', $todayDate)->exists()) {
+            return response()->json(['message' => 'Anda sudah memiliki catatan presensi atau izin hari ini.'], 422);
+        }
+
         // Tentukan apakah hari ini WFH (Selasa/Jumat) atau WFO (Senin/Rabu/Kamis)
         $isWfhDay = in_array($now->dayOfWeekIso, [2, 5]); // 2: Tuesday, 5: Friday
         
@@ -228,50 +237,48 @@ class PresensiController extends Controller
 
     public function submitIzin(Request $request)
     {
-        $request->validate([
-            'jenis_izin' => 'required|in:Sakit,Izin,Cuti',
-            'keterangan_izin' => 'required|string',
-            'file_lampiran' => 'required|file|mimes:pdf,jpeg,png,jpg'
+        $validated = $request->validate([
+            'jenis_izin' => 'required|in:Sakit,Izin',
+            'keterangan_izin' => 'required|string|max:2000',
+            'file_lampiran' => 'required|file|mimes:pdf,jpeg,png,jpg|max:2048',
         ]);
 
-        $user = $request->user();
-        $userId = $user->user_id;
-        $now = Carbon::now();
-        $todayDate = $now->format('Y-m-d');
+        $path = null;
+        try {
+            $presensi = DB::transaction(function () use ($request, $validated, &$path) {
+                $user = $request->user();
+                // Serialize submissions for the same employee before checking today's record.
+                DB::table('users')->where('user_id', $user->user_id)->lockForUpdate()->first();
+                $now = Carbon::now();
+                if (Presensi::where('user_id', $user->user_id)->whereDate('timestamp_checkin', $now->toDateString())->exists()) {
+                    throw ValidationException::withMessages([
+                        'jenis_izin' => 'Anda sudah memiliki catatan presensi atau izin hari ini.',
+                    ]);
+                }
 
-        // Check if already checked in today
-        $existing = Presensi::where('user_id', $userId)
-            ->whereDate('timestamp_checkin', $todayDate)
-            ->first();
-
-        if ($existing) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Anda sudah memiliki catatan presensi hari ini. Tidak dapat mengajukan izin.'
-            ], 403);
+                $path = $request->file('file_lampiran')->store('izin', 'public');
+                if (!$path) {
+                    throw new \RuntimeException('Lampiran izin gagal disimpan.');
+                }
+                return Presensi::create([
+                    'presensi_id' => (string) Str::uuid(),
+                    'user_id' => $user->user_id,
+                    'timestamp_checkin' => $now,
+                    'lampiran_izin' => $path,
+                    'status_ci' => $validated['jenis_izin'],
+                    'status_co' => $validated['jenis_izin'],
+                    'keterangan_izin' => trim($validated['keterangan_izin']),
+                ]);
+            });
+        } catch (\Throwable $exception) {
+            if ($path) Storage::disk('public')->delete($path);
+            throw $exception;
         }
-
-        $path = $request->file('file_lampiran')->store('izin', 'public');
-
-        $presensi = Presensi::create([
-            'presensi_id' => (string) Str::uuid(),
-            'user_id' => $userId,
-            'timestamp_checkin' => $now,
-            'selfie_masuk_url' => $path,
-            'status_ci' => $request->jenis_izin,
-            'status_co' => $request->jenis_izin,
-            'timestamp_checkout' => clone $now->setTime(16, 0, 0), // Dummy checkout time to complete the record
-            'gps_koordinat' => '-',
-            'liveness_score' => 1.0,
-            'keterangan_izin' => $request->keterangan_izin
-        ]);
-
-        Log::info("NOTIFIKASI: Pengajuan {$request->jenis_izin} berhasil oleh user: " . $user->username);
 
         return response()->json([
             'success' => true,
-            'message' => "Pengajuan {$request->jenis_izin} berhasil dicatat.",
-            'data' => $presensi
+            'message' => "Pengajuan {$validated['jenis_izin']} berhasil dicatat untuk hari ini.",
+            'data' => $presensi,
         ], 201);
     }
 
@@ -297,6 +304,10 @@ class PresensiController extends Controller
 
         if ($presensi->user_id !== $user->user_id) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        if (in_array($presensi->status_ci, ['Sakit', 'Izin', 'Cuti'])) {
+            return response()->json(['message' => 'Catatan sakit/izin tidak memerlukan check-out.'], 422);
         }
 
         $now = Carbon::now();

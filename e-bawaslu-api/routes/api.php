@@ -57,6 +57,8 @@ Route::middleware('auth:api')->group(function () {
 
         Route::get('/worklog', [WorklogController::class, 'index']);
         Route::post('/checkout', [PresensiController::class, 'checkOut']);
+        Route::put('/presensi/{id}', [PresensiController::class, 'update']);
+        Route::delete('/presensi/{id}', [PresensiController::class, 'destroy']);
         
         // Worklog Routes
         Route::get('/worklogs', [WorklogController::class, 'index']);

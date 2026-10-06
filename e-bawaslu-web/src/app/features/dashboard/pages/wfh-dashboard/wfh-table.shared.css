@@ -1,0 +1,33 @@
+ :host { display: block; min-width: 0; }
+.table-section { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; }
+.table-header { padding: 20px; border-bottom: 1px solid var(--color-border); }
+.table-title-group { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+.table-title { margin: 0; font-size: 16px; font-weight: 600; }
+.title-icon { color: var(--color-text-muted); width: 20px; height: 20px; font-size: 20px; }
+.table-toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.date-field { width: 280px; }
+.search-field { flex: 1; min-width: 200px; }
+.export-btn { flex-shrink: 0; }
+.table-body { min-width: 0; }
+.table-responsive { width: 100%; overflow-x: auto; }
+.table-responsive:focus-visible { outline: 2px solid var(--color-primary); outline-offset: -2px; }
+.data-table { width: 100%; min-width: 800px; }
+.table-row:hover { background: var(--color-background); }
+.status-chip { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; line-height: 1.5; white-space: nowrap; background: var(--color-background); color: var(--color-text-muted); }
+.status-hadir, .status-approved { background: #edf7f0; color: #166534; }
+.status-terlambat, .status-pulang-cepat, .status-pending { background: #fff7e6; color: #855510; }
+.status-sakit { background: #fef2f2; color: #991b1b; }
+.status-izin, .status-revised { background: #eff6ff; color: #1e40af; }
+.action-group { display: flex; gap: 4px; }
+.text-empty { color: var(--color-text-muted); }
+.no-data-cell { text-align: center; padding: 40px 20px; color: var(--color-text-muted); font-size: 13px; }
+.no-data-icon { display: block; margin: 0 auto 12px; color: var(--color-text-muted); }
+.file-link, .gps-link { display: inline-flex; align-items: center; gap: 4px; color: var(--color-primary-hover); text-decoration: none; font-size: 13px; white-space: nowrap; }
+.file-link:hover, .gps-link:hover { text-decoration: underline; }
+.file-icon, .gps-icon { width: 18px; height: 18px; font-size: 18px; }
+@media (max-width: 600px) {
+  .table-header { padding: 16px; }
+  .table-title-group { margin-bottom: 16px; }
+  .table-toolbar { align-items: stretch; flex-direction: column; }
+  .date-field, .search-field { width: 100%; min-width: 0; flex: auto; }
+}

@@ -14,6 +14,7 @@ import { ButtonComponent } from '../../../../../../shared/components/atoms/butto
   styleUrl: './wfh-presensi-action.component.css'
 })
 export class WfhPresensiActionComponent implements OnDestroy {
+  @Input() absence: string | null = null;
   @Input() isCheckedIn = false;
   @Input() isCheckedOut = false;
   @Input() currentTime: Date = new Date();

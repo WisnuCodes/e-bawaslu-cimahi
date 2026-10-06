@@ -1,0 +1,29 @@
+:host { display: block; min-width: 0; }
+.modal-backdrop { position: fixed; inset: 0; z-index: 999; background: rgb(23 43 58 / 45%); display: flex; align-items: center; justify-content: center; padding: 24px; }
+.modal-panel { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; width: 100%; max-width: 680px; max-height: calc(100dvh - 48px); overflow-y: auto; overscroll-behavior: contain; padding: 24px; box-shadow: var(--shadow-lg); }
+.modal-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.modal-title { font-size: 20px; font-weight: 600; margin: 0; }
+.modal-description { font-size: 13px; color: var(--color-text-muted); margin: 0 0 20px; overflow-wrap: anywhere; }
+.modal-form { display: flex; flex-direction: column; gap: 16px; }
+.modal-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; padding-top: 16px; border-top: 1px solid var(--color-border); margin-top: 8px; }
+.file-label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 8px; }
+.file-upload { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 16px; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-background); }
+.file-name { flex: 1; min-width: 140px; font-size: 13px; overflow-wrap: anywhere; color: var(--color-text-muted); }
+.file-hidden { display: none; }
+.full-width { width: 100%; }
+.button-spinner { display: inline-block; }
+.modal-state { text-align: center; padding: 32px 16px; color: var(--color-text-muted); }
+.center-spinner { margin: 0 auto 12px; }
+.empty-icon { width: 28px; height: 28px; font-size: 28px; color: var(--color-text-muted); }
+.empty-description { margin: 8px 0 0; }
+.version-list { display: flex; flex-direction: column; gap: 12px; }
+.version-entry { border: 1px solid var(--color-border); border-radius: 6px; padding: 16px; }
+.version-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.version-label { font-weight: 600; color: var(--color-text); }
+.muted-text { font-size: 12px; color: var(--color-text-muted); }
+.version-note { margin: 8px 0 0; font-size: 13px; white-space: pre-line; overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+ .modal-backdrop { padding: 12px; }
+ .modal-panel { padding: 16px; max-height: calc(100dvh - 24px); }
+ .modal-title { font-size: 18px; }
+}

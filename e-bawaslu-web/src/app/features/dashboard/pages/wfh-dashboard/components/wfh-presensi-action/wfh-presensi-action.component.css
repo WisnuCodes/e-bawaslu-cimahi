@@ -1,146 +1,34 @@
-.wfh-action-wrapper {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 24px;
-  margin-bottom: 24px;
+:host { display: block; min-width: 0; }
+.presensi-action-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; }
+.presensi-status-card, .presensi-action-card { padding: 24px; min-width: 0; }
+.presensi-status-card { border-right: 1px solid var(--color-border); }
+.presensi-action-card { display: flex; align-items: center; }
+.status-label, .action-title, .camera-title { margin: 0 0 6px; font-size: 16px; font-weight: 600; }
+.status-date, .action-description { margin: 0; font-size: 13px; color: var(--color-text-muted); line-height: 1.6; }
+.time-display { margin: 20px 0 16px; font-size: 36px; font-weight: 600; letter-spacing: -.025em; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+.status-badge mat-icon { width: 16px; height: 16px; font-size: 16px; }
+.badge-idle { background: var(--color-background); color: var(--color-text-muted); }
+.badge-active { background: #eff6ff; color: #1e40af; }
+.badge-done { background: #edf7f0; color: #166534; }
+.checkout-notice { margin: 12px 0 0; font-size: 12px; color: var(--color-text-muted); }
+.action-buttons { display: flex; flex-wrap: wrap; gap: 12px; width: 100%; }
+.action-intro { width: 100%; margin-bottom: 8px; }
+.action-btn { flex: 1; }
+.loading-state { display: flex; align-items: center; gap: 16px; color: var(--color-text-muted); font-size: 13px; }
+.loading-state p { margin: 0; }
+.camera-container { width: 100%; }
+.camera-frame { position: relative; width: 100%; max-width: 480px; aspect-ratio: 4/3; margin: 16px 0; border-radius: var(--radius-md); background: #172b3a; overflow: hidden; }
+.camera-video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.canvas-hidden { display: none; }
+.camera-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn-spinner { display: inline-block; }
+@media (max-width: 700px) {
+  .presensi-action-grid { grid-template-columns: minmax(0, 1fr); }
+  .presensi-status-card { border-right: 0; border-bottom: 1px solid var(--color-border); }
+  .presensi-status-card, .presensi-action-card { padding: 20px; }
 }
-
-@media (min-width: 992px) {
-  .wfh-action-wrapper {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.status-card-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 32px 20px;
-}
-
-.icon-wrapper {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background-color: var(--color-primary-light);
-  color: var(--color-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
-}
-
-.icon-wrapper mat-icon {
-  font-size: 32px;
-  width: 32px;
-  height: 32px;
-}
-
-.status-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  margin: 0 0 4px;
-}
-
-.status-date {
-  font-size: 13px;
-  color: #94a3b8;
-  margin: 0 0 24px;
-}
-
-.time-display {
-  font-size: 48px;
-  font-weight: 700;
-  font-family: 'Inter', monospace;
-  color: var(--color-text);
-  letter-spacing: 2px;
-  margin: 0 0 24px;
-  line-height: 1;
-}
-
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.status-badge.status-none {
-  background-color: #f1f5f9;
-  color: #64748b;
-}
-
-.status-badge.status-partial {
-  background-color: #eff6ff;
-  color: #2563eb;
-  border: 1px solid #bfdbfe;
-}
-
-.status-badge.status-complete {
-  background-color: #f0fdf4;
-  color: #166534;
-  border: 1px solid #bbf7d0;
-}
-
-.action-card-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 32px 24px;
-  height: 100%;
-}
-
-.action-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  width: 100%;
-  max-width: 400px;
-}
-
-.action-buttons button {
-  height: 54px !important;
-  font-size: 15px !important;
-  border-radius: 12px !important;
-}
-
-.camera-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-
-.camera-frame {
-  position: relative;
-  width: 100%;
-  max-width: 400px;
-  aspect-ratio: 4/3;
-  background: #000;
-  border-radius: 12px;
-  overflow: hidden;
-  margin-bottom: 20px;
-}
-
-.camera-video {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.camera-actions {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
+@media (max-width: 400px) {
+  .presensi-status-card, .presensi-action-card { padding: 16px; }
+  .action-btn { flex-basis: 100%; }
 }

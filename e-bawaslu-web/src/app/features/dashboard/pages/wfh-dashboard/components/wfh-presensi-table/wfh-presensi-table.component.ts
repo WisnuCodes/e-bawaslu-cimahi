@@ -1,4 +1,5 @@
 import { Component, Input, Output, EventEmitter, ViewChild, AfterViewInit } from '@angular/core';
+import { environment } from '../../../../../../../environments/environment';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -32,7 +33,7 @@ import { MatNativeDateModule } from '@angular/material/core';
     MatNativeDateModule
   ],
   templateUrl: './wfh-presensi-table.component.html',
-  styleUrl: './wfh-presensi-table.component.css'
+  styleUrls: ['../../wfh-table.shared.css', './wfh-presensi-table.component.css']
 })
 export class WfhPresensiTableComponent implements AfterViewInit {
   @Input() set data(value: any[]) {
@@ -100,10 +101,14 @@ export class WfhPresensiTableComponent implements AfterViewInit {
     this.cancelEditEvent.emit();
   }
 
+  isAbsence(row: any): boolean {
+    return ['Sakit', 'Izin', 'Cuti'].includes(row.status_ci);
+  }
+
   getAttachmentUrl(path: string | null): string {
     if (!path) return '';
     if (/^https?:\/\//i.test(path)) return path;
-    const baseUrl = 'http://localhost:8000'; // Environment fallback
+    const baseUrl = environment.apiUrl.replace(/\/api\/?$/, '');
     const relativePath = path.replace(/^\/+/, '').replace(/^storage\//, '');
     return `${baseUrl}/storage/${relativePath}`;
   }

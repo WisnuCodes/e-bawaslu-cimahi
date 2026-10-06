@@ -1,11 +1,13 @@
-<mat-card class="table-card mt-6">
-  <mat-card-header class="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full mb-4">
-    <mat-card-title>Riwayat Laporan Kerja (Worklog)</mat-card-title>
-    
-    <div class="table-actions flex flex-col sm:flex-row gap-4 w-full sm:w-auto mt-4 sm:mt-0">
-      
+<div class="table-section">
+  <div class="table-header">
+    <div class="table-title-group">
+      <mat-icon class="title-icon">assignment</mat-icon>
+      <h3 class="table-title">Riwayat worklog</h3>
+    </div>
+
+    <div class="table-toolbar">
       <!-- Date Filter -->
-      <mat-form-field appearance="outline" class="date-filter mb-0">
+      <mat-form-field appearance="outline" class="filter-field date-field" subscriptSizing="dynamic">
         <mat-label>Filter Tanggal</mat-label>
         <mat-date-range-input [rangePicker]="pickerWorklog">
           <input matStartDate [(ngModel)]="startDate" placeholder="Mulai">
@@ -15,22 +17,22 @@
         <mat-date-range-picker #pickerWorklog></mat-date-range-picker>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="search-input mb-0">
+      <mat-form-field appearance="outline" class="filter-field search-field" subscriptSizing="dynamic">
         <mat-label>Cari Laporan</mat-label>
         <input matInput (keyup)="applyFilter($event)" placeholder="Ketik aktivitas atau status..." title="Pencarian Data Laporan Kerja">
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
 
-      <button mat-stroked-button color="primary" (click)="onExport()" *ngIf="canViewOthers">
-        <mat-icon>download</mat-icon> Export CSV
+      <button mat-stroked-button color="primary" class="export-btn" (click)="onExport()" *ngIf="canViewOthers">
+        <mat-icon>download</mat-icon> Ekspor CSV
       </button>
     </div>
-  </mat-card-header>
+  </div>
 
-  <mat-card-content class="p-0">
-    <div class="table-responsive">
-      <table mat-table [dataSource]="dataSource" class="w-full">
-        
+  <div class="table-body">
+    <div class="table-responsive" tabindex="0" role="region" aria-label="Tabel riwayat, geser untuk melihat seluruh kolom">
+      <table mat-table [dataSource]="dataSource" class="data-table">
+
         <!-- Pegawai Column (Pimpinan/Admin Only) -->
         <ng-container matColumnDef="nama">
           <th mat-header-cell *matHeaderCellDef> Nama Pegawai </th>
@@ -41,9 +43,9 @@
         <ng-container matColumnDef="tanggal">
           <th mat-header-cell *matHeaderCellDef> Tanggal </th>
           <td mat-cell *matCellDef="let element">
-            <div class="flex flex-col">
-              <span class="font-medium text-gray-800">{{ element.created_at | date:'dd MMM yyyy':'':'id-ID' }}</span>
-              <span class="text-xs text-gray-500">{{ element.created_at | date:'HH:mm' }}</span>
+            <div class="date-cell">
+              <span class="date-primary">{{ element.tgl_kerja | date:'dd MMM yyyy':'':'id-ID' }}</span>
+              <span class="date-secondary">{{ element.created_at | date:'HH:mm' }}</span>
             </div>
           </td>
         </ng-container>
@@ -51,8 +53,8 @@
         <!-- Aktivitas Column -->
         <ng-container matColumnDef="aktivitas">
           <th mat-header-cell *matHeaderCellDef> Rincian Aktivitas </th>
-          <td mat-cell *matCellDef="let element" class="max-w-md break-words">
-            <p class="text-sm text-gray-700 whitespace-pre-wrap py-2">{{ element.rincian_aktivitas || element.activity }}</p>
+          <td mat-cell *matCellDef="let element" class="activity-cell">
+            <p class="activity-text">{{ element.rincian_aktivitas || element.activity }}</p>
           </td>
         </ng-container>
 
@@ -60,10 +62,10 @@
         <ng-container matColumnDef="lampiran">
           <th mat-header-cell *matHeaderCellDef> Lampiran </th>
           <td mat-cell *matCellDef="let element">
-            <a *ngIf="element.file_lampiran" [href]="getAttachmentUrl(element.file_lampiran)" target="_blank" class="text-primary-600 hover:underline flex items-center">
-              <mat-icon class="mr-1 text-sm">attach_file</mat-icon> Lihat File
+            <a *ngIf="element.attachment_url" [href]="getAttachmentUrl(element.attachment_url)" target="_blank" class="file-link">
+              <mat-icon class="file-icon">attach_file</mat-icon> Lihat File
             </a>
-            <span *ngIf="!element.file_lampiran" class="text-gray-400">-</span>
+            <span *ngIf="!element.attachment_url" class="text-empty">-</span>
           </td>
         </ng-container>
 
@@ -71,11 +73,11 @@
         <ng-container matColumnDef="status">
           <th mat-header-cell *matHeaderCellDef> Status </th>
           <td mat-cell *matCellDef="let element">
-            <span class="status-chip" [ngClass]="'status-' + (element.status_approval || 'pending').toLowerCase()">
+            <span class="status-chip" [ngClass]="'status-' + (element.status_approval || 'pending').toLowerCase().replace(' approval', '')">
               {{ element.status_approval || 'Pending' }}
             </span>
-            <div *ngIf="element.approved_by" class="text-xs text-gray-500 mt-1">
-              By: {{ element.approved_by }}
+            <div *ngIf="element.approved_by" class="approved-by">
+              Oleh: {{ element.approved_by }}
             </div>
           </td>
         </ng-container>
@@ -85,28 +87,28 @@
           <th mat-header-cell *matHeaderCellDef> Aksi </th>
           <td mat-cell *matCellDef="let element">
             <!-- User Actions -->
-            <div class="flex gap-2" *ngIf="!canApprove">
-              <button mat-icon-button color="primary" matTooltip="Edit Laporan" (click)="onEdit(element)" [disabled]="element.status_approval === 'Approved'">
+            <div class="action-group" *ngIf="!canApprove">
+              <button mat-icon-button color="primary" matTooltip="Edit Laporan" aria-label="Edit Laporan" (click)="onEdit(element)" [disabled]="element.status_approval === 'Approved'">
                 <mat-icon>edit</mat-icon>
               </button>
-              <button mat-icon-button color="warn" matTooltip="Hapus Laporan" (click)="onDelete(element.worklog_id)" [disabled]="element.status_approval === 'Approved'">
+              <button mat-icon-button color="warn" matTooltip="Hapus Laporan" aria-label="Hapus Laporan" (click)="onDelete(element.worklog_id)" [disabled]="element.status_approval === 'Approved'">
                 <mat-icon>delete</mat-icon>
               </button>
             </div>
 
             <!-- Approver Actions -->
-            <div class="flex gap-2" *ngIf="canApprove">
-              <button mat-icon-button [matMenuTriggerFor]="approveMenu" color="primary" matTooltip="Ubah Status">
+            <div class="action-group" *ngIf="canApprove">
+              <button mat-icon-button [matMenuTriggerFor]="approveMenu" color="primary" matTooltip="Ubah Status" aria-label="Ubah Status">
                 <mat-icon>fact_check</mat-icon>
               </button>
               <mat-menu #approveMenu="matMenu">
                 <button mat-menu-item (click)="onApprove(element.worklog_id, 'Approved')">
-                  <mat-icon class="text-green-600">check_circle</mat-icon>
-                  <span>Setujui (Approve)</span>
+                  <mat-icon class="menu-icon-approve">check_circle</mat-icon>
+                  <span>Setujui</span>
                 </button>
                 <button mat-menu-item (click)="onApprove(element.worklog_id, 'Revised')">
-                  <mat-icon class="text-orange-600">assignment_return</mat-icon>
-                  <span>Minta Revisi (Revise)</span>
+                  <mat-icon class="menu-icon-revise">assignment_return</mat-icon>
+                  <span>Minta revisi</span>
                 </button>
               </mat-menu>
             </div>
@@ -114,16 +116,17 @@
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50 transition-colors"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
 
         <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell p-8 text-center text-gray-500" [attr.colspan]="displayedColumns.length">
-            Tidak ada laporan kerja yang ditemukan.
+          <td class="no-data-cell" [attr.colspan]="displayedColumns.length">
+            <mat-icon class="no-data-icon">inbox</mat-icon>
+            <span>Tidak ada laporan kerja yang ditemukan.</span>
           </td>
         </tr>
       </table>
     </div>
-    
-    <mat-paginator #worklogPaginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of worklogs"></mat-paginator>
-  </mat-card-content>
-</mat-card>
+
+    <mat-paginator #worklogPaginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Halaman worklog"></mat-paginator>
+  </div>
+</div>

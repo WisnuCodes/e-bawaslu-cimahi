@@ -1,0 +1,36 @@
+:host { display: block; min-width: 0; }
+.archive-card, .audit-card { overflow: hidden; }
+.archive-card .archive-content { padding: 0; }
+.section-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px; }
+.section-title { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 16px; font-weight: 600; }
+.section-title mat-icon { color: var(--color-text-muted); font-size: 20px; width: 20px; height: 20px; }
+.result-count, .viewer-note { font-size: 13px; color: var(--color-text-muted); }
+.archive-filters { display: grid; grid-template-columns: minmax(240px, 2fr) repeat(3, minmax(140px, 1fr)); gap: 12px; padding: 0 20px 20px; }
+.archive-filters mat-form-field { width: 100%; min-width: 0; }
+.table-scroll { width: 100%; overflow-x: auto; }
+.table-scroll:focus-visible { outline: 2px solid var(--color-primary); outline-offset: -2px; }
+.archive-table { width: 100%; min-width: 980px; }
+.document-number { min-width: 150px; max-width: 220px; overflow-wrap: anywhere; font-weight: 500; }
+.document-title { font-weight: 500; min-width: 200px; max-width: 360px; overflow-wrap: anywhere; }
+.document-meta { display: block; margin-top: 4px; font-size: 12px; color: var(--color-text-muted); }
+.status-chip { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; background: var(--color-background); color: var(--color-text-muted); white-space: nowrap; }
+.status-sensitive { background: #fef2f2; color: #991b1b; }
+.status-important { background: #fff7e6; color: #855510; }
+.version-button { white-space: nowrap; min-width: 100px; }
+.version-icon { width: 20px; height: 20px; font-size: 20px; flex-shrink: 0; }
+.actions-cell { white-space: nowrap; }
+.actions-column { min-width: 144px; }
+.mat-column-tanggal { white-space: nowrap; }
+.empty-cell { padding: 40px 20px; text-align: center; color: var(--color-text-muted); font-size: 13px; }
+.audit-card { margin-top: 24px; }
+.audit-card .section-header { display: block; }
+.audit-card .mat-mdc-card-subtitle { margin-top: 6px; font-size: 13px; color: var(--color-text-muted); }
+.audit-card .mat-mdc-card-content { padding: 0; }
+.audit-table { min-width: 800px; }
+.audit-reason { max-width: 360px; overflow-wrap: anywhere; }
+@media (max-width: 1100px) { .archive-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) {
+ .section-header { padding: 16px; }
+ .archive-filters { grid-template-columns: minmax(0, 1fr); padding: 0 16px 16px; }
+ .audit-card { margin-top: 16px; }
+}

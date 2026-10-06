@@ -15,6 +15,7 @@ export interface PresensiState {
   isCheckedIn: boolean;
   isCheckedOut: boolean;
   presensiId: string | null;
+  absence: string | null;
   isCheckingIn: boolean;
   isCheckingOut: boolean;
   isGettingLocation: boolean;
@@ -44,7 +45,7 @@ export class WfhDashboardFacade {
   // State Signals
   private statePresensi = signal<PresensiState>({
     data: [], isLoading: false, error: null, startDate: new Date(), endDate: new Date(),
-    isCheckedIn: false, isCheckedOut: false, presensiId: null,
+    isCheckedIn: false, isCheckedOut: false, presensiId: null, absence: null,
     isCheckingIn: false, isCheckingOut: false, isGettingLocation: false
   });
 
@@ -58,6 +59,8 @@ export class WfhDashboardFacade {
   // Computed Selectors
   presensiData = computed(() => this.statePresensi().data);
   presensiIsLoading = computed(() => this.statePresensi().isLoading);
+  absence = computed(() => this.statePresensi().absence);
+  hasTodayRecord = computed(() => !!this.statePresensi().presensiId);
   isCheckedIn = computed(() => this.statePresensi().isCheckedIn);
   isCheckedOut = computed(() => this.statePresensi().isCheckedOut);
   isCheckingIn = computed(() => this.statePresensi().isCheckingIn);
@@ -88,26 +91,29 @@ export class WfhDashboardFacade {
     this.snackBar.open(message, 'Tutup', { duration: 4000, horizontalPosition: 'end', verticalPosition: 'bottom' });
   }
 
+  private dateOnly(date: Date | null): string | undefined {
+    if (!date) return undefined;
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  }
+
   // Action Methods
   loadPresensi(startDate?: Date | null, endDate?: Date | null) {
     this.statePresensi.update(s => ({ ...s, isLoading: true, startDate: startDate !== undefined ? startDate : s.startDate, endDate: endDate !== undefined ? endDate : s.endDate }));
-    const sDate = this.statePresensi().startDate?.toISOString().split('T')[0];
-    const eDate = this.statePresensi().endDate?.toISOString().split('T')[0];
+    const sDate = this.dateOnly(this.statePresensi().startDate);
+    const eDate = this.dateOnly(this.statePresensi().endDate);
 
     this.wfhService.getPresensi(sDate, eDate)
       .pipe(finalize(() => this.statePresensi.update(s => ({ ...s, isLoading: false }))))
       .subscribe({
         next: (res) => {
           const data = res.data || [];
-          const todayStr = new Date().toISOString().split('T')[0];
-          const myTodayLog = data.find((p: any) => 
-            p.timestamp_checkin && p.timestamp_checkin.startsWith(todayStr) && 
-            p.nama_pegawai === this.currentUser()?.username
-          );
+          const myTodayLog = res.today;
+          const absence = ['Sakit', 'Izin', 'Cuti'].includes(myTodayLog?.status_ci) ? myTodayLog.status_ci : null;
           this.statePresensi.update(s => ({
             ...s, data, error: null,
-            isCheckedIn: !!myTodayLog,
-            isCheckedOut: myTodayLog ? !!myTodayLog.timestamp_checkout : false,
+            absence,
+            isCheckedIn: !!myTodayLog && !absence,
+            isCheckedOut: !absence && !!myTodayLog?.timestamp_checkout,
             presensiId: myTodayLog ? myTodayLog.presensi_id : null
           }));
         },
@@ -119,8 +125,8 @@ export class WfhDashboardFacade {
 
   loadWorklogs(startDate?: Date | null, endDate?: Date | null) {
     this.stateWorklog.update(s => ({ ...s, isLoading: true, startDate: startDate !== undefined ? startDate : s.startDate, endDate: endDate !== undefined ? endDate : s.endDate }));
-    const sDate = this.stateWorklog().startDate?.toISOString().split('T')[0];
-    const eDate = this.stateWorklog().endDate?.toISOString().split('T')[0];
+    const sDate = this.dateOnly(this.stateWorklog().startDate);
+    const eDate = this.dateOnly(this.stateWorklog().endDate);
 
     this.wfhService.getWorklogs(sDate, eDate)
       .pipe(finalize(() => this.stateWorklog.update(s => ({ ...s, isLoading: false }))))
@@ -182,7 +188,7 @@ export class WfhDashboardFacade {
   submitWorklog(activity: string, file: File | null) {
     this.stateWorklog.update(s => ({ ...s, isSubmitting: true }));
     const formData = new FormData();
-    formData.append('tgl_kerja', new Date().toISOString().split('T')[0]);
+    formData.append('tgl_kerja', this.dateOnly(new Date())!);
     formData.append('rincian_aktivitas', activity);
     if (file) formData.append('file_lampiran', file);
 
@@ -194,7 +200,6 @@ export class WfhDashboardFacade {
   updateWorklog(id: string, activity: string, file: File | null) {
     this.stateWorklog.update(s => ({ ...s, isSubmitting: true }));
     const formData = new FormData();
-    formData.append('tgl_kerja', new Date().toISOString().split('T')[0]);
     formData.append('rincian_aktivitas', activity);
     if (file) formData.append('file_lampiran', file);
 

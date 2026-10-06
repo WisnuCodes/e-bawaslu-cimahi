@@ -1,83 +1,90 @@
-<!-- Modal: Unggah Arsip Baru -->
-<div class="styled-e58d47" *ngIf="facade.showUploadModal()" >
-  <div class="styled-84abf8" >
-    <div class="styled-ce1757" >
-      <h3 class="styled-3c1187" >Registrasi Arsip Baru (v1.0)</h3>
-      <button mat-icon-button (click)="facade.setModal('showUploadModal', false)">
+<div class="modal-backdrop" *ngIf="facade.showUploadModal()" >
+  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="arsip-upload-dialog-1">
+    <div class="modal-header" >
+      <h3 class="modal-title" id="arsip-upload-dialog-1" >Unggah Arsip Dokumen</h3>
+      <button mat-icon-button aria-label="Tutup dialog" (click)="facade.setModal('showUploadModal', false)">
         <mat-icon>close</mat-icon>
       </button>
     </div>
 
-    <form class="styled-e743eb" [formGroup]="uploadForm" (ngSubmit)="submitUpload()" >
-      <mat-form-field appearance="outline">
-        <mat-label>Divisi Pemilik</mat-label>
-        <mat-select formControlName="divisi_id" title="Select field" placeholder="Pilih...">
+    <p class="modal-description" >
+      Unggah surat atau dokumen arsip. Maksimal 5 MB per berkas.
+    </p>
+
+    <form class="modal-form" [formGroup]="uploadForm" (ngSubmit)="submitUpload()">
+      <div class="form-grid" >
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Nomor Surat</mat-label>
+          <input matInput formControlName="no_surat" placeholder="Contoh: 123/Bawaslu/2026">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Tanggal Surat</mat-label>
+          <input matInput type="date" formControlName="tgl_surat">
+        </mat-form-field>
+      </div>
+
+      <div class="form-grid" >
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Kategori</mat-label>
+          <mat-select formControlName="kategori" placeholder="Pilih Kategori">
+            <mat-option *ngFor="let cat of kategoriList" [value]="cat">{{ cat }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Klasifikasi Keamanan</mat-label>
+          <mat-select formControlName="klasifikasi" placeholder="Pilih Tingkat Keamanan">
+            <mat-option *ngFor="let cls of klasifikasiList" [value]="cls">{{ cls }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="form-grid" *ngIf="uploadForm.get('kategori')?.value === 'MHP'">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Jenjang Pengawas</mat-label>
+          <mat-select formControlName="jenjang_pengawas" placeholder="Pilih Jenjang">
+            <mat-option *ngFor="let j of jenjangList" [value]="j">{{ j }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field class="full-width" appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Perihal Dokumen</mat-label>
+        <textarea matInput formControlName="perihal" rows="2" placeholder="Tuliskan perihal atau ringkasan dokumen..."></textarea>
+      </mat-form-field>
+
+      <mat-form-field class="full-width" appearance="outline" subscriptSizing="dynamic" >
+        <mat-label>Divisi Tujuan / Pengirim</mat-label>
+        <mat-select formControlName="divisi_id" placeholder="Pilih...">
           <mat-option *ngFor="let div of facade.divisiList()" [value]="div.divisi_id">{{ div.nama_divisi }}</mat-option>
         </mat-select>
       </mat-form-field>
 
-      <div class="form-grid">
-        <mat-form-field appearance="outline">
-          <mat-label>Nomor Surat</mat-label>
-          <input matInput formControlName="no_surat" placeholder="Contoh: 001/BAWASLU/2026" title="Input field">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Tanggal Surat</mat-label>
-          <input matInput type="date" formControlName="tgl_surat" title="Input field" placeholder="...">
-        </mat-form-field>
-      </div>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Perihal Surat / Dokumen</mat-label>
-        <textarea matInput formControlName="perihal" rows="2" placeholder="Tulis perihal atau ringkasan isi surat..."></textarea>
-      </mat-form-field>
-
-      <div class="form-grid">
-        <mat-form-field appearance="outline">
-          <mat-label>Kategori</mat-label>
-          <mat-select formControlName="kategori" title="Select field" placeholder="Pilih...">
-            <mat-option *ngFor="let kat of kategoriList" [value]="kat">{{ kat }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Klasifikasi Keamanan</mat-label>
-          <mat-select formControlName="klasifikasi" title="Select field" placeholder="Pilih...">
-            <mat-option *ngFor="let klas of klasifikasiList" [value]="klas">{{ klas }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Jenjang Pengawas (wajib untuk MHP)</mat-label>
-        <mat-select formControlName="jenjang_pengawas" title="Select field" placeholder="Pilih...">
-          <mat-option value="">Internal</mat-option>
-          <mat-option *ngFor="let jenjang of jenjangList" [value]="jenjang">{{ jenjang }}</mat-option>
-        </mat-select>
-      </mat-form-field>
-      
       <!-- File Upload Button -->
       <div>
-        <label class="styled-fc935c" >Berkas Dokumen (PDF, DOC, DOCX, JPG, PNG)</label>
-        <div class="styled-ff1bae" >
+        <label class="file-label" >Berkas dokumen (PDF, DOC, DOCX, JPG, PNG; maks. 5 MB)</label>
+        <div class="file-upload" >
           <button type="button" mat-stroked-button color="primary" (click)="uploadFileInput.click()">
             <mat-icon>attach_file</mat-icon> Pilih Berkas
           </button>
-          <span class="styled-3857a4" >
+          <span class="file-name" >
             {{ uploadFile ? uploadFile.name : 'Belum ada file dipilih' }}
           </span>
-          <input class="styled-d35118" type="file" #uploadFileInput (change)="onUploadFileSelected($event)" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"  title="Input field" placeholder="...">
+          <input class="file-hidden" type="file" #uploadFileInput (change)="onUploadFileSelected($event)" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"  placeholder="...">
         </div>
+        <!-- Pesan Error Custom untuk Berkas -->
+        <p *ngIf="fileError" class="muted-text" style="color: var(--color-error); margin-top: 4px;">{{ fileError }}</p>
+        
         <app-file-preview [file]="uploadFile"></app-file-preview>
       </div>
 
-      <div class="styled-540b55" >
+      <div class="modal-actions" >
         <button type="button" mat-stroked-button (click)="facade.setModal('showUploadModal', false)">Batal</button>
         <button type="submit" mat-flat-button color="primary" [disabled]="uploadForm.invalid || !uploadFile || facade.isUploading()">
           <mat-icon *ngIf="!facade.isUploading()">cloud_upload</mat-icon>
-          <mat-progress-spinner class="styled-b0eb74" *ngIf="facade.isUploading()" diameter="18" mode="indeterminate" ></mat-progress-spinner>
-          {{ facade.isUploading() ? 'Mengunggah...' : 'Simpan & Daftarkan' }}
+          <mat-progress-spinner class="button-spinner" *ngIf="facade.isUploading()" diameter="18" mode="indeterminate" ></mat-progress-spinner>
+          {{ facade.isUploading() ? 'Menyimpan...' : 'Simpan' }}
         </button>
       </div>
     </form>

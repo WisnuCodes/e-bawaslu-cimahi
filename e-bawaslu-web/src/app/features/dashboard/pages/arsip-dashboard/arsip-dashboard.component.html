@@ -1,12 +1,11 @@
-<div class="styled-4da1a5 page-header animate-fade-in" >
+<header class="page-header">
   <div>
-    <h2 class="styled-eb163d" >E-Arsip Digital Terpadu</h2>
-    <p class="styled-46e8ca" >Repositori dokumen digital dan riwayat versi.</p>
+    <h1>E-Arsip</h1>
+    <p>Kelola dokumen, revisi, dan riwayat arsip.</p>
   </div>
-  <button class="styled-4a5f77" mat-flat-button color="primary" *ngIf="facade.authService.canWriteDocuments" (click)="facade.setModal('showUploadModal', true)" >
-    <mat-icon>add</mat-icon> Unggah Dokumen Baru
+  <button mat-flat-button color="primary" *ngIf="facade.authService.canWriteDocuments" (click)="openUploadModal()">
+    <mat-icon>add</mat-icon> Unggah dokumen
   </button>
-</div>
-
+</header>
 <app-arsip-list></app-arsip-list>
 <app-arsip-upload></app-arsip-upload>

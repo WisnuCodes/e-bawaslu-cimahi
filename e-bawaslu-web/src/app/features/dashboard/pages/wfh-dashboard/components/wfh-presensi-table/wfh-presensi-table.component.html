@@ -1,11 +1,13 @@
-<mat-card class="table-card">
-  <mat-card-header class="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full mb-4">
-    <mat-card-title>Riwayat Presensi</mat-card-title>
-    
-    <div class="table-actions flex flex-col sm:flex-row gap-4 w-full sm:w-auto mt-4 sm:mt-0">
-      
+<div class="table-section">
+  <div class="table-header">
+    <div class="table-title-group">
+      <mat-icon class="title-icon">history</mat-icon>
+      <h3 class="table-title">Riwayat Presensi</h3>
+    </div>
+
+    <div class="table-toolbar">
       <!-- Date Filter -->
-      <mat-form-field appearance="outline" class="date-filter mb-0">
+      <mat-form-field appearance="outline" class="filter-field date-field" subscriptSizing="dynamic">
         <mat-label>Filter Tanggal</mat-label>
         <mat-date-range-input [rangePicker]="pickerPresensi">
           <input matStartDate [(ngModel)]="startDate" placeholder="Mulai">
@@ -15,22 +17,22 @@
         <mat-date-range-picker #pickerPresensi></mat-date-range-picker>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="search-input mb-0">
+      <mat-form-field appearance="outline" class="filter-field search-field" subscriptSizing="dynamic">
         <mat-label>Cari Presensi</mat-label>
         <input matInput (keyup)="applyFilter($event)" placeholder="Ketik nama atau status..." title="Pencarian Data Presensi">
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
 
-      <button mat-stroked-button color="primary" (click)="onExport()" *ngIf="canViewOthers">
-        <mat-icon>download</mat-icon> Export CSV
+      <button mat-stroked-button color="primary" class="export-btn" (click)="onExport()" *ngIf="canViewOthers">
+        <mat-icon>download</mat-icon> Ekspor CSV
       </button>
     </div>
-  </mat-card-header>
+  </div>
 
-  <mat-card-content class="p-0">
-    <div class="table-responsive">
-      <table mat-table [dataSource]="dataSource" class="w-full">
-        
+  <div class="table-body">
+    <div class="table-responsive" tabindex="0" role="region" aria-label="Tabel riwayat, geser untuk melihat seluruh kolom">
+      <table mat-table [dataSource]="dataSource" class="data-table">
+
         <!-- Pegawai Column (Admin Only) -->
         <ng-container matColumnDef="nama">
           <th mat-header-cell *matHeaderCellDef> Nama Pegawai </th>
@@ -39,9 +41,9 @@
 
         <!-- Waktu Check In -->
         <ng-container matColumnDef="waktu_masuk">
-          <th mat-header-cell *matHeaderCellDef> Check In </th>
+          <th mat-header-cell *matHeaderCellDef> Tanggal / masuk </th>
           <td mat-cell *matCellDef="let element">
-            {{ element.timestamp_checkin ? (element.timestamp_checkin | date:'dd MMM yyyy, HH:mm':'':'id-ID') : '-' }}
+            {{ element.timestamp_checkin ? (element.timestamp_checkin | date:(isAbsence(element) ? 'dd MMM yyyy' : 'dd MMM yyyy, HH:mm'):'':'id-ID') : '-' }}
           </td>
         </ng-container>
 
@@ -49,10 +51,10 @@
         <ng-container matColumnDef="foto_masuk">
           <th mat-header-cell *matHeaderCellDef> Foto CI </th>
           <td mat-cell *matCellDef="let element">
-            <a *ngIf="element.foto_masuk" [href]="getAttachmentUrl(element.foto_masuk)" target="_blank">
-              <img [src]="getAttachmentUrl(element.foto_masuk)" alt="Foto Masuk" class="w-12 h-12 object-cover rounded shadow-sm border border-gray-200">
+            <a *ngIf="element.selfie_masuk_url && !isAbsence(element)" [href]="getAttachmentUrl(element.selfie_masuk_url)" target="_blank">
+              <img [src]="getAttachmentUrl(element.selfie_masuk_url)" alt="Foto Masuk" class="photo-thumb">
             </a>
-            <span *ngIf="!element.foto_masuk" class="text-gray-400">-</span>
+            <span *ngIf="!element.selfie_masuk_url || isAbsence(element)" class="text-empty">-</span>
           </td>
         </ng-container>
 
@@ -61,7 +63,7 @@
           <th mat-header-cell *matHeaderCellDef> Status CI </th>
           <td mat-cell *matCellDef="let element">
             <ng-container *ngIf="editingPresensiId === element.presensi_id; else displayStatusCI">
-              <mat-form-field appearance="outline" class="dense-select">
+              <mat-form-field appearance="outline" class="inline-select" subscriptSizing="dynamic">
                 <mat-select [(ngModel)]="editPresensiStatusCI" title="Pilih Status CI">
                   <mat-option value="Hadir">Hadir</mat-option>
                   <mat-option value="Terlambat">Terlambat</mat-option>
@@ -82,7 +84,7 @@
         <ng-container matColumnDef="waktu_keluar">
           <th mat-header-cell *matHeaderCellDef> Check Out </th>
           <td mat-cell *matCellDef="let element">
-            {{ element.timestamp_checkout ? (element.timestamp_checkout | date:'dd MMM yyyy, HH:mm':'':'id-ID') : '-' }}
+            {{ !isAbsence(element) && element.timestamp_checkout ? (element.timestamp_checkout | date:'dd MMM yyyy, HH:mm':'':'id-ID') : '-' }}
           </td>
         </ng-container>
 
@@ -90,10 +92,10 @@
         <ng-container matColumnDef="foto_keluar">
           <th mat-header-cell *matHeaderCellDef> Foto CO </th>
           <td mat-cell *matCellDef="let element">
-            <a *ngIf="element.foto_keluar" [href]="getAttachmentUrl(element.foto_keluar)" target="_blank">
-              <img [src]="getAttachmentUrl(element.foto_keluar)" alt="Foto Keluar" class="w-12 h-12 object-cover rounded shadow-sm border border-gray-200">
+            <a *ngIf="element.selfie_keluar_url" [href]="getAttachmentUrl(element.selfie_keluar_url)" target="_blank">
+              <img [src]="getAttachmentUrl(element.selfie_keluar_url)" alt="Foto Keluar" class="photo-thumb">
             </a>
-            <span *ngIf="!element.foto_keluar" class="text-gray-400">-</span>
+            <span *ngIf="!element.selfie_keluar_url" class="text-empty">-</span>
           </td>
         </ng-container>
 
@@ -102,7 +104,7 @@
           <th mat-header-cell *matHeaderCellDef> Status CO </th>
           <td mat-cell *matCellDef="let element">
             <ng-container *ngIf="editingPresensiId === element.presensi_id; else displayStatusCO">
-              <mat-form-field appearance="outline" class="dense-select">
+              <mat-form-field appearance="outline" class="inline-select" subscriptSizing="dynamic">
                 <mat-select [(ngModel)]="editPresensiStatusCO" title="Pilih Status CO">
                   <mat-option value="Hadir">Hadir</mat-option>
                   <mat-option value="Pulang Cepat">Pulang Cepat</mat-option>
@@ -115,8 +117,20 @@
               <span *ngIf="element.status_co" class="status-chip" [ngClass]="'status-' + element.status_co.toLowerCase().replace(' ', '-')">
                 {{ element.status_co }}
               </span>
-              <span *ngIf="!element.status_co" class="text-gray-400">-</span>
+              <span *ngIf="!element.status_co" class="text-empty">-</span>
             </ng-template>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="keterangan_izin">
+          <th mat-header-cell *matHeaderCellDef> Keterangan / surat </th>
+          <td mat-cell *matCellDef="let element">
+            <p class="absence-reason" *ngIf="element.keterangan_izin">{{ element.keterangan_izin }}</p>
+            <a *ngIf="isAbsence(element) && (element.lampiran_izin || element.selfie_masuk_url)"
+              [href]="getAttachmentUrl(element.lampiran_izin || element.selfie_masuk_url)" target="_blank" rel="noopener" class="file-link">
+              <mat-icon class="file-icon">attach_file</mat-icon> Lihat surat
+            </a>
+            <span *ngIf="!element.keterangan_izin && !isAbsence(element)" class="text-empty">-</span>
           </td>
         </ng-container>
 
@@ -124,10 +138,10 @@
         <ng-container matColumnDef="lokasi">
           <th mat-header-cell *matHeaderCellDef> Lokasi GPS </th>
           <td mat-cell *matCellDef="let element">
-            <a *ngIf="element.gps_koordinat" [href]="'https://maps.google.com/?q=' + element.gps_koordinat" target="_blank" class="text-primary-600 hover:underline text-sm flex items-center">
-              <mat-icon class="text-sm mr-1">location_on</mat-icon> Maps
+            <a *ngIf="element.gps_koordinat && !isAbsence(element)" [href]="'https://maps.google.com/?q=' + element.gps_koordinat" target="_blank" class="gps-link">
+              <mat-icon class="gps-icon">location_on</mat-icon> Maps
             </a>
-            <span *ngIf="!element.gps_koordinat">-</span>
+            <span *ngIf="!element.gps_koordinat || isAbsence(element)" class="text-empty">-</span>
           </td>
         </ng-container>
 
@@ -135,20 +149,20 @@
         <ng-container matColumnDef="aksi">
           <th mat-header-cell *matHeaderCellDef> Aksi </th>
           <td mat-cell *matCellDef="let element">
-            <div class="flex gap-2" *ngIf="editingPresensiId === element.presensi_id">
-              <button mat-icon-button color="primary" matTooltip="Simpan Perubahan" (click)="onSave(element.presensi_id)">
+            <div class="action-group" *ngIf="editingPresensiId === element.presensi_id">
+              <button mat-icon-button color="primary" matTooltip="Simpan Perubahan" aria-label="Simpan Perubahan" (click)="onSave(element.presensi_id)">
                 <mat-icon>check</mat-icon>
               </button>
-              <button mat-icon-button matTooltip="Batal" (click)="onCancel()">
+              <button mat-icon-button matTooltip="Batal" aria-label="Batal" (click)="onCancel()">
                 <mat-icon>close</mat-icon>
               </button>
             </div>
-            
-            <div class="flex gap-2" *ngIf="editingPresensiId !== element.presensi_id">
-              <button mat-icon-button color="primary" matTooltip="Edit Status" (click)="onEdit(element)">
+
+            <div class="action-group" *ngIf="editingPresensiId !== element.presensi_id">
+              <button mat-icon-button color="primary" matTooltip="Edit Status" aria-label="Edit Status" (click)="onEdit(element)">
                 <mat-icon>edit</mat-icon>
               </button>
-              <button mat-icon-button color="warn" matTooltip="Hapus" (click)="onDelete(element.presensi_id)">
+              <button mat-icon-button color="warn" matTooltip="Hapus" aria-label="Hapus" (click)="onDelete(element.presensi_id)">
                 <mat-icon>delete</mat-icon>
               </button>
             </div>
@@ -156,16 +170,17 @@
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50 transition-colors"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
 
         <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell p-8 text-center text-gray-500" [attr.colspan]="displayedColumns.length">
-            Tidak ada data presensi yang ditemukan.
+          <td class="no-data-cell" [attr.colspan]="displayedColumns.length">
+            <mat-icon class="no-data-icon">inbox</mat-icon>
+            <span>Tidak ada data presensi yang ditemukan.</span>
           </td>
         </tr>
       </table>
     </div>
-    
-    <mat-paginator #presensiPaginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of presensi"></mat-paginator>
-  </mat-card-content>
-</mat-card>
+
+    <mat-paginator #presensiPaginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Halaman presensi"></mat-paginator>
+  </div>
+</div>

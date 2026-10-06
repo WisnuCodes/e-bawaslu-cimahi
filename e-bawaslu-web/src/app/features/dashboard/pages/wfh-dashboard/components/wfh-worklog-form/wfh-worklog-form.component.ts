@@ -25,6 +25,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   styleUrl: './wfh-worklog-form.component.css'
 })
 export class WfhWorklogFormComponent {
+  @Input() errorMessage = '';
+  fileError = '';
   @Input() isSubmittingLog = false;
   @Input() isEditMode = false;
   
@@ -39,22 +41,30 @@ export class WfhWorklogFormComponent {
 
   private fb = inject(FormBuilder);
   worklogForm: FormGroup = this.fb.group({
-    activity: ['', Validators.required]
+    activity: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(10000)]]
   });
 
   selectedFile: File | null = null;
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
-  onFileSelected(event: any) {
-    if (event.target.files.length > 0) {
-      this.selectedFile = event.target.files[0];
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    this.selectedFile = null;
+    this.fileError = '';
+    if (!file) return;
+    if (!/\.(pdf|jpe?g|png)$/i.test(file.name) || file.size > 2 * 1024 * 1024) {
+      this.fileError = 'Gunakan PDF, JPG, atau PNG dengan ukuran maksimal 2 MB.';
+      input.value = '';
+      return;
     }
+    this.selectedFile = file;
   }
 
   onSubmit() {
-    if (this.worklogForm.invalid) return;
+    if (this.worklogForm.invalid || this.isSubmittingLog || this.fileError) return;
     this.submitWorklog.emit({
-      activity: this.worklogForm.value.activity,
+      activity: this.worklogForm.value.activity.trim(),
       file: this.selectedFile
     });
   }
@@ -64,6 +74,7 @@ export class WfhWorklogFormComponent {
   }
 
   resetForm() {
+    this.fileError = '';
     this.worklogForm.reset();
     this.selectedFile = null;
     if (this.fileInput) {

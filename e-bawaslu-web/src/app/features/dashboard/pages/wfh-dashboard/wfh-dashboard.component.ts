@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { WfhDashboardFacade } from './wfh-dashboard.facade';
@@ -69,14 +69,17 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
   isEditMode = false;
   editWorklogId: string | null = null;
   editWorklogActivity = '';
+  worklogError = '';
+  @ViewChild(WfhWorklogFormComponent) worklogFormComponent?: WfhWorklogFormComponent;
 
   // Izin State
   showIzinForm = false;
   izinForm: FormGroup = this.fb.group({
     jenis_izin: ['Sakit', Validators.required],
-    keterangan_izin: ['', Validators.required]
+    keterangan_izin: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(2000)]]
   });
   selectedIzinFile: File | null = null;
+  izinError = '';
   izinFileInputValue = ''; // Used to clear input programmatically
 
   get isCheckoutDisabled(): boolean {
@@ -94,9 +97,9 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
 
     // Setup Columns
     if (!this.facade.canViewOthersPresensi()) {
-      this.presensiDisplayedColumns = ['waktu_masuk', 'foto_masuk', 'status_ci', 'waktu_keluar', 'foto_keluar', 'status_co', 'lokasi'];
+      this.presensiDisplayedColumns = ['waktu_masuk', 'foto_masuk', 'status_ci', 'waktu_keluar', 'foto_keluar', 'status_co', 'keterangan_izin', 'lokasi'];
     } else {
-      this.presensiDisplayedColumns = ['nama', 'waktu_masuk', 'foto_masuk', 'status_ci', 'waktu_keluar', 'foto_keluar', 'status_co', 'lokasi'];
+      this.presensiDisplayedColumns = ['nama', 'waktu_masuk', 'foto_masuk', 'status_ci', 'waktu_keluar', 'foto_keluar', 'status_co', 'keterangan_izin', 'lokasi'];
       if (this.facade.isAdmin()) {
         this.presensiDisplayedColumns.push('aksi');
       }
@@ -156,25 +159,31 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
 
   // --- Worklog Form Actions ---
   onSubmitWorklog(event: { activity: string, file: File | null }) {
-    if (this.isEditMode && this.editWorklogId) {
-      this.facade.updateWorklog(this.editWorklogId, event.activity, event.file).subscribe({
-        next: () => {
-          this.snackBar.open('Worklog berhasil diperbarui!', 'Tutup', { duration: 3000 });
-          this.cancelEditWorklog();
-          this.facade.loadWorklogs();
-        }
-      });
-    } else {
-      this.facade.submitWorklog(event.activity, event.file).subscribe({
-        next: () => {
-          this.snackBar.open('Worklog berhasil disimpan!', 'Tutup', { duration: 3000 });
-          this.facade.loadWorklogs();
-        }
-      });
-    }
+    if (this.facade.isSubmittingWorklog()) return;
+    this.worklogError = '';
+    const editing = this.isEditMode && !!this.editWorklogId;
+    const request = editing
+      ? this.facade.updateWorklog(this.editWorklogId!, event.activity, event.file)
+      : this.facade.submitWorklog(event.activity, event.file);
+    request.subscribe({
+      next: () => {
+        this.snackBar.open(editing ? 'Worklog berhasil diperbarui.' : 'Worklog berhasil dikirim.', 'Tutup', { duration: 4000 });
+        this.cancelEditWorklog();
+        if (editing) this.facade.loadWorklogs();
+        else this.facade.loadWorklogs(new Date(), new Date());
+      },
+      error: (err) => {
+        this.worklogError = err.error?.errors
+          ? (Object.values(err.error.errors).flat() as string[]).join(' ')
+          : err.error?.message || 'Worklog gagal dikirim. Periksa koneksi lalu coba lagi.';
+      }
+    });
   }
 
   onEditWorklog(log: any) {
+    if (this.facade.isSubmittingWorklog()) return;
+    this.worklogError = '';
+    this.worklogFormComponent?.resetForm();
     this.isEditMode = true;
     this.editWorklogId = log.worklog_id;
     this.editWorklogActivity = log.rincian_aktivitas || log.activity;
@@ -182,6 +191,8 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
   }
 
   cancelEditWorklog() {
+    this.worklogError = '';
+    this.worklogFormComponent?.resetForm();
     this.isEditMode = false;
     this.editWorklogId = null;
     this.editWorklogActivity = '';
@@ -211,6 +222,8 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
 
   // --- Izin Actions ---
   toggleIzinForm() {
+    if (this.facade.isSubmittingIzin()) return;
+    this.izinError = '';
     this.showIzinForm = !this.showIzinForm;
     if (!this.showIzinForm) this.cancelIzin();
   }
@@ -222,23 +235,40 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
     this.izinFileInputValue = '';
   }
 
-  onIzinFileSelected(event: any) {
-    if (event.target.files.length > 0) {
-      this.selectedIzinFile = event.target.files[0];
+  onIzinFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    this.izinError = '';
+    this.selectedIzinFile = null;
+    if (!file) return;
+    if (!/\.(pdf|jpe?g|png)$/i.test(file.name) || file.size > 2 * 1024 * 1024) {
+      this.izinError = 'Gunakan file PDF, JPG, atau PNG dengan ukuran maksimal 2 MB.';
+      input.value = '';
+      return;
     }
+    this.selectedIzinFile = file;
   }
 
   submitIzin() {
+    if (this.facade.isSubmittingIzin()) return;
+    this.izinError = '';
     if (this.izinForm.invalid || !this.selectedIzinFile) {
-      this.snackBar.open('Harap lengkapi semua data dan unggah lampiran.', 'Tutup', { duration: 3000 });
+      this.izinForm.markAllAsTouched();
+      this.izinError = 'Lengkapi jenis ketidakhadiran, keterangan, dan lampiran.';
       return;
     }
-    
-    this.facade.submitIzin(this.izinForm.value.jenis_izin, this.izinForm.value.keterangan_izin, this.selectedIzinFile).subscribe({
-      next: () => {
-        this.snackBar.open('Pengajuan izin berhasil dicatat.', 'Tutup', { duration: 3000 });
+
+    this.facade.submitIzin(this.izinForm.value.jenis_izin, this.izinForm.value.keterangan_izin.trim(), this.selectedIzinFile).subscribe({
+      next: (res) => {
+        this.snackBar.open(res.message || 'Pengajuan berhasil dicatat.', 'Tutup', { duration: 4000 });
         this.cancelIzin();
-        this.facade.loadPresensi();
+        this.facade.loadPresensi(new Date(), new Date());
+      },
+      error: (err) => {
+        const errors = err.error?.errors;
+        this.izinError = errors
+          ? (Object.values(errors).flat() as string[]).join(' ')
+          : err.error?.message || 'Pengajuan gagal dikirim. Periksa koneksi lalu coba lagi.';
       }
     });
   }

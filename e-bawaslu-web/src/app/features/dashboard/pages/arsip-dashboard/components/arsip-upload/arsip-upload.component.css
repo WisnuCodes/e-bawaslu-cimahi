@@ -1,0 +1,5 @@
+.modal-form mat-form-field { width: 100%; }
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 600px) { .form-grid { grid-template-columns: minmax(0, 1fr); } }
+
+.upload-error { padding: 12px; margin: 0; color: var(--color-error); background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; font-size: 13px; }

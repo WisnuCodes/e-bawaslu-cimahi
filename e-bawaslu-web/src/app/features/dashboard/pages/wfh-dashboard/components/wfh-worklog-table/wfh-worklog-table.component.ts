@@ -32,7 +32,7 @@ import { MatMenuModule } from '@angular/material/menu';
     MatMenuModule
   ],
   templateUrl: './wfh-worklog-table.component.html',
-  styleUrl: './wfh-worklog-table.component.css'
+  styleUrls: ['../../wfh-table.shared.css', './wfh-worklog-table.component.css']
 })
 export class WfhWorklogTableComponent implements AfterViewInit {
   @Input() set data(value: any[]) {

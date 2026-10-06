@@ -1,4 +1,5 @@
-import { Component, inject, ViewChild, ElementRef, OnInit, effect, OnDestroy } from '@angular/core';
+import { A11yModule } from '@angular/cdk/a11y';
+import { Component, inject, ViewChild, ElementRef, OnInit, effect, OnDestroy, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -22,6 +23,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
   standalone: true,
   imports: [
     CommonModule,
+    A11yModule,
     FormsModule,
     ReactiveFormsModule,
     MatCardModule,
@@ -36,7 +38,8 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
     MatPaginatorModule,
     FilePreviewComponent
   ],
-  templateUrl: './arsip-list.component.html'
+  templateUrl: './arsip-list.component.html',
+  styleUrls: ['../../arsip-modal.shared.css', './arsip-list.component.css']
 })
 export class ArsipListComponent implements OnInit, OnDestroy {
   public facade = inject(ArsipFacade);
@@ -58,10 +61,15 @@ export class ArsipListComponent implements OnInit, OnDestroy {
 
   constructor() {
     effect(() => {
-      this.dataSource.data = this.facade.documents();
-      if (this.paginator && !this.dataSource.paginator) {
-        this.dataSource.paginator = this.paginator;
-      }
+      const documents = this.facade.documents();
+      const query = this.facade.searchQuery();
+      // Material creates row views and updates internal signals synchronously.
+      // Keep that work outside the reactive effect's tracking context.
+      untracked(() => {
+        this.dataSource.data = documents;
+        this.dataSource.filter = query.trim().toLowerCase();
+        this.dataSource.paginator?.firstPage();
+      });
     });
   }
 
