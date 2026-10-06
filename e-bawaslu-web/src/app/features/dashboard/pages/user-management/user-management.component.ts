@@ -36,6 +36,7 @@ export class UserManagementComponent implements OnInit {
   users: User[] = [];
   displayedColumns: string[] = ['username', 'email', 'role', 'divisi', 'status_aktif', 'actions'];
   isLoading = false;
+  isError = false;
 
   ngOnInit(): void {
     this.loadUsers();
@@ -43,15 +44,30 @@ export class UserManagementComponent implements OnInit {
 
   loadUsers(): void {
     this.isLoading = true;
+    this.isError = false;
     this.userService.getUsers().subscribe({
-      next: (res) => {
-        this.users = res.data;
+      next: (res: any) => {
+        console.log('API Response:', res);
+        
+        let extractedData = res;
+        if (res && res.data) {
+          extractedData = res.data;
+        }
+
+        if (Array.isArray(extractedData)) {
+          this.users = extractedData;
+        } else {
+          this.users = [];
+          console.warn('Expected array for users, got:', extractedData);
+        }
+
         this.isLoading = false;
       },
       error: (err) => {
         console.error('Failed to load users', err);
         this.snackBar.open('Gagal memuat data pengguna', 'Tutup', { duration: 3000 });
         this.isLoading = false;
+        this.isError = true;
       }
     });
   }

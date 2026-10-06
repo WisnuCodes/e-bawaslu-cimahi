@@ -10,12 +10,10 @@ class UserRepository
 {
     public function getAllUsersWithDivisi()
     {
-        return Cache::rememberForever('users_all_with_divisi', function () {
-            return User::leftJoin('divisi', 'users.divisi_id', '=', 'divisi.divisi_id')
-                ->select('users.*', 'divisi.nama_divisi')
-                ->orderBy('users.created_at', 'desc')
-                ->get();
-        });
+        return User::leftJoin('divisi', 'users.divisi_id', '=', 'divisi.divisi_id')
+            ->select('users.*', 'divisi.nama_divisi')
+            ->orderBy('users.created_at', 'desc')
+            ->get();
     }
 
     public function invalidateCache()

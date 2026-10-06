@@ -13,8 +13,16 @@
     <div class="styled-137581" *ngIf="isLoading" >
       Memuat data pengguna...
     </div>
+
+    <!-- Error State -->
+    <div class="error-container" *ngIf="isError" style="padding: 2rem; text-align: center; color: #f44336; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+      <mat-icon style="font-size: 48px; height: 48px; width: 48px;">error_outline</mat-icon>
+      <h3>Gagal Memuat Data</h3>
+      <p>Terjadi kesalahan saat memuat data pengguna dari server.</p>
+      <button mat-stroked-button color="warn" (click)="loadUsers()">Coba Lagi</button>
+    </div>
     
-    <table class="styled-e06dc6" mat-table [dataSource]="users" *ngIf="!isLoading" >
+    <table class="styled-e06dc6" mat-table [dataSource]="users" *ngIf="!isLoading && !isError" >
       <!-- Username Column -->
       <ng-container matColumnDef="username">
         <th mat-header-cell *matHeaderCellDef> Username </th>
