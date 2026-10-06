@@ -91,7 +91,11 @@ export class ArsipFacade {
   loadDivisi() {
     this.masterDataService.getDivisi().subscribe({
       next: (res: any) => {
-        this.updateState({ divisiList: res.data || [] });
+        let divisiData = res.data || [];
+        if (!Array.isArray(divisiData) && typeof divisiData === 'object') {
+          divisiData = Object.values(divisiData);
+        }
+        this.updateState({ divisiList: divisiData });
       },
       error: () => this.updateState({ divisiList: [] })
     });
@@ -102,6 +106,9 @@ export class ArsipFacade {
     this.arsipService.getArsip(filter).subscribe({
       next: (res: any) => {
         let docs = res.data || [];
+        if (!Array.isArray(docs) && typeof docs === 'object') {
+          docs = Object.values(docs);
+        }
         
         // Ekstrak tahun unik
         const years = new Set<string>();
@@ -132,7 +139,11 @@ export class ArsipFacade {
   loadLogs() {
     this.arsipService.getArsipLogs().subscribe({
       next: (res: any) => {
-        this.updateState({ arsipLogs: res.data || [] });
+        let logsData = res.data || [];
+        if (!Array.isArray(logsData) && typeof logsData === 'object') {
+          logsData = Object.values(logsData);
+        }
+        this.updateState({ arsipLogs: logsData });
       },
       error: () => {
         this.updateState({ arsipLogs: [] });

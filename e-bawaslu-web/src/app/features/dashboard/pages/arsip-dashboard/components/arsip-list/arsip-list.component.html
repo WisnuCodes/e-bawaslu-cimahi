@@ -41,11 +41,13 @@
 
         <!-- Perihal -->
         <ng-container matColumnDef="perihal">
-          <th mat-header-cell *matHeaderCellDef> Perihal & Divisi </th>
+          <th mat-header-cell *matHeaderCellDef> Perihal & Detail </th>
           <td mat-cell *matCellDef="let doc">
             <div style="font-weight: 500; margin-bottom: 4px;">{{ doc.perihal || 'Tanpa perihal' }}</div>
             <div class="document-meta">{{ doc.jenjang_pengawas || 'Internal' }}</div>
-            <small class="document-meta" >Divisi: {{ getDivisiName(doc.divisi_id) }}</small>
+            <small class="document-meta">Pengelola: {{ getDivisiName(doc.divisi_id) }}</small>
+            <small class="document-meta" *ngIf="doc.pengirim"> | Pengirim: {{ doc.pengirim }}</small>
+            <small class="document-meta" *ngIf="doc.divisi_tujuan"> | Tujuan: {{ getDivisiName(doc.divisi_tujuan) }}</small>
           </td>
         </ng-container>
 
@@ -145,7 +147,7 @@
           <th mat-header-cell *matHeaderCellDef> Aksi </th>
           <td mat-cell *matCellDef="let log">
             <span class="status-chip" [class.status-sensitive]="log.action === 'DELETE_ARSIP'" [class.status-important]="log.action === 'EDIT_ARSIP'">
-              {{ log.action.replace('_ARSIP', '') }}
+              {{ log.action ? log.action.replace('_ARSIP', '') : '-' }}
             </span>
           </td>
         </ng-container>
@@ -186,7 +188,7 @@
   <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="arsip-list-dialog-1">
     <div class="modal-header" >
       <h3 class="modal-title" id="arsip-list-dialog-1" >Unggah Revisi Dokumen</h3>
-      <button mat-icon-button aria-label="Tutup dialog" (click)="facade.setModal('showRevisiModal', false)">
+      <button type="button" mat-icon-button aria-label="Tutup dialog" (click)="facade.setModal('showRevisiModal', false)">
         <mat-icon>close</mat-icon>
       </button>
     </div>
@@ -232,7 +234,7 @@
   <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="arsip-list-dialog-2">
     <div class="modal-header" >
       <h3 class="modal-title" id="arsip-list-dialog-2" >Riwayat Versi Dokumen</h3>
-      <button mat-icon-button aria-label="Tutup dialog" (click)="facade.setModal('showVersionModal', false)">
+      <button type="button" mat-icon-button aria-label="Tutup dialog" (click)="facade.setModal('showVersionModal', false)">
         <mat-icon>close</mat-icon>
       </button>
     </div>
@@ -274,7 +276,7 @@
   <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="arsip-list-dialog-3">
     <div class="modal-header" >
       <h3 class="modal-title" id="arsip-list-dialog-3" >Hapus dokumen</h3>
-      <button mat-icon-button aria-label="Tutup dialog" (click)="facade.setModal('showDeleteModal', false)">
+      <button type="button" mat-icon-button aria-label="Tutup dialog" (click)="facade.setModal('showDeleteModal', false)">
         <mat-icon>close</mat-icon>
       </button>
     </div>

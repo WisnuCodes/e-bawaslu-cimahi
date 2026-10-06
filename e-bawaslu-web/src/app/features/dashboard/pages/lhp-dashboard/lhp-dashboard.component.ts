@@ -63,6 +63,7 @@ export class LhpDashboardComponent implements OnInit {
   
   availableYears: string[] = [];
   selectedYearFilter: string = '';
+  tahapanList: any[] = [];
 
   applyFilterArsip = _.debounce((event: Event) => {
     const filterValue = (event.target as HTMLInputElement).value;
@@ -101,6 +102,8 @@ export class LhpDashboardComponent implements OnInit {
     tgl_surat: [new Date().toISOString().split('T')[0], Validators.required],
     perihal: ['', Validators.required],
     kategori: ['LHPP', Validators.required],
+    jenis_pemilihan: ['Pemilu', Validators.required],
+    tahapan_id: ['', Validators.required],
     klasifikasi: ['Rahasia', Validators.required]
   });
   uploadFile: File | null = null;
@@ -122,10 +125,18 @@ export class LhpDashboardComponent implements OnInit {
       return;
     }
     this.loadDivisi();
+    this.loadTahapan();
     this.loadDocuments();
     if (this.canViewLogs) {
       this.loadLogs();
     }
+  }
+
+  loadTahapan() {
+    this.masterDataService.getTahapan().subscribe({
+      next: (res) => this.tahapanList = res.data || [],
+      error: () => this.tahapanList = []
+    });
   }
 
   loadDivisi() {
@@ -213,6 +224,8 @@ export class LhpDashboardComponent implements OnInit {
       tgl_surat: new Date().toISOString().split('T')[0],
       perihal: '',
       kategori: 'LHPP',
+      jenis_pemilihan: 'Pemilu',
+      tahapan_id: this.tahapanList.length > 0 ? this.tahapanList[0].id : '',
       klasifikasi: 'Rahasia'
     });
     this.uploadFile = null;
@@ -238,6 +251,8 @@ export class LhpDashboardComponent implements OnInit {
     formData.append('tgl_surat', this.uploadForm.value.tgl_surat);
     formData.append('perihal', this.uploadForm.value.perihal);
     formData.append('kategori', this.uploadForm.value.kategori);
+    formData.append('jenis_pemilihan', this.uploadForm.value.jenis_pemilihan);
+    formData.append('tahapan_id', this.uploadForm.value.tahapan_id);
     formData.append('klasifikasi', this.uploadForm.value.klasifikasi);
     formData.append('file_dokumen', this.uploadFile);
 

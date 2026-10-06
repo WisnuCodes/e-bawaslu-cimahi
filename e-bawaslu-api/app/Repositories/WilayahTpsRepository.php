@@ -14,8 +14,8 @@ class WilayahTpsRepository
      */
     public function getAllCached()
     {
-        return Cache::rememberForever('wilayah_tps_all', function () {
-            return WilayahTps::all();
+        return Cache::rememberForever('wilayah_tps_all_array', function () {
+            return WilayahTps::all()->toArray();
         });
     }
 

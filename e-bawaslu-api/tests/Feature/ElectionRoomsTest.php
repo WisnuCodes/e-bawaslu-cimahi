@@ -29,7 +29,7 @@ class ElectionRoomsTest extends TestCase
             'email' => Str::uuid().'@example.test', 'password_hash' => 'test',
             'role' => $role, 'divisi_id' => $division,
         ])->save();
-        $this->actingAs($user, 'sanctum');
+        $this->actingAs($user, 'api');
     }
 
     public function test_only_chair_and_admin_can_create_stages_and_candidate_determination_requires_dispute_division(): void

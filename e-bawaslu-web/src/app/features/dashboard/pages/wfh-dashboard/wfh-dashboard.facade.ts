@@ -19,6 +19,9 @@ export interface PresensiState {
   isCheckingIn: boolean;
   isCheckingOut: boolean;
   isGettingLocation: boolean;
+  tipeKehadiranHariIni: string | null;
+  isLiburHariIni: boolean;
+  keteranganLibur: string | null;
 }
 
 export interface WorklogState {
@@ -46,7 +49,8 @@ export class WfhDashboardFacade {
   private statePresensi = signal<PresensiState>({
     data: [], isLoading: false, error: null, startDate: new Date(), endDate: new Date(),
     isCheckedIn: false, isCheckedOut: false, presensiId: null, absence: null,
-    isCheckingIn: false, isCheckingOut: false, isGettingLocation: false
+    isCheckingIn: false, isCheckingOut: false, isGettingLocation: false,
+    tipeKehadiranHariIni: null, isLiburHariIni: false, keteranganLibur: null
   });
 
   private stateWorklog = signal<WorklogState>({
@@ -68,6 +72,9 @@ export class WfhDashboardFacade {
   isGettingLocation = computed(() => this.statePresensi().isGettingLocation);
   startDatePresensi = computed(() => this.statePresensi().startDate);
   endDatePresensi = computed(() => this.statePresensi().endDate);
+  tipeKehadiranHariIni = computed(() => this.statePresensi().tipeKehadiranHariIni);
+  isLiburHariIni = computed(() => this.statePresensi().isLiburHariIni);
+  keteranganLibur = computed(() => this.statePresensi().keteranganLibur);
 
   worklogData = computed(() => this.stateWorklog().data);
   worklogIsLoading = computed(() => this.stateWorklog().isLoading);
@@ -84,7 +91,8 @@ export class WfhDashboardFacade {
     return user?.role === 'PTPS' || user?.role === 'Saksi TPS';
   });
   canApprove = computed(() => this.authService.canApprove);
-  canViewOthersPresensi = computed(() => this.authService.isAdmin || this.authService.isPimpinan || this.authService.isKepalaDivisi);
+  canViewOthersPresensi = computed(() => this.authService.canViewAllPresensi);
+  canViewOthersWorklog = computed(() => this.authService.isAdmin || this.authService.isPimpinan || this.authService.isKepalaDivisi);
   currentUser = computed(() => this.authService.currentUser());
 
   private showMessage(message: string) {
@@ -97,6 +105,19 @@ export class WfhDashboardFacade {
   }
 
   // Action Methods
+  loadStatusHariIni() {
+    this.wfhService.getStatusHariIni().subscribe({
+      next: (res) => {
+        this.statePresensi.update(s => ({
+          ...s,
+          tipeKehadiranHariIni: res.tipe_kehadiran,
+          isLiburHariIni: res.is_holiday,
+          keteranganLibur: res.keterangan_libur
+        }));
+      }
+    });
+  }
+
   loadPresensi(startDate?: Date | null, endDate?: Date | null) {
     this.statePresensi.update(s => ({ ...s, isLoading: true, startDate: startDate !== undefined ? startDate : s.startDate, endDate: endDate !== undefined ? endDate : s.endDate }));
     const sDate = this.dateOnly(this.statePresensi().startDate);
@@ -212,8 +233,8 @@ export class WfhDashboardFacade {
     return this.wfhService.deleteWorklog(id);
   }
 
-  approveWorklog(id: string, status: 'Approved' | 'Revised') {
-    return this.wfhService.approveWorklog(id, status);
+  approveWorklog(id: string, status: 'Approved' | 'Revised', notes?: string) {
+    return this.wfhService.approveWorklog(id, status, notes);
   }
 
   submitIzin(jenisIzin: string, keterangan: string, file: File) {

@@ -232,6 +232,23 @@
         </mat-form-field>
       </div>
 
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <mat-form-field appearance="outline">
+          <mat-label>Jenis Pemilihan</mat-label>
+          <mat-select formControlName="jenis_pemilihan">
+            <mat-option value="Pemilu">Pemilu</mat-option>
+            <mat-option value="Pilkada">Pilkada</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Tahapan Pemilihan</mat-label>
+          <mat-select formControlName="tahapan_id" placeholder="Pilih Tahapan">
+            <mat-option *ngFor="let th of tahapanList" [value]="th.id">{{ th.nama_tahapan }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
       <!-- File Upload Button -->
       <div>
         <label style="display: block; font-size: 0.85rem; font-weight: 500; color: #475569; margin-bottom: 6px;">Berkas Dokumen (.pdf, .docx, .xlsx)</label>

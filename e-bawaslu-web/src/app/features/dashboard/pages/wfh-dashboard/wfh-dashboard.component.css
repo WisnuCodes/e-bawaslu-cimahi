@@ -29,3 +29,25 @@
 }
 
 .izin-error { margin: 0; padding: 12px; border: 1px solid #fecaca; border-radius: 6px; background: #fef2f2; color: var(--color-error); font-size: 13px; }
+
+.jadwal-banner {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--blue-100, #e0f2fe);
+  color: var(--blue-700, #0369a1);
+  border-radius: 8px;
+  margin-bottom: 24px;
+  gap: 12px;
+}
+.jadwal-banner mat-icon {
+  color: var(--blue-600, #0284c7);
+}
+.jadwal-banner.is-libur {
+  background: var(--red-100, #fee2e2);
+  color: var(--red-700, #b91c1c);
+}
+.jadwal-banner.is-libur mat-icon {
+  color: var(--red-600, #dc2626);
+}
+

@@ -50,12 +50,14 @@ Route::middleware('auth:api')->group(function () {
 
     // WFH Module Routes
     Route::prefix('wfh')->group(function () {
+        Route::get('/presensi/status-hari-ini', [PresensiController::class, 'statusHariIni']);
         Route::get('/presensi', [PresensiController::class, 'index']);
         Route::post('/presensi/check-in', [PresensiController::class, 'checkIn']);
         Route::post('/presensi/check-out', [PresensiController::class, 'checkOut']);
         Route::post('/izin', [PresensiController::class, 'submitIzin']);
 
         Route::get('/worklog', [WorklogController::class, 'index']);
+        Route::post('/checkin', [PresensiController::class, 'checkIn']);
         Route::post('/checkout', [PresensiController::class, 'checkOut']);
         Route::put('/presensi/{id}', [PresensiController::class, 'update']);
         Route::delete('/presensi/{id}', [PresensiController::class, 'destroy']);

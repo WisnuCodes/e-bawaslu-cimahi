@@ -45,7 +45,8 @@ class UserRequest extends FormRequest
                 'role' => 'required|string|max:30',
                 'divisi_id' => 'nullable|uuid|exists:divisi,divisi_id',
                 'tps_id' => 'nullable|uuid|exists:wilayah_tps,tps_id',
-                'status_aktif' => 'nullable|boolean'
+                'status_aktif' => 'nullable|boolean',
+                'koordinat_acuan' => ['nullable', 'string', 'regex:/^[-]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-]?(1[0-7]\d(\.\d+)?|[1-9]?\d(\.\d+)?|180(\.0+)?)$/']
             ];
         }
 
@@ -56,7 +57,8 @@ class UserRequest extends FormRequest
             'role' => 'sometimes|string|max:30',
             'divisi_id' => 'nullable|uuid|exists:divisi,divisi_id',
             'tps_id' => 'nullable|uuid|exists:wilayah_tps,tps_id',
-            'status_aktif' => 'nullable|boolean'
+            'status_aktif' => 'nullable|boolean',
+            'koordinat_acuan' => ['nullable', 'string', 'regex:/^[-]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-]?(1[0-7]\d(\.\d+)?|[1-9]?\d(\.\d+)?|180(\.0+)?)$/']
         ];
     }
 }

@@ -10,6 +10,8 @@ export interface ArsipItem {
   no_surat: string;
   tgl_surat: string;
   perihal: string;
+  pengirim?: string;
+  divisi_tujuan?: string;
   kategori: string;
   catatan_kejadian?: string[];
   kondisi_kotak_surat?: string;

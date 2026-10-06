@@ -71,6 +71,8 @@ class ArsipController extends Controller
             'tgl_surat' => 'required|date',
             'perihal' => 'required|string',
             'kategori' => 'required|string',
+            'pengirim' => 'nullable|string',
+            'divisi_tujuan' => 'nullable|uuid|exists:divisi,divisi_id',
             'jenjang_pengawas' => 'required_if:kategori,MHP|nullable|in:Panwascam,PKD,PTPS',
             'klasifikasi' => 'required|string',
             'catatan_kejadian' => 'nullable|array|max:3',

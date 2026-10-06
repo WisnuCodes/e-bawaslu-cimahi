@@ -23,4 +23,9 @@ class Worklog extends Model
         'catatan_revisi',
         'created_at'
     ];
+
+    protected $casts = [
+        'tgl_kerja' => 'date',
+        'created_at' => 'datetime'
+    ];
 }

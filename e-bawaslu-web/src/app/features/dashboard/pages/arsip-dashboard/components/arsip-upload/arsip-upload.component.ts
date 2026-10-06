@@ -44,9 +44,11 @@ export class ArsipUploadComponent implements OnInit {
   klasifikasiList = ['Biasa', 'Penting', 'Rahasia', 'Sangat Rahasia'];
   jenjangList = ['Panwascam', 'PKD', 'PTPS'];
 
-  constructor() {
+    constructor() {
     this.uploadForm = this.fb.group({
       divisi_id: ['', Validators.required],
+      divisi_tujuan: [null],
+      pengirim: [''],
       no_surat: ['', Validators.required],
       tgl_surat: [new Date().toISOString().split('T')[0], Validators.required],
       perihal: ['', Validators.required],
@@ -63,6 +65,8 @@ export class ArsipUploadComponent implements OnInit {
             const divisiList = this.facade.divisiList();
             this.uploadForm.reset({
               divisi_id: divisiList.length > 0 ? divisiList[0].divisi_id : '',
+              divisi_tujuan: null,
+              pengirim: '',
               no_surat: '',
               tgl_surat: new Date().toISOString().split('T')[0],
               perihal: '',
@@ -103,6 +107,8 @@ export class ArsipUploadComponent implements OnInit {
 
     const formData = new FormData();
     formData.append('divisi_id', this.uploadForm.value.divisi_id);
+    if (this.uploadForm.value.divisi_tujuan) formData.append('divisi_tujuan', this.uploadForm.value.divisi_tujuan);
+    if (this.uploadForm.value.pengirim) formData.append('pengirim', this.uploadForm.value.pengirim);
     formData.append('no_surat', this.uploadForm.value.no_surat);
     formData.append('tgl_surat', this.uploadForm.value.tgl_surat);
     formData.append('perihal', this.uploadForm.value.perihal);

@@ -98,19 +98,12 @@
 
             <!-- Approver Actions -->
             <div class="action-group" *ngIf="canApprove">
-              <button mat-icon-button [matMenuTriggerFor]="approveMenu" color="primary" matTooltip="Ubah Status" aria-label="Ubah Status">
-                <mat-icon>fact_check</mat-icon>
+              <button mat-icon-button color="primary" matTooltip="Setujui" aria-label="Setujui" (click)="onApprove(element.worklog_id, 'Approved')">
+                <mat-icon>check_circle</mat-icon>
               </button>
-              <mat-menu #approveMenu="matMenu">
-                <button mat-menu-item (click)="onApprove(element.worklog_id, 'Approved')">
-                  <mat-icon class="menu-icon-approve">check_circle</mat-icon>
-                  <span>Setujui</span>
-                </button>
-                <button mat-menu-item (click)="onApprove(element.worklog_id, 'Revised')">
-                  <mat-icon class="menu-icon-revise">assignment_return</mat-icon>
-                  <span>Minta revisi</span>
-                </button>
-              </mat-menu>
+              <button mat-icon-button color="warn" matTooltip="Minta Revisi" aria-label="Minta Revisi" (click)="onApprove(element.worklog_id, 'Revised')">
+                <mat-icon>assignment_return</mat-icon>
+              </button>
             </div>
           </td>
         </ng-container>

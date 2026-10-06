@@ -24,6 +24,8 @@ class Arsip extends Model
         'tgl_surat',
         'perihal',
         'kategori',
+        'pengirim',
+        'divisi_tujuan',
         'catatan_kejadian',
         'kondisi_kotak_surat',
         'jenjang_pengawas',

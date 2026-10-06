@@ -12,6 +12,10 @@ export class WfhService {
     return this.api.post<any>('/wfh/presensi/check-in', data);
   }
 
+  getStatusHariIni(): Observable<any> {
+    return this.api.get<any>('/wfh/presensi/status-hari-ini');
+  }
+
   submitIzin(data: FormData): Observable<any> {
     return this.api.post<any>('/wfh/izin', data);
   }

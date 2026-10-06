@@ -24,6 +24,16 @@
 
         <div class="tab-content">
 
+          <!-- Jadwal Hari Ini Banner -->
+          <div *ngIf="facade.tipeKehadiranHariIni()" class="jadwal-banner" [ngClass]="{'is-libur': facade.isLiburHariIni()}">
+            <mat-icon *ngIf="!facade.isLiburHariIni()">event_available</mat-icon>
+            <mat-icon *ngIf="facade.isLiburHariIni()">event_busy</mat-icon>
+            <div class="banner-text">
+              <strong>Jadwal Hari Ini: {{ facade.tipeKehadiranHariIni() }}</strong>
+              <span *ngIf="facade.isLiburHariIni()"> - {{ facade.keteranganLibur() }}. Anda tetap dapat melakukan absen (tercatat sebagai Lembur Libur).</span>
+            </div>
+          </div>
+
           <!-- Presensi Action Component -->
           <app-wfh-presensi-action
             [absence]="facade.absence()"
@@ -145,14 +155,14 @@
             [data]="facade.worklogData()"
             [displayedColumns]="worklogDisplayedColumns"
             [canApprove]="facade.canApprove()"
-            [canViewOthers]="facade.canViewOthersPresensi()"
+            [canViewOthers]="facade.canViewOthersWorklog()"
             [startDate]="facade.startDateWorklog()"
             [endDate]="facade.endDateWorklog()"
             (filterDate)="facade.loadWorklogs($event.startDate, $event.endDate)"
             (exportToCSV)="exportWorklog()"
             (editWorklog)="onEditWorklog($event)"
-            (deleteWorklog)="facade.deleteWorklog($event).subscribe({next: facade.loadWorklogs.bind(facade)})"
-            (approveWorklog)="facade.approveWorklog($event.id, $event.status).subscribe({next: facade.loadWorklogs.bind(facade)})"
+            (deleteWorklog)="onDeleteWorklog($event)"
+            (approveWorklog)="onApproveWorklog($event)"
           ></app-wfh-worklog-table>
 
         </div>

@@ -174,6 +174,17 @@ export class AuthService {
     return this.isSuperAdmin;
   }
 
+  // Divisi SDMO secara spesifik
+  get isSDMO(): boolean {
+    return this.userRole.toLowerCase().includes('sdmo');
+  }
+
+  // Hak Akses Presensi Global (Hanya Admin, Ketua, Sekretaris, dan SDMO)
+  get canViewAllPresensi(): boolean {
+    const r = this.userRole.toLowerCase();
+    return this.isAdmin || r.includes('ketua') || r.includes('sekretaris') || r.includes('sekretariat') || this.isSDMO;
+  }
+
   // Kelas 1: Staf / Pegawai (Pelaksana Operasional)
   get isStaf(): boolean {
     const r = this.userRole.toLowerCase();

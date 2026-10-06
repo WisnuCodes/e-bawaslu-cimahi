@@ -14,8 +14,8 @@ class DivisiRepository
      */
     public function getAllCached()
     {
-        return Cache::rememberForever('divisi_all', function () {
-            return Divisi::all();
+        return Cache::rememberForever('divisi_all_array', function () {
+            return Divisi::all()->toArray();
         });
     }
 

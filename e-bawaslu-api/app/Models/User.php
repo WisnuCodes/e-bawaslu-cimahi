@@ -105,6 +105,44 @@ class User extends Authenticatable implements JWTSubject
         return $this->isSuperAdmin() || $this->isPimpinan() || $this->isKepalaDivisi();
     }
 
+    public function isPanwascam(): bool
+    {
+        $role = strtolower($this->role ?? '');
+        return str_contains($role, 'panwascam');
+    }
+
+    public function isPkd(): bool
+    {
+        $role = strtolower($this->role ?? '');
+        return str_contains($role, 'pkd');
+    }
+
+    public function isPtps(): bool
+    {
+        return $this->isPengawasTps();
+    }
+
+    public function canAccessDocument(string $type): bool
+    {
+        $role = strtolower($this->role ?? '');
+        $type = strtoupper($type);
+        
+        if ($this->isSuperAdmin()) return true;
+
+        if ($type === 'C1') {
+            return $this->isPanwascam() || $this->isPtps() || $this->isKepalaDivisi();
+        }
+        if ($type === 'LHP') {
+            return $this->isPanwascam() || $this->isPkd() || $this->isPtps() || $this->isKepalaDivisi();
+        }
+        return true;
+    }
+
+    public function canManageUsers(): bool
+    {
+        return $this->isSuperAdmin();
+    }
+
     public function canAccessP2H(): bool
     {
         $role = strtolower($this->role ?? '');

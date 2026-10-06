@@ -22,7 +22,7 @@ class FieldSupervisorTest extends TestCase
         $user->forceFill(['user_id' => (string) Str::uuid(), 'username' => (string) Str::uuid(),
             'email' => Str::uuid().'@example.test', 'password_hash' => 'test', 'role' => $role,
             'divisi_id' => $division, 'koordinat_acuan' => '-6.87,107.54'])->save();
-        $this->actingAs($user, 'sanctum');
+        $this->actingAs($user, 'api');
         return $user;
     }
 

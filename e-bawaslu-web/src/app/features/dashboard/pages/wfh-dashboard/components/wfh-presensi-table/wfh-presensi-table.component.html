@@ -39,11 +39,19 @@
           <td mat-cell *matCellDef="let element"> {{ element.nama_pegawai || 'Anda' }} </td>
         </ng-container>
 
-        <!-- Waktu Check In -->
-        <ng-container matColumnDef="waktu_masuk">
-          <th mat-header-cell *matHeaderCellDef> Tanggal / masuk </th>
+        <!-- Tanggal -->
+        <ng-container matColumnDef="tanggal">
+          <th mat-header-cell *matHeaderCellDef> Tanggal </th>
           <td mat-cell *matCellDef="let element">
-            {{ element.timestamp_checkin ? (element.timestamp_checkin | date:(isAbsence(element) ? 'dd MMM yyyy' : 'dd MMM yyyy, HH:mm'):'':'id-ID') : '-' }}
+            {{ element.timestamp_checkin ? (safeDate(element.timestamp_checkin) | date:'dd MMM yyyy':'':'id-ID') : '-' }}
+          </td>
+        </ng-container>
+
+        <!-- Waktu Check In -->
+        <ng-container matColumnDef="jam_masuk">
+          <th mat-header-cell *matHeaderCellDef> Jam Masuk </th>
+          <td mat-cell *matCellDef="let element">
+            {{ !isAbsence(element) && element.timestamp_checkin ? (safeDate(element.timestamp_checkin) | date:'HH:mm':'':'id-ID') : '-' }}
           </td>
         </ng-container>
 
@@ -81,10 +89,10 @@
         </ng-container>
 
         <!-- Waktu Check Out -->
-        <ng-container matColumnDef="waktu_keluar">
-          <th mat-header-cell *matHeaderCellDef> Check Out </th>
+        <ng-container matColumnDef="jam_keluar">
+          <th mat-header-cell *matHeaderCellDef> Jam Keluar </th>
           <td mat-cell *matCellDef="let element">
-            {{ !isAbsence(element) && element.timestamp_checkout ? (element.timestamp_checkout | date:'dd MMM yyyy, HH:mm':'':'id-ID') : '-' }}
+            {{ !isAbsence(element) && element.timestamp_checkout ? (safeDate(element.timestamp_checkout) | date:'HH:mm':'':'id-ID') : '-' }}
           </td>
         </ng-container>
 

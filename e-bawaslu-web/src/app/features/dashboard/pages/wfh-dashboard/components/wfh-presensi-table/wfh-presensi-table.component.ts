@@ -112,4 +112,11 @@ export class WfhPresensiTableComponent implements AfterViewInit {
     const relativePath = path.replace(/^\/+/, '').replace(/^storage\//, '');
     return `${baseUrl}/storage/${relativePath}`;
   }
+
+  safeDate(dateStr: string | null): Date | null {
+    if (!dateStr) return null;
+    // Replace space with T for Safari/iOS compatibility
+    const safeStr = dateStr.replace(' ', 'T');
+    return new Date(safeStr);
+  }
 }

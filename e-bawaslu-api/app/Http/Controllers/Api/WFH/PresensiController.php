@@ -12,37 +12,28 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use App\Services\HolidayService;
 
 class PresensiController extends Controller
 {
-    private function isHoliday($date)
+    protected $holidayService;
+
+    public function __construct(HolidayService $holidayService)
     {
-        // $date format: Y-m-d
-        // Weekend check
-        $carbonDate = Carbon::parse($date);
-        if ($carbonDate->isWeekend()) {
-            return true;
-        }
+        $this->holidayService = $holidayService;
+    }
 
-        try {
-            $response = Http::get('https://api-harilibur.vercel.app/api', [
-                'month' => $carbonDate->month,
-                'year' => $carbonDate->year
-            ]);
-
-            if ($response->successful()) {
-                $holidays = $response->json();
-                foreach ($holidays as $holiday) {
-                    if ($holiday['is_national_holiday'] && $holiday['holiday_date'] == $date) {
-                        return true;
-                    }
-                }
-            }
-        } catch (\Exception $e) {
-            Log::error('Error fetching holidays: ' . $e->getMessage());
-        }
-
-        return false;
+    public function statusHariIni(Request $request)
+    {
+        $now = Carbon::now();
+        $tipe = $this->holidayService->getJadwalType($now);
+        $keterangan = $this->holidayService->getHolidayInfo($now);
+        
+        return response()->json([
+            'tipe_kehadiran' => $tipe,
+            'is_holiday' => $tipe === 'Libur',
+            'keterangan_libur' => $keterangan
+        ]);
     }
 
     private function calculateDistance($lat1, $lon1, $lat2, $lon2) {
@@ -71,12 +62,13 @@ class PresensiController extends Controller
 
         $role = strtolower($user->role);
         $isAdmin = str_contains($role, 'admin') || str_contains($role, 'superadmin');
-        $isPimpinan = str_contains($role, 'ketua') || str_contains($role, 'pimpinan') || str_contains($role, 'koordinator sekretariat');
-        $isKadiv = str_contains($role, 'kordiv') || str_contains($role, 'kepala divisi') || str_contains($role, 'kasubag') || str_contains($role, 'kabag');
+        $isKetua = str_contains($role, 'ketua');
+        $isSekretaris = str_contains($role, 'sekretaris') || str_contains($role, 'koordinator sekretariat');
+        $isSDMO = str_contains($role, 'sdmo');
 
-        $canManageOther = $isAdmin || $isPimpinan || $isKadiv;
+        $canManageOther = $isAdmin || $isKetua || $isSekretaris || $isSDMO;
 
-        // Tampilkan semua untuk admin, pimpinan, kadiv. Jika staf, hanya miliknya sendiri.
+        // Tampilkan semua untuk admin, ketua, sekretaris, dan SDMO. Jika staf/kordiv lain, hanya miliknya sendiri.
         if (!$canManageOther) {
             $query->where('presensi_wfh.user_id', $user->user_id);
         }
@@ -178,31 +170,49 @@ class PresensiController extends Controller
         $now = Carbon::now();
         $todayDate = $now->format('Y-m-d');
 
-        if ($this->isHoliday($todayDate)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Sistem presensi ditutup pada hari libur / akhir pekan.'
-            ], 403);
+        $tipeJadwal = $this->holidayService->getJadwalType($now);
+        $isWfhDay = ($tipeJadwal === 'WFH');
+        
+        $tipeKehadiran = $tipeJadwal;
+        if ($tipeJadwal === 'Libur') {
+            $tipeKehadiran = 'Lembur Libur';
         }
 
         if (Presensi::where('user_id', $userId)->whereDate('timestamp_checkin', $todayDate)->exists()) {
             return response()->json(['message' => 'Anda sudah memiliki catatan presensi atau izin hari ini.'], 422);
         }
 
-        // Tentukan apakah hari ini WFH (Selasa/Jumat) atau WFO (Senin/Rabu/Kamis)
-        $isWfhDay = in_array($now->dayOfWeekIso, [2, 5]); // 2: Tuesday, 5: Friday
-        
-        // Radius 500 meter dari Kantor Bawaslu
-        $acuan = [-6.871618578044813, 107.54454829659048];
+        // Validasi Koordinat dan Geofence
         $current = explode(',', $request->gps_koordinat);
-        
-        if (!$isWfhDay && count($current) == 2) {
-            $distance = $this->calculateDistance($acuan[0], $acuan[1], $current[0], $current[1]);
-            if ($distance > 0.5) { // 0.5 km = 500 meters radius
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Presensi ditolak. Hari ini adalah hari WFO dan Anda berada di luar radius 500 meter dari Kantor Bawaslu.'
-                ], 403);
+        $role = strtolower($user->role);
+        $isFieldSupervisor = str_contains($role, 'pkd') || str_contains($role, 'panwascam') || str_contains($role, 'pengawas tps') || str_contains($role, 'ptps');
+
+        if ($isFieldSupervisor) {
+            if (!$user->koordinat_acuan) {
+                return response()->json(['message' => 'Koordinat acuan belum disetting.', 'errors' => ['gps_koordinat' => ['Koordinat acuan tidak ditemukan.']]], 422);
+            }
+            $acuan = explode(',', $user->koordinat_acuan);
+            if (count($acuan) == 2 && count($current) == 2) {
+                $distance = $this->calculateDistance($acuan[0], $acuan[1], $current[0], $current[1]);
+                if ($distance > 1.0) { // 1 km = 1000 meters
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Presensi ditolak. Anda berada di luar radius penugasan.'
+                    ], 403);
+                }
+            }
+        } else {
+            // Radius 500 meter dari Kantor Bawaslu
+            $acuan = [-6.871618578044813, 107.54454829659048];
+            
+            if (!$isWfhDay && $tipeJadwal !== 'Libur' && count($current) == 2) {
+                $distance = $this->calculateDistance($acuan[0], $acuan[1], $current[0], $current[1]);
+                if ($distance > 0.5) { // 0.5 km = 500 meters radius
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Presensi ditolak. Hari ini adalah hari WFO dan Anda berada di luar radius 500 meter dari Kantor Bawaslu.'
+                    ], 403);
+                }
             }
         }
 
@@ -221,6 +231,7 @@ class PresensiController extends Controller
             'timestamp_checkin' => $now,
             'selfie_masuk_url' => $path,
             'status_ci' => $status_ci,
+            'tipe_kehadiran' => $tipeKehadiran,
             'gps_koordinat' => $request->gps_koordinat,
             'liveness_score' => $request->liveness_score
         ]);
@@ -267,6 +278,7 @@ class PresensiController extends Controller
                     'lampiran_izin' => $path,
                     'status_ci' => $validated['jenis_izin'],
                     'status_co' => $validated['jenis_izin'],
+                    'tipe_kehadiran' => $validated['jenis_izin'],
                     'keterangan_izin' => trim($validated['keterangan_izin']),
                 ]);
             });
@@ -313,27 +325,40 @@ class PresensiController extends Controller
         $now = Carbon::now();
         $todayDate = $now->format('Y-m-d');
 
-        if ($this->isHoliday($todayDate)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Sistem presensi ditutup pada hari libur / akhir pekan.'
-            ], 403);
-        }
+        $tipeJadwal = $this->holidayService->getJadwalType($now);
+        $isWfhDay = ($tipeJadwal === 'WFH');
 
-        // Tentukan apakah hari ini WFH (Selasa/Jumat) atau WFO (Senin/Rabu/Kamis)
-        $isWfhDay = in_array($now->dayOfWeekIso, [2, 5]); // 2: Tuesday, 5: Friday
-
-        // Radius 500 meter dari Kantor Bawaslu
-        $acuan = [-6.871618578044813, 107.54454829659048];
+        // Validasi Koordinat dan Geofence
         $current = explode(',', $request->gps_koordinat);
-        
-        if (!$isWfhDay && count($current) == 2) {
-            $distance = $this->calculateDistance($acuan[0], $acuan[1], $current[0], $current[1]);
-            if ($distance > 0.5) { // 0.5 km = 500 meters radius
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Presensi ditolak. Hari ini adalah hari WFO dan Anda berada di luar radius 500 meter dari Kantor Bawaslu.'
-                ], 403);
+        $role = strtolower($user->role);
+        $isFieldSupervisor = str_contains($role, 'pkd') || str_contains($role, 'panwascam') || str_contains($role, 'pengawas tps') || str_contains($role, 'ptps');
+
+        if ($isFieldSupervisor) {
+            if (!$user->koordinat_acuan) {
+                return response()->json(['message' => 'Koordinat acuan belum disetting.', 'errors' => ['gps_koordinat' => ['Koordinat acuan tidak ditemukan.']]], 422);
+            }
+            $acuan = explode(',', $user->koordinat_acuan);
+            if (count($acuan) == 2 && count($current) == 2) {
+                $distance = $this->calculateDistance($acuan[0], $acuan[1], $current[0], $current[1]);
+                if ($distance > 1.0) { // 1 km = 1000 meters
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Presensi ditolak. Anda berada di luar radius penugasan.'
+                    ], 403);
+                }
+            }
+        } else {
+            // Radius 500 meter dari Kantor Bawaslu
+            $acuan = [-6.871618578044813, 107.54454829659048];
+            
+            if (!$isWfhDay && $tipeJadwal !== 'Libur' && count($current) == 2) {
+                $distance = $this->calculateDistance($acuan[0], $acuan[1], $current[0], $current[1]);
+                if ($distance > 0.5) { // 0.5 km = 500 meters radius
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Presensi ditolak. Hari ini adalah hari WFO dan Anda berada di luar radius 500 meter dari Kantor Bawaslu.'
+                    ], 403);
+                }
             }
         }
 

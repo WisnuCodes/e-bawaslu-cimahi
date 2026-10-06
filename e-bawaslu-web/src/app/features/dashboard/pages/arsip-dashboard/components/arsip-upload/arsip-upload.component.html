@@ -2,7 +2,7 @@
   <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="arsip-upload-dialog-1">
     <div class="modal-header" >
       <h3 class="modal-title" id="arsip-upload-dialog-1" >Unggah Arsip Dokumen</h3>
-      <button mat-icon-button aria-label="Tutup dialog" (click)="facade.setModal('showUploadModal', false)">
+      <button type="button" mat-icon-button aria-label="Tutup dialog" (click)="facade.setModal('showUploadModal', false)">
         <mat-icon>close</mat-icon>
       </button>
     </div>
@@ -54,11 +54,26 @@
         <textarea matInput formControlName="perihal" rows="2" placeholder="Tuliskan perihal atau ringkasan dokumen..."></textarea>
       </mat-form-field>
 
-      <mat-form-field class="full-width" appearance="outline" subscriptSizing="dynamic" >
-        <mat-label>Divisi Tujuan / Pengirim</mat-label>
-        <mat-select formControlName="divisi_id" placeholder="Pilih...">
-          <mat-option *ngFor="let div of facade.divisiList()" [value]="div.divisi_id">{{ div.nama_divisi }}</mat-option>
-        </mat-select>
+      <div class="form-grid" >
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Divisi Pengelola (Akses)</mat-label>
+          <mat-select formControlName="divisi_id" placeholder="Pilih Divisi">
+            <mat-option *ngFor="let div of facade.divisiList()" [value]="div.divisi_id">{{ div.nama_divisi }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Divisi Tujuan (Opsional)</mat-label>
+          <mat-select formControlName="divisi_tujuan" placeholder="Pilih Divisi Tujuan">
+            <mat-option [value]="null">-- Tidak Ada --</mat-option>
+            <mat-option *ngFor="let div of facade.divisiList()" [value]="div.divisi_id">{{ div.nama_divisi }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field class="full-width" appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Pengirim (Opsional)</mat-label>
+        <input matInput formControlName="pengirim" placeholder="Contoh: Bawaslu Provinsi Jawa Barat">
       </mat-form-field>
 
       <!-- File Upload Button -->

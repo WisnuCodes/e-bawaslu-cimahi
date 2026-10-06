@@ -21,6 +21,8 @@ import { WfhWorklogTableComponent } from './components/wfh-worklog-table/wfh-wor
 import { ButtonComponent } from '../../../../shared/components/atoms/button/button.component';
 
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { PromptDialogComponent } from '../../../../shared/components/molecules/prompt-dialog/prompt-dialog.component';
 
 @Component({
   selector: 'app-wfh-dashboard',
@@ -36,6 +38,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatInputModule, 
     MatSelectModule,
     MatProgressSpinnerModule,
+    MatDialogModule,
     ButtonComponent,
     WfhPresensiActionComponent,
     WfhWorklogFormComponent,
@@ -49,6 +52,7 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
   public facade = inject(WfhDashboardFacade);
   private fb = inject(FormBuilder);
   private snackBar = inject(MatSnackBar);
+  private dialog = inject(MatDialog);
 
   // Component local state for things that don't need to be in facade
   currentTime: Date = new Date();
@@ -97,9 +101,9 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
 
     // Setup Columns
     if (!this.facade.canViewOthersPresensi()) {
-      this.presensiDisplayedColumns = ['waktu_masuk', 'foto_masuk', 'status_ci', 'waktu_keluar', 'foto_keluar', 'status_co', 'keterangan_izin', 'lokasi'];
+      this.presensiDisplayedColumns = ['tanggal', 'jam_masuk', 'foto_masuk', 'status_ci', 'jam_keluar', 'foto_keluar', 'status_co', 'keterangan_izin', 'lokasi'];
     } else {
-      this.presensiDisplayedColumns = ['nama', 'waktu_masuk', 'foto_masuk', 'status_ci', 'waktu_keluar', 'foto_keluar', 'status_co', 'keterangan_izin', 'lokasi'];
+      this.presensiDisplayedColumns = ['nama', 'tanggal', 'jam_masuk', 'foto_masuk', 'status_ci', 'jam_keluar', 'foto_keluar', 'status_co', 'keterangan_izin', 'lokasi'];
       if (this.facade.isAdmin()) {
         this.presensiDisplayedColumns.push('aksi');
       }
@@ -111,6 +115,7 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
       this.worklogDisplayedColumns = ['tanggal', 'aktivitas', 'lampiran', 'status', 'aksi'];
     }
 
+    this.facade.loadStatusHariIni();
     this.facade.loadWorklogs();
     this.facade.loadPresensi();
   }
@@ -196,6 +201,53 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
     this.isEditMode = false;
     this.editWorklogId = null;
     this.editWorklogActivity = '';
+  }
+
+  onDeleteWorklog(id: string) {
+    if (confirm('Yakin ingin menghapus laporan kerja ini?')) {
+      this.facade.deleteWorklog(id).subscribe({
+        next: () => {
+          this.snackBar.open('Worklog berhasil dihapus.', 'Tutup', { duration: 3000 });
+          this.facade.loadWorklogs();
+        },
+        error: () => this.snackBar.open('Gagal menghapus worklog.', 'Tutup', { duration: 3000 })
+      });
+    }
+  }
+
+  onApproveWorklog(event: {id: string, status: 'Approved' | 'Revised'}) {
+    if (event.status === 'Revised') {
+      const dialogRef = this.dialog.open(PromptDialogComponent, {
+        width: '400px',
+        disableClose: true,
+        data: {
+          title: 'Catatan Revisi',
+          message: 'Silakan berikan catatan mengenai bagian laporan yang perlu direvisi oleh pegawai.',
+          inputLabel: 'Catatan',
+          inputPlaceholder: 'Tuliskan catatan revisi...',
+          confirmText: 'Simpan',
+          required: true
+        }
+      });
+
+      dialogRef.afterClosed().subscribe(note => {
+        if (note !== null && note !== undefined) {
+          this.processApproveWorklog(event.id, event.status, note);
+        }
+      });
+    } else {
+      this.processApproveWorklog(event.id, event.status, '');
+    }
+  }
+
+  private processApproveWorklog(id: string, status: 'Approved' | 'Revised', catatan: string) {
+    this.facade.approveWorklog(id, status, catatan).subscribe({
+      next: () => {
+        this.snackBar.open(`Status laporan berhasil diubah menjadi ${status}.`, 'Tutup', { duration: 3000 });
+        this.facade.loadWorklogs();
+      },
+      error: () => this.snackBar.open('Gagal mengubah status laporan.', 'Tutup', { duration: 3000 })
+    });
   }
 
   // --- Presensi Table Actions ---
