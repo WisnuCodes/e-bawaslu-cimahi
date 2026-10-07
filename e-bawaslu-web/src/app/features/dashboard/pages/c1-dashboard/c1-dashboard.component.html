@@ -49,6 +49,7 @@
     [isOcrScanning]="state().isOcrScanning"
     [ocrStatusText]="state().ocrStatusText"
     [editingC1Id]="state().editingC1Id"
+    [isAdmin]="isAdmin()"
     [isUploading]="state().isUploading"
     (jumlahPaslonChange)="facade.onJumlahPaslonChange($event)"
     (fileSelected)="onFileSelected($event)"

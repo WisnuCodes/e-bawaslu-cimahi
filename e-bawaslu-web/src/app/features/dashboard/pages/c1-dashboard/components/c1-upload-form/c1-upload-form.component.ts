@@ -38,6 +38,7 @@ export class C1UploadFormComponent {
   @Input() isOcrScanning: boolean = false;
   @Input() ocrStatusText: string = '';
   @Input() editingC1Id: string | null = null;
+  @Input() isAdmin: boolean = false;
   @Input() isUploading: boolean = false;
 
   @Output() fileSelected = new EventEmitter<Event>();

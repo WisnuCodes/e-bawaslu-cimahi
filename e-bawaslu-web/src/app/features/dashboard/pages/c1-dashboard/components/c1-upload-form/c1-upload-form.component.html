@@ -58,7 +58,12 @@
 
           <mat-form-field appearance="outline" class="paslon-custom-input">
             <mat-label>Kustom Jumlah Paslon</mat-label>
-            <input matInput type="number" formControlName="jumlah_paslon" min="1" (change)="jumlahPaslonChange.emit(c1Form.value.jumlah_paslon)" title="Input field" placeholder="...">
+            <input matInput type="number" formControlName="jumlah_paslon" min="1"
+              [readonly]="!isAdmin"
+              [attr.aria-disabled]="!isAdmin"
+              (change)="isAdmin && jumlahPaslonChange.emit(c1Form.value.jumlah_paslon)"
+              title="Input field" placeholder="...">
+            <mat-hint *ngIf="!isAdmin" align="start">Hanya Admin yang dapat mengubah jumlah Paslon.</mat-hint>
           </mat-form-field>
         </div>
 

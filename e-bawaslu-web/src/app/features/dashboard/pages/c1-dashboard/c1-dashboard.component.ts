@@ -79,6 +79,11 @@ export class C1DashboardComponent implements OnInit, OnDestroy {
     return this.facade.authService.userRole === 'superadmin';
   });
 
+  isAdmin = computed(() => {
+    const role = this.facade.authService.userRole;
+    return role === 'admin' || role === 'superadmin';
+  });
+
   isPimpinan = computed(() => {
     const role = this.facade.authService.userRole;
     return role === 'pimpinan' || role === 'ketua_bawaslu' || role === 'anggota_bawaslu';
