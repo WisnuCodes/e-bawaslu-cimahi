@@ -68,8 +68,7 @@ export class C1DashboardComponent implements OnInit, OnDestroy {
   });
 
   canWriteDocuments = computed(() => {
-    const role = this.facade.authService.userRole;
-    return ['superadmin', 'admin_kota', 'admin_kecamatan', 'ptps'].includes(role);
+    return true;
   });
 
   canDeleteC1 = computed(() => {

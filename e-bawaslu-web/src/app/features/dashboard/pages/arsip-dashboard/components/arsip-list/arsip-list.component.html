@@ -25,7 +25,6 @@
           <mat-option *ngFor="let year of facade.availableYears()" [value]="year">{{ year }}</mat-option>
         </mat-select>
       </mat-form-field>
-    <mat-form-field class="level-field" appearance="outline" subscriptSizing="dynamic"><mat-label>Jenjang Pengawas</mat-label><mat-select [value]="facade.selectedJenjang()" (selectionChange)="facade.setFilter('selectedJenjang', $event.value)" placeholder="Pilih..."><mat-option value="">Semua Jenjang</mat-option><mat-option *ngFor="let jenjang of jenjangList" [value]="jenjang">{{ jenjang }}</mat-option></mat-select></mat-form-field>
     </div>
     <!-- Tabel Dokumen Arsip -->
     <div class="table-scroll" tabindex="0" role="region" aria-label="Tabel arsip, geser untuk melihat semua kolom" >

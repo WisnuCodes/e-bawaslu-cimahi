@@ -10,6 +10,7 @@ import { ArsipService } from '../../../../core/services/arsip/arsip.service';
 import { C1Service, C1Item } from '../../../../core/services/c1/c1.service';
 import { WfhService } from '../../../../core/services/wfh/wfh.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { MasterDataService } from '../../../../core/services/master-data.service';
 
 interface PresensiItem {
   presensi_id?: string;
@@ -41,6 +42,7 @@ export class DashboardHomeComponent implements OnInit {
   private c1Service = inject(C1Service);
   private wfhService = inject(WfhService);
   public authService = inject(AuthService);
+  private masterDataService = inject(MasterDataService);
 
   today: Date = new Date();
   
@@ -49,6 +51,8 @@ export class DashboardHomeComponent implements OnInit {
   c1MismatchCount: number = 0;
   totalTpsTarget: number = 15;
   c1ProgressPercentage: number = 0;
+  totalC1Pilkada: number = 0;
+  c1PilkadaProgressPercentage: number = 0;
   pendingApprovalWorklog: number = 0;
   presensiTodayStatus: 'Checked In' | 'Checked Out' | 'Belum Presensi' = 'Belum Presensi';
 
@@ -77,13 +81,32 @@ export class DashboardHomeComponent implements OnInit {
     // 2. C1 count, mismatches & live progress
     this.c1Service.getC1List().subscribe({
       next: (res: { data: C1Item[] }) => {
-        const list: C1Item[] = (res?.data || []).filter(c => (c.jenis_pemilihan || 'Pemilu') === 'Pemilu');
-        this.totalC1 = list.length;
-        this.c1MismatchCount = list.filter((c: C1Item) => c.status_c1 === 'Mismatch').length;
-        this.c1ProgressPercentage = Math.min(100, Math.round((this.totalC1 / this.totalTpsTarget) * 100));
+        const list: C1Item[] = (res?.data || []);
+        const listPemilu = list.filter(c => (c.jenis_pemilihan || 'Pemilu') === 'Pemilu');
+        const listPilkada = list.filter(c => c.jenis_pemilihan === 'Pilkada');
+        
+        this.totalC1 = listPemilu.length;
+        this.totalC1Pilkada = listPilkada.length;
+        this.c1MismatchCount = listPemilu.filter((c: C1Item) => c.status_c1 === 'Mismatch').length;
+        
+        // Fetch actual TPS target from Master Data
+        this.masterDataService.getTps().subscribe({
+          next: (tpsRes: any) => {
+            this.totalTpsTarget = (tpsRes?.data || []).length;
+            if (this.totalTpsTarget === 0) this.totalTpsTarget = 1; // Prevent division by zero
+            this.c1ProgressPercentage = Math.min(100, Math.round((this.totalC1 / this.totalTpsTarget) * 100));
+            this.c1PilkadaProgressPercentage = Math.min(100, Math.round((this.totalC1Pilkada / this.totalTpsTarget) * 100));
+          },
+          error: () => {
+            this.totalTpsTarget = 15; // Fallback
+            this.c1ProgressPercentage = Math.min(100, Math.round((this.totalC1 / this.totalTpsTarget) * 100));
+            this.c1PilkadaProgressPercentage = Math.min(100, Math.round((this.totalC1Pilkada / this.totalTpsTarget) * 100));
+          }
+        });
       },
       error: () => {
         this.totalC1 = 0;
+        this.totalC1Pilkada = 0;
       }
     });
 

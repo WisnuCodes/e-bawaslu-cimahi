@@ -12,7 +12,6 @@ export interface ArsipState {
   selectedYearFilter: string;
   availableYears: string[];
   searchQuery: string;
-  selectedJenjang: string;
   
   showUploadModal: boolean;
   showRevisiModal: boolean;
@@ -48,7 +47,6 @@ export class ArsipFacade {
     selectedYearFilter: '',
     availableYears: [],
     searchQuery: '',
-    selectedJenjang: '',
     showUploadModal: false,
     showRevisiModal: false,
     showVersionModal: false,
@@ -71,7 +69,6 @@ export class ArsipFacade {
   readonly availableYears = computed(() => this.state().availableYears);
   readonly selectedDivisiFilter = computed(() => this.state().selectedDivisiFilter);
   readonly selectedYearFilter = computed(() => this.state().selectedYearFilter);
-  readonly selectedJenjang = computed(() => this.state().selectedJenjang);
   readonly searchQuery = computed(() => this.state().searchQuery);
   readonly showUploadModal = computed(() => this.state().showUploadModal);
   readonly showRevisiModal = computed(() => this.state().showRevisiModal);
@@ -125,8 +122,8 @@ export class ArsipFacade {
           docs = docs.filter((doc: ArsipItem) => doc.tgl_surat?.startsWith(yearFilter));
         }
 
-        const jenjang = this.selectedJenjang();
-        const filteredDocs = docs.filter((doc: ArsipItem) => !jenjang || doc.jenjang_pengawas === jenjang);
+        // Eksklusi LHP & LHPP agar tidak muncul di E-Arsip umum
+        const filteredDocs = docs.filter((doc: ArsipItem) => doc.kategori !== 'LHP' && doc.kategori !== 'LHPP');
 
         this.updateState({ documents: filteredDocs, availableYears });
       },
@@ -151,7 +148,7 @@ export class ArsipFacade {
     });
   }
 
-  setFilter(key: 'selectedDivisiFilter' | 'selectedYearFilter' | 'selectedJenjang' | 'searchQuery', value: string) {
+  setFilter(key: 'selectedDivisiFilter' | 'selectedYearFilter' | 'searchQuery', value: string) {
     this.updateState({ [key]: value });
     if (key !== 'searchQuery') {
       this.loadDocuments();

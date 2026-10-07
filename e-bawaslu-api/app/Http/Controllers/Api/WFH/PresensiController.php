@@ -203,14 +203,14 @@ class PresensiController extends Controller
             }
         } else {
             // Radius 500 meter dari Kantor Bawaslu
-            $acuan = [-6.871618578044813, 107.54454829659048];
+            $acuan = [-6.871635322140859, 107.54447933887951];
             
             if (!$isWfhDay && $tipeJadwal !== 'Libur' && count($current) == 2) {
                 $distance = $this->calculateDistance($acuan[0], $acuan[1], $current[0], $current[1]);
-                if ($distance > 0.5) { // 0.5 km = 500 meters radius
+                if ($distance > 10.0) { // Toleransi 10 km untuk PC/Laptop
                     return response()->json([
                         'success' => false,
-                        'message' => 'Presensi ditolak. Hari ini adalah hari WFO dan Anda berada di luar radius 500 meter dari Kantor Bawaslu.'
+                        'message' => 'Presensi ditolak. Hari ini adalah hari WFO dan Anda berada di luar radius dari Kantor Bawaslu. (Lokasi terdeteksi berjarak ' . round($distance * 1000) . ' meter. Titik Anda: ' . implode(',', $current) . ')'
                     ], 403);
                 }
             }
@@ -349,14 +349,14 @@ class PresensiController extends Controller
             }
         } else {
             // Radius 500 meter dari Kantor Bawaslu
-            $acuan = [-6.871618578044813, 107.54454829659048];
+            $acuan = [-6.871635322140859, 107.54447933887951];
             
             if (!$isWfhDay && $tipeJadwal !== 'Libur' && count($current) == 2) {
                 $distance = $this->calculateDistance($acuan[0], $acuan[1], $current[0], $current[1]);
-                if ($distance > 0.5) { // 0.5 km = 500 meters radius
+                if ($distance > 10.0) { // Toleransi 10 km untuk PC/Laptop
                     return response()->json([
                         'success' => false,
-                        'message' => 'Presensi ditolak. Hari ini adalah hari WFO dan Anda berada di luar radius 500 meter dari Kantor Bawaslu.'
+                        'message' => 'Presensi ditolak. Hari ini adalah hari WFO dan Anda berada di luar radius dari Kantor Bawaslu. (Lokasi terdeteksi berjarak ' . round($distance * 1000) . ' meter. Titik Anda: ' . implode(',', $current) . ')'
                     ], 403);
                 }
             }

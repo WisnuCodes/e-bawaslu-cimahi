@@ -49,7 +49,6 @@ export class ArsipListComponent implements OnInit, OnDestroy {
 
   dataSource = new MatTableDataSource<ArsipItem>([]);
   displayedColumns: string[] = ['no_surat', 'perihal', 'kategori', 'klasifikasi', 'versi', 'tanggal', 'aksi'];
-  jenjangList = ['Panwascam', 'PKD', 'PTPS'];
 
   // Local state for modals
   revisiCatatan: string = '';

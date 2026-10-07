@@ -38,6 +38,26 @@
     </div>
   </div>
 
+  <!-- FR-REP-01: EXECUTIVE LIVE PROGRESS PILKADA -->
+  <div class="progress-banner" *ngIf="authService.canAccessC1" style="margin-top: 15px;">
+    <div class="styled-b73d46" >
+      <div class="styled-e4f36c" >
+        <mat-icon class="styled-636807" >bar_chart</mat-icon>
+        <strong class="styled-a2f7de" >Live Progress Form C1 Pilkada Kota Cimahi</strong>
+      </div>
+      <span class="styled-6e2641" >
+        <strong>{{ totalC1Pilkada }}</strong> dari <strong>{{ totalTpsTarget }} TPS</strong> Masuk ({{ c1PilkadaProgressPercentage }}%)
+      </span>
+    </div>
+    <mat-progress-bar class="styled-bfe983" mode="determinate" [value]="c1PilkadaProgressPercentage" ></mat-progress-bar>
+    <div class="styled-c20deb" >
+      <span>Cakupan: Pemilihan Kepala Daerah / Wali Kota Cimahi</span>
+      <a class="styled-878db5" routerLink="/dashboard/c1" [queryParams]="{kamar: 'Pilkada'}" >
+        Lihat Detail Rekapitulasi <mat-icon class="styled-39bb04" >chevron_right</mat-icon>
+      </a>
+    </div>
+  </div>
+
   <!-- STATISTIK KINERJA UTAMA -->
   <div class="stats-grid">
     
