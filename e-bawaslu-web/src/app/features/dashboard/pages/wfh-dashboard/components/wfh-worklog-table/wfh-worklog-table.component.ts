@@ -1,4 +1,5 @@
 import { Component, Input, Output, EventEmitter, ViewChild, AfterViewInit } from '@angular/core';
+import { environment } from '../../../../../../../environments/environment';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -90,8 +91,8 @@ export class WfhWorklogTableComponent implements AfterViewInit {
   getAttachmentUrl(path: string | null): string {
     if (!path) return '';
     if (/^https?:\/\//i.test(path)) return path;
-    const baseUrl = 'http://localhost:8000';
-    const relativePath = path.replace(/^\/+/, '').replace(/^storage\//, '');
+    const baseUrl = environment.apiUrl.replace(/\/api\/?$/, '');
+    const relativePath = path.replace(/\\/g, '/').replace(/^\/+/, '').replace(/^storage\//, '');
     return `${baseUrl}/storage/${relativePath}`;
   }
 }

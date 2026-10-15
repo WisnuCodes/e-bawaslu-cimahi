@@ -29,6 +29,8 @@ class IzinTest extends TestCase
             'database/migrations/2026_08_27_120048_split_status_kehadiran_in_presensi_wfh_table.php',
             'database/migrations/2026_09_14_142441_add_keterangan_izin_to_presensi_wfh_table.php',
             'database/migrations/2026_10_06_000001_add_lampiran_izin_to_presensi_wfh.php',
+            'database/migrations/2026_10_06_232218_add_tipe_kehadiran_to_presensi_wfh_table.php',
+            'database/migrations/2026_10_06_232226_create_hari_libur_table.php',
         ]];
     }
 

@@ -39,6 +39,14 @@
           <td mat-cell *matCellDef="let element"> {{ element.nama_pegawai || 'Anda' }} </td>
         </ng-container>
 
+        <!-- Jabatan Column -->
+        <ng-container matColumnDef="jabatan">
+          <th mat-header-cell *matHeaderCellDef> Jabatan </th>
+          <td mat-cell *matCellDef="let element">
+            <span class="role-badge">{{ element.role || '-' }}</span>
+          </td>
+        </ng-container>
+
         <!-- Tanggal -->
         <ng-container matColumnDef="tanggal">
           <th mat-header-cell *matHeaderCellDef> Tanggal </th>
@@ -59,7 +67,7 @@
         <ng-container matColumnDef="foto_masuk">
           <th mat-header-cell *matHeaderCellDef> Foto CI </th>
           <td mat-cell *matCellDef="let element">
-            <a *ngIf="element.selfie_masuk_url && !isAbsence(element)" [href]="getAttachmentUrl(element.selfie_masuk_url)" target="_blank">
+            <a *ngIf="element.selfie_masuk_url && !isAbsence(element)" [href]="getAttachmentUrl(element.selfie_masuk_url)" target="_blank" rel="noopener noreferrer" title="Buka foto masuk di tab baru">
               <img [src]="getAttachmentUrl(element.selfie_masuk_url)" alt="Foto Masuk" class="photo-thumb">
             </a>
             <span *ngIf="!element.selfie_masuk_url || isAbsence(element)" class="text-empty">-</span>
@@ -100,7 +108,7 @@
         <ng-container matColumnDef="foto_keluar">
           <th mat-header-cell *matHeaderCellDef> Foto CO </th>
           <td mat-cell *matCellDef="let element">
-            <a *ngIf="element.selfie_keluar_url" [href]="getAttachmentUrl(element.selfie_keluar_url)" target="_blank">
+            <a *ngIf="element.selfie_keluar_url" [href]="getAttachmentUrl(element.selfie_keluar_url)" target="_blank" rel="noopener noreferrer" title="Buka foto keluar di tab baru">
               <img [src]="getAttachmentUrl(element.selfie_keluar_url)" alt="Foto Keluar" class="photo-thumb">
             </a>
             <span *ngIf="!element.selfie_keluar_url" class="text-empty">-</span>

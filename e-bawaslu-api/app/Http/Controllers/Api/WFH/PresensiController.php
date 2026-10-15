@@ -57,7 +57,7 @@ class PresensiController extends Controller
         $user = $request->user();
         $query = Presensi::query()
             ->join('users', 'presensi_wfh.user_id', '=', 'users.user_id')
-            ->select('presensi_wfh.*', 'users.username as nama_pegawai')
+            ->select('presensi_wfh.*', 'users.username as nama_pegawai', 'users.role as role')
             ->orderBy('timestamp_checkin', 'desc');
 
         $role = strtolower($user->role);

@@ -25,7 +25,7 @@ class Worklog extends Model
     ];
 
     protected $casts = [
-        'tgl_kerja' => 'date',
+        'tgl_kerja' => 'date:Y-m-d',
         'created_at' => 'datetime'
     ];
 }

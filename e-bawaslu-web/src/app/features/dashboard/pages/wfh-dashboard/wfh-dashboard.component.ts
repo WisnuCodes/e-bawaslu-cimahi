@@ -99,18 +99,18 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
 
     // Setup Columns
     if (!this.facade.canViewOthersPresensi()) {
-      this.presensiDisplayedColumns = ['tanggal', 'jam_masuk', 'foto_masuk', 'status_ci', 'jam_keluar', 'foto_keluar', 'status_co', 'keterangan_izin', 'lokasi'];
+      this.presensiDisplayedColumns = ['jabatan', 'tanggal', 'jam_masuk', 'foto_masuk', 'status_ci', 'jam_keluar', 'foto_keluar', 'status_co', 'keterangan_izin', 'lokasi'];
     } else {
-      this.presensiDisplayedColumns = ['nama', 'tanggal', 'jam_masuk', 'foto_masuk', 'status_ci', 'jam_keluar', 'foto_keluar', 'status_co', 'keterangan_izin', 'lokasi'];
+      this.presensiDisplayedColumns = ['nama', 'jabatan', 'tanggal', 'jam_masuk', 'foto_masuk', 'status_ci', 'jam_keluar', 'foto_keluar', 'status_co', 'keterangan_izin', 'lokasi'];
       if (this.facade.isAdmin()) {
         this.presensiDisplayedColumns.push('aksi');
       }
     }
 
-    if (this.facade.canApprove()) {
-      this.worklogDisplayedColumns = ['nama', 'tanggal', 'aktivitas', 'lampiran', 'status', 'aksi'];
+    if (this.facade.canApprove() || this.facade.canViewOthersWorklog()) {
+      this.worklogDisplayedColumns = ['nama', 'jabatan', 'tanggal', 'aktivitas', 'lampiran', 'status', 'aksi'];
     } else {
-      this.worklogDisplayedColumns = ['tanggal', 'aktivitas', 'lampiran', 'status', 'aksi'];
+      this.worklogDisplayedColumns = ['jabatan', 'tanggal', 'aktivitas', 'lampiran', 'status', 'aksi'];
     }
 
     this.facade.loadStatusHariIni();
@@ -325,27 +325,29 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
 
   // CSV Exports
   exportPresensi() {
-    let csvData = 'Nama Pegawai,Waktu Check-In,Status CI,Waktu Check-Out,Status CO,Koordinat GPS\n';
+    let csvData = 'Nama Pegawai,Jabatan,Waktu Check-In,Status CI,Waktu Check-Out,Status CO,Koordinat GPS\n';
     this.facade.presensiData().forEach((p: any) => {
       const nama = `"${p.nama_pegawai || 'Anda'}"`;
+      const jabatan = `"${p.role || '-'}"`;
       const ci = `"${p.timestamp_checkin || '-'}"`;
       const stCI = `"${p.status_ci || 'Hadir'}"`;
       const co = `"${p.timestamp_checkout || '-'}"`;
       const stCO = `"${p.status_co || '-'}"`;
       const gps = `"${p.gps_koordinat || '-'}"`;
-      csvData += `${nama},${ci},${stCI},${co},${stCO},${gps}\n`;
+      csvData += `${nama},${jabatan},${ci},${stCI},${co},${stCO},${gps}\n`;
     });
     this.triggerDownload(csvData, `Laporan_Presensi_${new Date().toISOString().split('T')[0]}.csv`);
   }
 
   exportWorklog() {
-    let csvData = 'Nama Pegawai,Tanggal,Aktivitas,Status\n';
+    let csvData = 'Nama Pegawai,Jabatan,Tanggal,Aktivitas,Status\n';
     this.facade.worklogData().forEach((log: any) => {
       const nama = `"${log.nama_pegawai || 'Anda'}"`;
+      const jabatan = `"${log.role || '-'}"`;
       const tgl = `"${log.created_at || '-'}"`;
       const aktivitas = `"${(log.rincian_aktivitas || log.activity || '').replace(/"/g, '""')}"`;
       const status = `"${log.status_approval || 'Pending'}"`;
-      csvData += `${nama},${tgl},${aktivitas},${status}\n`;
+      csvData += `${nama},${jabatan},${tgl},${aktivitas},${status}\n`;
     });
     this.triggerDownload(csvData, `Laporan_Worklog_${new Date().toISOString().split('T')[0]}.csv`);
   }

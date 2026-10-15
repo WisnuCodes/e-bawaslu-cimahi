@@ -11,8 +11,9 @@
 .table-body { min-width: 0; }
 .table-responsive { width: 100%; overflow-x: auto; }
 .table-responsive:focus-visible { outline: 2px solid var(--color-primary); outline-offset: -2px; }
-.data-table { width: 100%; min-width: 800px; }
+.data-table { width: 100%; min-width: 900px; }
 .table-row:hover { background: var(--color-background); }
+.role-badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; line-height: 1.4; white-space: nowrap; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
 .status-chip { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; line-height: 1.5; white-space: nowrap; background: var(--color-background); color: var(--color-text-muted); }
 .status-hadir, .status-approved { background: #edf7f0; color: #166534; }
 .status-terlambat, .status-pulang-cepat, .status-pending { background: #fff7e6; color: #855510; }

@@ -39,6 +39,14 @@
           <td mat-cell *matCellDef="let element"> {{ element.nama_pegawai || 'Anda' }} </td>
         </ng-container>
 
+        <!-- Jabatan Column -->
+        <ng-container matColumnDef="jabatan">
+          <th mat-header-cell *matHeaderCellDef> Jabatan </th>
+          <td mat-cell *matCellDef="let element">
+            <span class="role-badge">{{ element.role || '-' }}</span>
+          </td>
+        </ng-container>
+
         <!-- Tanggal Column -->
         <ng-container matColumnDef="tanggal">
           <th mat-header-cell *matHeaderCellDef> Tanggal </th>
@@ -62,7 +70,7 @@
         <ng-container matColumnDef="lampiran">
           <th mat-header-cell *matHeaderCellDef> Lampiran </th>
           <td mat-cell *matCellDef="let element">
-            <a *ngIf="element.attachment_url" [href]="getAttachmentUrl(element.attachment_url)" target="_blank" class="file-link">
+            <a *ngIf="element.attachment_url" [href]="getAttachmentUrl(element.attachment_url)" target="_blank" rel="noopener noreferrer" class="file-link" title="Buka lampiran file di tab baru">
               <mat-icon class="file-icon">attach_file</mat-icon> Lihat File
             </a>
             <span *ngIf="!element.attachment_url" class="text-empty">-</span>

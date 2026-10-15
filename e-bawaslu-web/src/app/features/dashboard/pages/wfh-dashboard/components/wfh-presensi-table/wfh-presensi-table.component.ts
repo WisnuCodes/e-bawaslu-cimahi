@@ -109,7 +109,7 @@ export class WfhPresensiTableComponent implements AfterViewInit {
     if (!path) return '';
     if (/^https?:\/\//i.test(path)) return path;
     const baseUrl = environment.apiUrl.replace(/\/api\/?$/, '');
-    const relativePath = path.replace(/^\/+/, '').replace(/^storage\//, '');
+    const relativePath = path.replace(/\\/g, '/').replace(/^\/+/, '').replace(/^storage\//, '');
     return `${baseUrl}/storage/${relativePath}`;
   }
 

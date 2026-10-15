@@ -25,7 +25,7 @@ class WorklogController extends Controller
 
         $query = Worklog::query()
             ->join('users', 'daily_worklog.user_id', '=', 'users.user_id')
-            ->select('daily_worklog.*', 'users.username as nama_pegawai')
+            ->select('daily_worklog.*', 'users.username as nama_pegawai', 'users.role as role')
             ->orderBy('daily_worklog.tgl_kerja', 'desc');
 
         if (!$canApprove) {
