@@ -36,8 +36,8 @@ class PresensiController extends Controller
         ]);
     }
 
-    private function calculateDistance($lat1, $lon1, $lat2, $lon2) {
-        $earthRadius = 6371; // km
+    private function calculateDistanceInMeters($lat1, $lon1, $lat2, $lon2): float {
+        $earthRadius = 6371000; // Radius bumi dalam meter
         
         $lat1 = deg2rad((float)$lat1);
         $lon1 = deg2rad((float)$lon1);
@@ -50,8 +50,13 @@ class PresensiController extends Controller
         $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
             cos($lat1) * cos($lat2) * pow(sin($lonDelta / 2), 2)));
             
-        return $angle * $earthRadius;
+        return round($angle * $earthRadius);
     }
+
+    private function calculateDistance($lat1, $lon1, $lat2, $lon2) {
+        return $this->calculateDistanceInMeters($lat1, $lon1, $lat2, $lon2) / 1000;
+    }
+
     public function index(Request $request)
     {
         $user = $request->user();
@@ -73,14 +78,17 @@ class PresensiController extends Controller
             $query->where('presensi_wfh.user_id', $user->user_id);
         }
 
-        // Filter berdasarkan start_date dan end_date (jika tidak ada, ambil hari ini)
-        if ($request->has('start_date') && $request->has('end_date')) {
+        // Filter berdasarkan start_date dan end_date (jika tidak difilter, tampilkan seluruh riwayat agar data riwayat tidak tersembunyi)
+        if ($request->filled('start_date') && $request->filled('end_date')) {
             $startDate = Carbon::parse($request->start_date)->startOfDay();
             $endDate = Carbon::parse($request->end_date)->endOfDay();
             $query->whereBetween('timestamp_checkin', [$startDate, $endDate]);
-        } else {
-            $today = Carbon::today();
-            $query->whereDate('timestamp_checkin', $today);
+        } elseif ($request->filled('start_date')) {
+            $startDate = Carbon::parse($request->start_date)->startOfDay();
+            $query->where('timestamp_checkin', '>=', $startDate);
+        } elseif ($request->filled('end_date')) {
+            $endDate = Carbon::parse($request->end_date)->endOfDay();
+            $query->where('timestamp_checkin', '<=', $endDate);
         }
 
         return response()->json([
@@ -182,8 +190,8 @@ class PresensiController extends Controller
             return response()->json(['message' => 'Anda sudah memiliki catatan presensi atau izin hari ini.'], 422);
         }
 
-        // Validasi Koordinat dan Geofence
-        $current = explode(',', $request->gps_koordinat);
+        // Validasi Koordinat dan Geofence Radius
+        $current = array_map('trim', explode(',', $request->gps_koordinat));
         $role = strtolower($user->role);
         $isFieldSupervisor = str_contains($role, 'pkd') || str_contains($role, 'panwascam') || str_contains($role, 'pengawas tps') || str_contains($role, 'ptps');
 
@@ -191,26 +199,26 @@ class PresensiController extends Controller
             if (!$user->koordinat_acuan) {
                 return response()->json(['message' => 'Koordinat acuan belum disetting.', 'errors' => ['gps_koordinat' => ['Koordinat acuan tidak ditemukan.']]], 422);
             }
-            $acuan = explode(',', $user->koordinat_acuan);
+            $acuan = array_map('trim', explode(',', $user->koordinat_acuan));
             if (count($acuan) == 2 && count($current) == 2) {
-                $distance = $this->calculateDistance($acuan[0], $acuan[1], $current[0], $current[1]);
-                if ($distance > 1.0) { // 1 km = 1000 meters
+                $distanceMeters = $this->calculateDistanceInMeters($acuan[0], $acuan[1], $current[0], $current[1]);
+                if ($distanceMeters > 1000) { // 1 km = 1000 meter untuk pengawas lapangan
                     return response()->json([
                         'success' => false,
-                        'message' => 'Presensi ditolak. Anda berada di luar radius penugasan.'
+                        'message' => "Presensi ditolak. Anda berada di luar radius penugasan lapangan (maksimal 1.000 meter). Jarak terdeteksi: {$distanceMeters} meter."
                     ], 403);
                 }
             }
         } else {
-            // Radius 500 meter dari Kantor Bawaslu
+            // Titik Pusat: Kantor Bawaslu Kota Cimahi (-6.871635322140859, 107.54447933887951)
             $acuan = [-6.871635322140859, 107.54447933887951];
             
-            if (!$isWfhDay && $tipeJadwal !== 'Libur' && count($current) == 2) {
-                $distance = $this->calculateDistance($acuan[0], $acuan[1], $current[0], $current[1]);
-                if ($distance > 10.0) { // Toleransi 10 km untuk PC/Laptop
+            if (count($current) == 2) {
+                $distanceMeters = $this->calculateDistanceInMeters($acuan[0], $acuan[1], $current[0], $current[1]);
+                if ($distanceMeters > 100) { // Radius maksimal 100 meter dari Kantor Bawaslu
                     return response()->json([
                         'success' => false,
-                        'message' => 'Presensi ditolak. Hari ini adalah hari WFO dan Anda berada di luar radius dari Kantor Bawaslu. (Lokasi terdeteksi berjarak ' . round($distance * 1000) . ' meter. Titik Anda: ' . implode(',', $current) . ')'
+                        'message' => "Presensi ditolak. Anda berada di luar radius Kantor Bawaslu (maksimal 100 meter dari titik pusat). Lokasi Anda terdeteksi berjarak {$distanceMeters} meter dari Kantor Bawaslu."
                     ], 403);
                 }
             }
@@ -328,8 +336,8 @@ class PresensiController extends Controller
         $tipeJadwal = $this->holidayService->getJadwalType($now);
         $isWfhDay = ($tipeJadwal === 'WFH');
 
-        // Validasi Koordinat dan Geofence
-        $current = explode(',', $request->gps_koordinat);
+        // Validasi Koordinat dan Geofence Radius
+        $current = array_map('trim', explode(',', $request->gps_koordinat));
         $role = strtolower($user->role);
         $isFieldSupervisor = str_contains($role, 'pkd') || str_contains($role, 'panwascam') || str_contains($role, 'pengawas tps') || str_contains($role, 'ptps');
 
@@ -337,26 +345,26 @@ class PresensiController extends Controller
             if (!$user->koordinat_acuan) {
                 return response()->json(['message' => 'Koordinat acuan belum disetting.', 'errors' => ['gps_koordinat' => ['Koordinat acuan tidak ditemukan.']]], 422);
             }
-            $acuan = explode(',', $user->koordinat_acuan);
+            $acuan = array_map('trim', explode(',', $user->koordinat_acuan));
             if (count($acuan) == 2 && count($current) == 2) {
-                $distance = $this->calculateDistance($acuan[0], $acuan[1], $current[0], $current[1]);
-                if ($distance > 1.0) { // 1 km = 1000 meters
+                $distanceMeters = $this->calculateDistanceInMeters($acuan[0], $acuan[1], $current[0], $current[1]);
+                if ($distanceMeters > 1000) { // 1 km = 1000 meter untuk pengawas lapangan
                     return response()->json([
                         'success' => false,
-                        'message' => 'Presensi ditolak. Anda berada di luar radius penugasan.'
+                        'message' => "Check-out ditolak. Anda berada di luar radius penugasan lapangan (maksimal 1.000 meter). Jarak terdeteksi: {$distanceMeters} meter."
                     ], 403);
                 }
             }
         } else {
-            // Radius 500 meter dari Kantor Bawaslu
+            // Titik Pusat: Kantor Bawaslu Kota Cimahi (-6.871635322140859, 107.54447933887951)
             $acuan = [-6.871635322140859, 107.54447933887951];
             
-            if (!$isWfhDay && $tipeJadwal !== 'Libur' && count($current) == 2) {
-                $distance = $this->calculateDistance($acuan[0], $acuan[1], $current[0], $current[1]);
-                if ($distance > 10.0) { // Toleransi 10 km untuk PC/Laptop
+            if (count($current) == 2) {
+                $distanceMeters = $this->calculateDistanceInMeters($acuan[0], $acuan[1], $current[0], $current[1]);
+                if ($distanceMeters > 100) { // Radius maksimal 100 meter dari Kantor Bawaslu
                     return response()->json([
                         'success' => false,
-                        'message' => 'Presensi ditolak. Hari ini adalah hari WFO dan Anda berada di luar radius dari Kantor Bawaslu. (Lokasi terdeteksi berjarak ' . round($distance * 1000) . ' meter. Titik Anda: ' . implode(',', $current) . ')'
+                        'message' => "Check-out ditolak. Anda berada di luar radius Kantor Bawaslu (maksimal 100 meter dari titik pusat). Lokasi Anda terdeteksi berjarak {$distanceMeters} meter dari Kantor Bawaslu."
                     ], 403);
                 }
             }

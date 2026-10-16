@@ -47,14 +47,14 @@ export class WfhDashboardFacade {
 
   // State Signals
   private statePresensi = signal<PresensiState>({
-    data: [], isLoading: false, error: null, startDate: new Date(), endDate: new Date(),
+    data: [], isLoading: false, error: null, startDate: null, endDate: null,
     isCheckedIn: false, isCheckedOut: false, presensiId: null, absence: null,
     isCheckingIn: false, isCheckingOut: false, isGettingLocation: false,
     tipeKehadiranHariIni: null, isLiburHariIni: false, keteranganLibur: null
   });
 
   private stateWorklog = signal<WorklogState>({
-    data: [], isLoading: false, error: null, startDate: new Date(), endDate: new Date(),
+    data: [], isLoading: false, error: null, startDate: null, endDate: null,
     isSubmitting: false
   });
 
@@ -96,7 +96,7 @@ export class WfhDashboardFacade {
   currentUser = computed(() => this.authService.currentUser());
 
   private showMessage(message: string) {
-    this.snackBar.open(message, 'Tutup', { duration: 4000, horizontalPosition: 'end', verticalPosition: 'bottom' });
+    this.snackBar.open(message, 'Tutup', { duration: 6000, horizontalPosition: 'end', verticalPosition: 'bottom' });
   }
 
   private dateOnly(date: Date | null): string | undefined {

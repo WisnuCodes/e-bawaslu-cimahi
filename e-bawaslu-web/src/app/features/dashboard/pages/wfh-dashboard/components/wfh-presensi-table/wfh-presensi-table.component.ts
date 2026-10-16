@@ -77,6 +77,12 @@ export class WfhPresensiTableComponent implements AfterViewInit {
     this.filterDate.emit({ startDate: this.startDate, endDate: this.endDate });
   }
 
+  clearDateFilter() {
+    this.startDate = null;
+    this.endDate = null;
+    this.onFilterDate();
+  }
+
   onExport() {
     this.exportToCSV.emit();
   }

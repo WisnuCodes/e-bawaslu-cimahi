@@ -172,8 +172,7 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
       next: () => {
         this.snackBar.open(editing ? 'Worklog berhasil diperbarui.' : 'Worklog berhasil dikirim.', 'Tutup', { duration: 4000 });
         this.cancelEditWorklog();
-        if (editing) this.facade.loadWorklogs();
-        else this.facade.loadWorklogs(new Date(), new Date());
+        this.facade.loadWorklogs();
       },
       error: (err) => {
         this.worklogError = err.error?.errors
@@ -312,7 +311,7 @@ export class WfhDashboardComponent implements OnInit, OnDestroy {
       next: (res) => {
         this.snackBar.open(res.message || 'Pengajuan berhasil dicatat.', 'Tutup', { duration: 4000 });
         this.cancelIzin();
-        this.facade.loadPresensi(new Date(), new Date());
+        this.facade.loadPresensi();
       },
       error: (err) => {
         const errors = err.error?.errors;

@@ -61,6 +61,10 @@
         <p class="action-description">
           {{ absence ? 'Anda tercatat ' + absence.toLowerCase() + ' hari ini. Surat dan keterangan tersedia di riwayat presensi.' : isCheckedIn && isCheckedOut ? 'Presensi hari ini sudah lengkap.' : (isCheckedIn ? 'Anda sedang bekerja. Jangan lupa check out.' : 'Silakan lakukan check in untuk memulai hari kerja.') }}
         </p>
+        <div class="geo-radius-info" *ngIf="!absence">
+          <mat-icon>near_me</mat-icon>
+          <span>Radius presensi: Maksimal 100 meter dari Kantor Bawaslu Cimahi</span>
+        </div>
       </div>
 
       <button mat-flat-button color="primary" class="action-btn" *ngIf="!absence" [disabled]="isCheckedIn" (click)="onOpenCamera('checkin')">

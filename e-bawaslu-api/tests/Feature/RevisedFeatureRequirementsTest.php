@@ -37,4 +37,19 @@ class RevisedFeatureRequirementsTest extends TestCase
         $this->assertTrue(Presensi::isWithinGeofence(-6.906, 107.533, -6.900, 107.533, 1000));
         $this->assertFalse(Presensi::isWithinGeofence(-6.906, 107.533, -6.890, 107.533, 1000));
     }
+
+    public function test_presensi_geofence_validates_100m_bawaslu_radius(): void
+    {
+        $bawasluLat = -6.871635;
+        $bawasluLon = 107.544479;
+
+        // Titik berjarak ~35 meter: di dalam radius 100m
+        $this->assertTrue(Presensi::isWithinGeofence($bawasluLat, $bawasluLon, -6.871635, 107.544800, 100));
+
+        // Titik berjarak ~4.2 km: di luar radius 100m
+        $this->assertFalse(Presensi::isWithinGeofence($bawasluLat, $bawasluLon, -6.853854, 107.510951, 100));
+
+        // Titik berjarak ~200 meter: di luar radius 100m
+        $this->assertFalse(Presensi::isWithinGeofence($bawasluLat, $bawasluLon, -6.873500, 107.544479, 100));
+    }
 }

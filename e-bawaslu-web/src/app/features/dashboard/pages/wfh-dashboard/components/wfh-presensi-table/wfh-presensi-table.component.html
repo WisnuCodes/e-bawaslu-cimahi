@@ -13,6 +13,9 @@
           <input matStartDate [(ngModel)]="startDate" placeholder="Mulai">
           <input matEndDate [(ngModel)]="endDate" placeholder="Selesai" (dateChange)="onFilterDate()">
         </mat-date-range-input>
+        <button *ngIf="startDate || endDate" mat-icon-button matSuffix (click)="clearDateFilter()" matTooltip="Reset Filter Tanggal" aria-label="Reset Filter Tanggal">
+          <mat-icon>close</mat-icon>
+        </button>
         <mat-datepicker-toggle matIconSuffix [for]="pickerPresensi"></mat-datepicker-toggle>
         <mat-date-range-picker #pickerPresensi></mat-date-range-picker>
       </mat-form-field>

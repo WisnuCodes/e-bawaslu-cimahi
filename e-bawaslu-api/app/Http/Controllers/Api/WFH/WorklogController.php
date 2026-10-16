@@ -32,15 +32,18 @@ class WorklogController extends Controller
             $query->where('daily_worklog.user_id', $user->user_id);
         }
 
-        // Filter berdasarkan start_date dan end_date (jika tidak ada, ambil hari ini)
-        if ($request->has('start_date') && $request->has('end_date')) {
+        // Filter berdasarkan start_date dan end_date (jika tidak difilter, tampilkan seluruh riwayat)
+        if ($request->filled('start_date') && $request->filled('end_date')) {
             $startDate = Carbon::parse($request->start_date)->startOfDay();
             $endDate = Carbon::parse($request->end_date)->endOfDay();
             $query->whereDate('daily_worklog.tgl_kerja', '>=', $startDate->toDateString())
                 ->whereDate('daily_worklog.tgl_kerja', '<=', $endDate->toDateString());
-        } else {
-            $today = Carbon::today();
-            $query->whereDate('daily_worklog.tgl_kerja', $today);
+        } elseif ($request->filled('start_date')) {
+            $startDate = Carbon::parse($request->start_date)->startOfDay();
+            $query->whereDate('daily_worklog.tgl_kerja', '>=', $startDate->toDateString());
+        } elseif ($request->filled('end_date')) {
+            $endDate = Carbon::parse($request->end_date)->endOfDay();
+            $query->whereDate('daily_worklog.tgl_kerja', '<=', $endDate->toDateString());
         }
         
         $worklogs = $query->get();
