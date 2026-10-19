@@ -209,16 +209,17 @@ class PresensiController extends Controller
                     ], 403);
                 }
             }
-        } else {
-            // Titik Pusat: Kantor Bawaslu Kota Cimahi (-6.871635322140859, 107.54447933887951)
+        } elseif (!$isWfhDay) {
+            // Saat WFO (atau Lembur di kantor), Titik Pusat: Kantor Bawaslu Kota Cimahi (-6.871635322140859, 107.54447933887951)
+            // Saat WFH, staf absen dari rumah masing-masing sehingga tidak dibatasi radius 100 meter kantor
             $acuan = [-6.871635322140859, 107.54447933887951];
             
             if (count($current) == 2) {
                 $distanceMeters = $this->calculateDistanceInMeters($acuan[0], $acuan[1], $current[0], $current[1]);
-                if ($distanceMeters > 100) { // Radius maksimal 100 meter dari Kantor Bawaslu
+                if ($distanceMeters > 100) { // Radius maksimal 100 meter dari Kantor Bawaslu saat WFO
                     return response()->json([
                         'success' => false,
-                        'message' => "Presensi ditolak. Anda berada di luar radius Kantor Bawaslu (maksimal 100 meter dari titik pusat). Lokasi Anda terdeteksi berjarak {$distanceMeters} meter dari Kantor Bawaslu."
+                        'message' => "Presensi WFO ditolak. Anda berada di luar radius Kantor Bawaslu (maksimal 100 meter dari titik pusat). Lokasi Anda terdeteksi berjarak {$distanceMeters} meter dari Kantor Bawaslu."
                     ], 403);
                 }
             }
@@ -334,7 +335,7 @@ class PresensiController extends Controller
         $todayDate = $now->format('Y-m-d');
 
         $tipeJadwal = $this->holidayService->getJadwalType($now);
-        $isWfhDay = ($tipeJadwal === 'WFH');
+        $isWfhDay = ($tipeJadwal === 'WFH' || $presensi->tipe_kehadiran === 'WFH');
 
         // Validasi Koordinat dan Geofence Radius
         $current = array_map('trim', explode(',', $request->gps_koordinat));
@@ -355,16 +356,17 @@ class PresensiController extends Controller
                     ], 403);
                 }
             }
-        } else {
-            // Titik Pusat: Kantor Bawaslu Kota Cimahi (-6.871635322140859, 107.54447933887951)
+        } elseif (!$isWfhDay) {
+            // Saat WFO (atau Lembur di kantor), Titik Pusat: Kantor Bawaslu Kota Cimahi (-6.871635322140859, 107.54447933887951)
+            // Saat WFH, staf check-out dari rumah masing-masing sehingga tidak dibatasi radius 100 meter kantor
             $acuan = [-6.871635322140859, 107.54447933887951];
             
             if (count($current) == 2) {
                 $distanceMeters = $this->calculateDistanceInMeters($acuan[0], $acuan[1], $current[0], $current[1]);
-                if ($distanceMeters > 100) { // Radius maksimal 100 meter dari Kantor Bawaslu
+                if ($distanceMeters > 100) { // Radius maksimal 100 meter dari Kantor Bawaslu saat WFO
                     return response()->json([
                         'success' => false,
-                        'message' => "Check-out ditolak. Anda berada di luar radius Kantor Bawaslu (maksimal 100 meter dari titik pusat). Lokasi Anda terdeteksi berjarak {$distanceMeters} meter dari Kantor Bawaslu."
+                        'message' => "Check-out WFO ditolak. Anda berada di luar radius Kantor Bawaslu (maksimal 100 meter dari titik pusat). Lokasi Anda terdeteksi berjarak {$distanceMeters} meter dari Kantor Bawaslu."
                     ], 403);
                 }
             }

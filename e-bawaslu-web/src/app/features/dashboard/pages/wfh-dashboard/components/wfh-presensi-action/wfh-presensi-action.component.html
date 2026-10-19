@@ -63,7 +63,11 @@
         </p>
         <div class="geo-radius-info" *ngIf="!absence">
           <mat-icon>near_me</mat-icon>
-          <span>Radius presensi: Maksimal 100 meter dari Kantor Bawaslu Cimahi</span>
+          <span>
+            {{ tipeKehadiran === 'WFH'
+              ? 'Jadwal WFH: Presensi dari lokasi masing-masing (tanpa batas radius kantor)'
+              : 'Radius presensi WFO: Maksimal 100 meter dari Kantor Bawaslu Cimahi' }}
+          </span>
         </div>
       </div>
 

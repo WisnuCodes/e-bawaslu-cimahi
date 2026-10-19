@@ -24,6 +24,7 @@ export class WfhPresensiActionComponent implements OnDestroy {
   @Input() isCameraOpen = false;
   @Input() captureMode: 'checkin' | 'checkout' = 'checkin';
   @Input() isCheckoutDisabled = false;
+  @Input() tipeKehadiran: string | null = null;
 
   @Output() openCamera = new EventEmitter<'checkin' | 'checkout'>();
   @Output() stopCamera = new EventEmitter<void>();
