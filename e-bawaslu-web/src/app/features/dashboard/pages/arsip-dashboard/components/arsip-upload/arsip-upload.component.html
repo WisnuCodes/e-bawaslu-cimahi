@@ -86,10 +86,13 @@
           <span class="file-name" >
             {{ uploadFile ? uploadFile.name : 'Belum ada file dipilih' }}
           </span>
-          <input class="file-hidden" type="file" #uploadFileInput (change)="onUploadFileSelected($event)" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"  placeholder="...">
+          <input class="file-hidden" type="file" #uploadFileInput (change)="onUploadFileSelected($event)" accept="*/*" placeholder="...">
         </div>
-        <!-- Pesan Error Custom untuk Berkas -->
-        <p *ngIf="fileError" class="muted-text file-error-text">{{ fileError }}</p>
+        <!-- Pesan Peringatan Format Berkas Tidak Didukung -->
+        <div *ngIf="fileError" class="file-error-alert" role="alert">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ fileError }}</span>
+        </div>
         
         <app-file-preview [file]="uploadFile"></app-file-preview>
       </div>

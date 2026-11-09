@@ -1,4 +1,5 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ArsipService, ArsipItem, VersionHistoryItem } from '../../../../core/services/arsip/arsip.service';
 import { MasterDataService, Divisi } from '../../../../core/services/master-data.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -17,8 +18,10 @@ export interface ArsipState {
   showRevisiModal: boolean;
   showVersionModal: boolean;
   showDeleteModal: boolean;
+  showPreviewModal: boolean;
 
   selectedArsip: ArsipItem | null;
+  selectedPreviewDoc: ArsipItem | null;
   versionHistory: VersionHistoryItem[];
   
   uploadError: string;
@@ -28,6 +31,14 @@ export interface ArsipState {
   isDeleting: boolean;
   isDownloading: { [id: string]: boolean };
   arsipLogs: any[];
+
+  // Viewer State
+  isPreviewLoading: boolean;
+  previewRawUrl: string;
+  previewSafeUrl: SafeResourceUrl | null;
+  previewKind: 'pdf' | 'image' | 'other';
+  previewExtension: string;
+  previewZoom: number;
 }
 
 @Injectable({
@@ -38,6 +49,7 @@ export class ArsipFacade {
   private masterDataService = inject(MasterDataService);
   public authService = inject(AuthService);
   private snackBar = inject(MatSnackBar);
+  private sanitizer = inject(DomSanitizer);
 
   // Initial State
   private state = signal<ArsipState>({
@@ -51,7 +63,9 @@ export class ArsipFacade {
     showRevisiModal: false,
     showVersionModal: false,
     showDeleteModal: false,
+    showPreviewModal: false,
     selectedArsip: null,
+    selectedPreviewDoc: null,
     versionHistory: [],
     uploadError: '',
     isLoadingVersions: false,
@@ -59,7 +73,13 @@ export class ArsipFacade {
     isSubmittingRevisi: false,
     isDeleting: false,
     isDownloading: {},
-    arsipLogs: []
+    arsipLogs: [],
+    isPreviewLoading: false,
+    previewRawUrl: '',
+    previewSafeUrl: null,
+    previewKind: 'pdf',
+    previewExtension: 'pdf',
+    previewZoom: 100
   });
 
   // Selectors
@@ -74,7 +94,9 @@ export class ArsipFacade {
   readonly showRevisiModal = computed(() => this.state().showRevisiModal);
   readonly showVersionModal = computed(() => this.state().showVersionModal);
   readonly showDeleteModal = computed(() => this.state().showDeleteModal);
+  readonly showPreviewModal = computed(() => this.state().showPreviewModal);
   readonly selectedArsip = computed(() => this.state().selectedArsip);
+  readonly selectedPreviewDoc = computed(() => this.state().selectedPreviewDoc);
   readonly versionHistory = computed(() => this.state().versionHistory);
   readonly isLoadingVersions = computed(() => this.state().isLoadingVersions);
   readonly isUploading = computed(() => this.state().isUploading);
@@ -82,6 +104,14 @@ export class ArsipFacade {
   readonly isDeleting = computed(() => this.state().isDeleting);
   readonly isDownloading = computed(() => this.state().isDownloading);
   readonly arsipLogs = computed(() => this.state().arsipLogs);
+
+  // Viewer Selectors
+  readonly isPreviewLoading = computed(() => this.state().isPreviewLoading);
+  readonly previewSafeUrl = computed(() => this.state().previewSafeUrl);
+  readonly previewRawUrl = computed(() => this.state().previewRawUrl);
+  readonly previewKind = computed(() => this.state().previewKind);
+  readonly previewExtension = computed(() => this.state().previewExtension);
+  readonly previewZoom = computed(() => this.state().previewZoom);
 
   readonly canViewLogs = computed(() => this.authService.canAccessAuditLog);
 
@@ -155,7 +185,7 @@ export class ArsipFacade {
     }
   }
 
-  setModal(key: 'showUploadModal' | 'showRevisiModal' | 'showVersionModal' | 'showDeleteModal', value: boolean) {
+  setModal(key: 'showUploadModal' | 'showRevisiModal' | 'showVersionModal' | 'showDeleteModal' | 'showPreviewModal', value: boolean) {
     this.updateState({ [key]: value, ...(key === 'showUploadModal' ? { uploadError: '' } : {}) });
   }
 
@@ -228,6 +258,86 @@ export class ArsipFacade {
     });
   }
 
+  // =====================================
+  // PRATINJAU DOKUMEN DIGITAL (VIEWER)
+  // =====================================
+
+  openPreview(doc: ArsipItem) {
+    this.closePreview();
+
+    const ext = doc.file_path?.split('.').pop()?.toLowerCase() || 'pdf';
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
+    let kind: 'pdf' | 'image' | 'other' = 'other';
+    if (ext === 'pdf') {
+      kind = 'pdf';
+    } else if (imageExtensions.includes(ext)) {
+      kind = 'image';
+    }
+
+    this.updateState({
+      showPreviewModal: true,
+      selectedPreviewDoc: doc,
+      isPreviewLoading: true,
+      previewKind: kind,
+      previewExtension: ext.toUpperCase(),
+      previewZoom: 100
+    });
+
+    this.arsipService.previewDocument(doc.id).subscribe({
+      next: (blob: Blob) => {
+        let mime = blob.type;
+        if (!mime || mime === 'application/octet-stream') {
+          if (kind === 'pdf') mime = 'application/pdf';
+          else if (ext === 'png') mime = 'image/png';
+          else if (ext === 'jpg' || ext === 'jpeg') mime = 'image/jpeg';
+        }
+        const safeBlob = new Blob([blob], { type: mime });
+        const rawUrl = URL.createObjectURL(safeBlob);
+        const safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(rawUrl);
+
+        this.updateState({
+          isPreviewLoading: false,
+          previewRawUrl: rawUrl,
+          previewSafeUrl: safeUrl
+        });
+
+        if (this.canViewLogs()) this.loadLogs();
+      },
+      error: () => {
+        this.updateState({ isPreviewLoading: false });
+        this.showNotification('Gagal memuat pratinjau berkas digital.', 'error');
+      }
+    });
+  }
+
+  closePreview() {
+    const currentRawUrl = this.state().previewRawUrl;
+    if (currentRawUrl) {
+      URL.revokeObjectURL(currentRawUrl);
+    }
+    this.updateState({
+      showPreviewModal: false,
+      selectedPreviewDoc: null,
+      isPreviewLoading: false,
+      previewRawUrl: '',
+      previewSafeUrl: null,
+      previewZoom: 100
+    });
+  }
+
+  changeZoom(delta: number) {
+    const newZoom = Math.min(300, Math.max(50, this.state().previewZoom + delta));
+    this.updateState({ previewZoom: newZoom });
+  }
+
+  resetZoom() {
+    this.updateState({ previewZoom: 100 });
+  }
+
+  // =====================================
+  // UNDUH & HAPUS
+  // =====================================
+
   downloadDocument(doc: ArsipItem) {
     const isDownloading = { ...this.state().isDownloading, [doc.id]: true };
     this.updateState({ isDownloading });
@@ -237,13 +347,16 @@ export class ArsipFacade {
         const newIsDownloading = { ...this.state().isDownloading, [doc.id]: false };
         this.updateState({ isDownloading: newIsDownloading });
         
-        const url = window.URL.createObjectURL(blob);
+        const ext = doc.file_path.split('.').pop() || 'pdf';
+        const fileBlob = new Blob([blob], { type: ext === 'pdf' ? 'application/pdf' : (blob.type || 'application/octet-stream') });
+        const url = window.URL.createObjectURL(fileBlob);
         const a = document.createElement('a');
         a.href = url;
-        const ext = doc.file_path.split('.').pop() || 'pdf';
         a.download = `${doc.no_surat.replace(/\//g, '_')}.${ext}`;
+        document.body.appendChild(a);
         a.click();
-        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        setTimeout(() => window.URL.revokeObjectURL(url), 2000);
         if (this.canViewLogs()) this.loadLogs();
       },
       error: () => {

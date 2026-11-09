@@ -44,7 +44,7 @@ export class ArsipUploadComponent implements OnInit {
   klasifikasiList = ['Biasa', 'Penting', 'Rahasia', 'Sangat Rahasia'];
   jenjangList = ['Panwascam', 'PKD', 'PTPS'];
 
-    constructor() {
+  constructor() {
     this.uploadForm = this.fb.group({
       divisi_id: ['', Validators.required],
       divisi_tujuan: [null],
@@ -90,17 +90,54 @@ export class ArsipUploadComponent implements OnInit {
     this.uploadFile = null;
     this.fileError = '';
     if (!file) return;
-    if (!/\.(pdf|docx?|jpe?g|png)$/i.test(file.name) || file.size > 5 * 1024 * 1024) {
-      this.fileError = 'Pilih PDF, DOC, DOCX, JPG, atau PNG dengan ukuran maksimal 5 MB.';
+
+    const fileName = file.name.toLowerCase();
+    const ext = fileName.split('.').pop() || '';
+
+    // Menolak file format exe, zip, dan executable / archive lainnya
+    if (['zip', 'exe', 'rar', '7z', 'tar', 'gz', 'bat', 'cmd', 'sh', 'bin', 'msi', 'com'].includes(ext)) {
+      this.fileError = `Format berkas tidak didukung. Sistem menolak pemilihan file berkas .${ext}. Berkas arsip tidak boleh berupa arsip terkompresi (.zip) atau berkas program/executable (.exe). Harap unggah dokumen dengan format PDF, DOC, DOCX, JPG, atau PNG.`;
       input.value = '';
+      this.facade.showNotification(`Format berkas tidak didukung: Pemilihan file .${ext} ditolak oleh sistem.`, 'error');
       return;
     }
+
+    // Validasi format dokumen yang diizinkan (PDF, DOC, DOCX, JPG, JPEG, PNG)
+    if (!/\.(pdf|docx?|jpe?g|png)$/i.test(file.name)) {
+      this.fileError = 'Format berkas tidak didukung. Harap pilih dokumen dengan format PDF, DOC, DOCX, JPG, atau PNG.';
+      input.value = '';
+      this.facade.showNotification('Format berkas tidak didukung. Harap gunakan format berkas dokumen resmi.', 'error');
+      return;
+    }
+
+    // Validasi batas ukuran file (maks 5 MB)
+    if (file.size > 5 * 1024 * 1024) {
+      this.fileError = 'Ukuran berkas melebihi batas maksimal 5 MB.';
+      input.value = '';
+      this.facade.showNotification('Ukuran berkas melebihi batas maksimal 5 MB.', 'error');
+      return;
+    }
+
     this.uploadFile = file;
   }
 
   submitUpload() {
     if (this.facade.isUploading()) return;
-    if (this.uploadForm.invalid || !this.uploadFile || (this.uploadForm.value.kategori === 'MHP' && !this.uploadForm.value.jenjang_pengawas)) {
+
+    if (!this.uploadFile) {
+      this.facade.showNotification('Mohon lengkapi semua field dan sertakan file dokumen yang valid.', 'error');
+      return;
+    }
+
+    const fileName = this.uploadFile.name.toLowerCase();
+    const ext = fileName.split('.').pop() || '';
+    if (['zip', 'exe'].includes(ext) || !/\.(pdf|docx?|jpe?g|png)$/i.test(this.uploadFile.name)) {
+      this.fileError = 'Format berkas tidak didukung. Berkas format .zip atau .exe ditolak oleh sistem.';
+      this.facade.showNotification('Format berkas tidak didukung. Unggahan ditolak.', 'error');
+      return;
+    }
+
+    if (this.uploadForm.invalid || (this.uploadForm.value.kategori === 'MHP' && !this.uploadForm.value.jenjang_pengawas)) {
       this.facade.showNotification('Mohon lengkapi semua field dan sertakan file dokumen.', 'error');
       return;
     }

@@ -21,19 +21,31 @@ class AuthController extends Controller
         // Dalam skenario nyata, ini akan me-redirect ke Keycloak login page
         // return redirect()->away('https://keycloak.bawaslu.go.id/auth/...');
 
-        // Untuk simulasi, kita langsung menerima kredensial dasar dan mengembalikan OTP requirement
+        // Menerima kredensial dasar (email atau username) dan mengembalikan OTP requirement
         $request->validate([
-            'email' => 'required|email',
+            'email' => 'required|string',
             'password' => 'required',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $identifier = trim($request->email ?? $request->username ?? '');
+
+        // Dukung pencarian case-insensitive pada kolom email atau username
+        $user = User::whereRaw('LOWER(email) = ?', [strtolower($identifier)])
+            ->orWhereRaw('LOWER(username) = ?', [strtolower($identifier)])
+            ->first();
 
         if (! $user || ! Hash::check($request->password, $user->password_hash)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Kredensial tidak valid'
             ], 401);
+        }
+
+        if (isset($user->status_aktif) && !$user->status_aktif) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun tidak aktif. Silakan hubungi Administrator.'
+            ], 403);
         }
 
         // Generate Real OTP

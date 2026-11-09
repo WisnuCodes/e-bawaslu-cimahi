@@ -56,6 +56,11 @@ class User extends Authenticatable implements JWTSubject
         ];
     }
 
+    public function getAuthPassword()
+    {
+        return $this->password_hash;
+    }
+
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
      *

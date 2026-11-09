@@ -1,20 +1,37 @@
-<header class="auth-heading">
-  <p class="auth-step">VERIFIKASI AKUN</p>
-  <div class="security-mark"><mat-icon>phonelink_lock</mat-icon></div>
-  <h2>Verifikasi OTP</h2>
-  <p>Masukkan kode OTP 6 digit untuk menyelesaikan proses masuk ke akun Anda.</p>
+<header class="auth-heading mfa-heading">
+  <div class="mfa-icon-badge">
+    <mat-icon>shield</mat-icon>
+  </div>
+  <h2>Verifikasi Dua Langkah</h2>
+  <p>Masukkan 6 digit kode OTP autentikasi untuk memvalidasi akses akun Anda.</p>
 </header>
+
 <form class="mfa-form" (ngSubmit)="verifyOtp()">
   <mat-form-field appearance="outline" class="auth-field otp-input-field">
-    <mat-label>Kode OTP</mat-label>
+    <mat-label>Kode Autentikasi (6 Digit)</mat-label>
     <input matInput name="otp" [(ngModel)]="otpCode" placeholder="000000" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" class="otp-input-text" aria-describedby="otp-help">
   </mat-form-field>
-  <p id="otp-help" class="otp-help">Pastikan seluruh digit kode sudah terisi.</p>
+
+  <p id="otp-help" class="otp-help">
+    <mat-icon>info</mat-icon>
+    <span>Pastikan seluruh 6 digit kode verifikasi telah terisi.</span>
+  </p>
+
   <button mat-flat-button type="submit" [disabled]="!isOtpValid || isLoading()" class="auth-button">
     <mat-spinner *ngIf="isLoading()" diameter="18"></mat-spinner>
-    <span>{{ isLoading() ? 'Memverifikasi...' : 'Verifikasi & masuk' }}</span>
+    <span>{{ isLoading() ? 'Memvalidasi Kode...' : 'Verifikasi & Masuk' }}</span>
     <mat-icon *ngIf="!isLoading()" iconPositionEnd>arrow_forward</mat-icon>
   </button>
-  <div class="auth-error" *ngIf="errorMsg" role="alert"><mat-icon>error_outline</mat-icon><span>{{ errorMsg }}</span></div>
-  <a class="back-link" routerLink="/auth/login"><mat-icon>arrow_back</mat-icon>Kembali ke halaman masuk</a>
+
+  <div class="auth-error" *ngIf="errorMsg" role="alert">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ errorMsg }}</span>
+  </div>
+
+  <div class="mfa-footer-action">
+    <a class="back-link" routerLink="/auth/login">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Kembali ke Halaman Masuk</span>
+    </a>
+  </div>
 </form>

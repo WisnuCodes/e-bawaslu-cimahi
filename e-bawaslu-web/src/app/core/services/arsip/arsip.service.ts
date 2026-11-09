@@ -63,6 +63,10 @@ export class ArsipService {
     return this.api.get<{ success: boolean; data: { current_version: ArsipItem; history: VersionHistoryItem[] } }>(`/arsip/${id}/versions`);
   }
 
+  previewDocument(id: string): Observable<Blob> {
+    return this.api.getBlob(`/arsip/${id}/preview`);
+  }
+
   downloadWatermarked(id: string): Observable<Blob> {
     return this.api.getBlob(`/arsip/${id}/download`);
   }

@@ -90,6 +90,11 @@
         <ng-container matColumnDef="aksi">
           <th class="actions-column" mat-header-cell *matHeaderCellDef > Aksi </th>
           <td class="actions-cell" mat-cell *matCellDef="let doc" >
+            <!-- Pratinjau Dokumen Digital Langsung di Browser -->
+            <button mat-icon-button color="primary" matTooltip="Pratinjau Dokumen" aria-label="Pratinjau Dokumen" (click)="facade.openPreview(doc)">
+              <mat-icon>visibility</mat-icon>
+            </button>
+
             <!-- Download Watermarked -->
             <button mat-icon-button color="primary" matTooltip="Unduh Berkas dengan Dynamic Watermark" aria-label="Unduh Berkas dengan Dynamic Watermark" [disabled]="facade.isDownloading()[doc.id]" (click)="facade.downloadDocument(doc)">
               <mat-icon *ngIf="!facade.isDownloading()[doc.id]">file_download</mat-icon>
@@ -203,7 +208,7 @@
       </mat-form-field>
 
       <div>
-        <label class="file-label" >Pilih Berkas Baru (.pdf, .docx)</label>
+        <label class="file-label" >Pilih Berkas Baru (PDF, DOC, DOCX, JPG, PNG; maks. 5 MB)</label>
         <div class="file-upload" >
           <button type="button" mat-stroked-button color="primary" (click)="revisiFileInput.click()">
             <mat-icon>attach_file</mat-icon> Pilih Berkas
@@ -211,7 +216,12 @@
           <span class="file-name" >
             {{ revisiFile ? revisiFile.name : 'Belum ada file dipilih' }}
           </span>
-          <input class="file-hidden" type="file" #revisiFileInput (change)="onRevisiFileSelected($event)" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"  placeholder="...">
+          <input class="file-hidden" type="file" #revisiFileInput (change)="onRevisiFileSelected($event)" accept="*/*" placeholder="...">
+        </div>
+        <!-- Pesan Peringatan Format Berkas Tidak Didukung -->
+        <div *ngIf="revisiFileError" class="file-error-alert" role="alert">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ revisiFileError }}</span>
         </div>
         <app-file-preview [file]="revisiFile"></app-file-preview>
       </div>
@@ -296,6 +306,72 @@
         <mat-progress-spinner class="button-spinner" *ngIf="facade.isDeleting()" diameter="18" mode="indeterminate" ></mat-progress-spinner>
         {{ facade.isDeleting() ? 'Menghapus...' : 'Konfirmasi Hapus' }}
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Dialog Penampil Berkas (Viewer Dokumen Digital) -->
+<div class="modal-backdrop preview-backdrop" *ngIf="facade.showPreviewModal()">
+  <div class="modal-panel preview-modal-panel" role="dialog" aria-modal="true" aria-labelledby="viewer-dialog-title">
+    <div class="modal-header">
+      <div class="preview-header-info">
+        <h3 class="modal-title" id="viewer-dialog-title">
+          <mat-icon class="preview-title-icon" color="primary">visibility</mat-icon>
+          Pratinjau Dokumen Digital
+        </h3>
+        <p class="preview-subtitle">
+          <strong>{{ facade.selectedPreviewDoc()?.no_surat }}</strong> &bull; {{ facade.selectedPreviewDoc()?.perihal }} (Versi {{ facade.selectedPreviewDoc()?.version || 'v1.0' }})
+        </p>
+      </div>
+      <button type="button" mat-icon-button aria-label="Tutup pratinjau" (click)="facade.closePreview()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="modal-state" *ngIf="facade.isPreviewLoading()">
+      <mat-progress-spinner class="center-spinner" diameter="40" mode="indeterminate"></mat-progress-spinner>
+      <p class="muted-text">Memuat berkas digital secara langsung pada peramban...</p>
+    </div>
+
+    <!-- Preview Content -->
+    <div class="preview-body" *ngIf="!facade.isPreviewLoading()">
+      <div class="viewer-container" [ngSwitch]="facade.previewKind()">
+        <!-- PDF Viewer via Iframe -->
+        <iframe *ngSwitchCase="'pdf'" [src]="facade.previewSafeUrl()" class="document-iframe" title="Pratinjau Dokumen Digital"></iframe>
+
+        <!-- Image Viewer with Zoom -->
+        <div *ngSwitchCase="'image'" class="image-viewer-container">
+          <div class="zoom-toolbar">
+            <button type="button" mat-icon-button (click)="facade.changeZoom(-25)" [disabled]="facade.previewZoom() <= 50" aria-label="Perkecil">
+              <mat-icon>zoom_out</mat-icon>
+            </button>
+            <span class="zoom-level">{{ facade.previewZoom() }}%</span>
+            <button type="button" mat-icon-button (click)="facade.changeZoom(25)" [disabled]="facade.previewZoom() >= 300" aria-label="Perbesar">
+              <mat-icon>zoom_in</mat-icon>
+            </button>
+            <button type="button" mat-button (click)="facade.resetZoom()">Atur Ulang</button>
+          </div>
+          <div class="image-scroll-box">
+            <img [src]="facade.previewSafeUrl()" [style.width.%]="facade.previewZoom()" alt="Pratinjau Dokumen Digital">
+          </div>
+        </div>
+
+        <!-- Fallback for other formats (e.g. doc/docx) -->
+        <div *ngSwitchDefault class="viewer-fallback">
+          <mat-icon class="fallback-icon">description</mat-icon>
+          <h4>Dokumen: {{ facade.selectedPreviewDoc()?.no_surat }}</h4>
+          <p>Format dokumen ({{ facade.previewExtension() }}) memerlukan aplikasi pembuka dokumen. Anda dapat mengunduh berkas salinan untuk membukanya secara utuh.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Actions -->
+    <div class="modal-actions preview-actions">
+      <button mat-stroked-button color="primary" *ngIf="facade.selectedPreviewDoc()" (click)="facade.downloadDocument(facade.selectedPreviewDoc()!)">
+        <mat-icon>file_download</mat-icon> Unduh Dokumen
+      </button>
+      <button mat-flat-button color="primary" (click)="facade.closePreview()">Tutup</button>
     </div>
   </div>
 </div>

@@ -79,6 +79,9 @@ class ArsipController extends Controller
             'catatan_kejadian.*' => 'required|string|max:2000',
             'kondisi_kotak_surat' => 'nullable|string|max:2000',
             'file_dokumen' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120'
+        ], [
+            'file_dokumen.mimes' => 'Format berkas tidak didukung. Sistem menolak berkas berformat selain PDF, DOC, DOCX, JPG, dan PNG (seperti .zip atau .exe).',
+            'file_dokumen.max' => 'Ukuran berkas melebihi batas maksimal 5 MB.'
         ]);
 
         abort_if(str_contains(strtolower($request->user()->role), 'tamu'), 403, 'Role Tamu hanya dapat melihat data.');
@@ -99,9 +102,9 @@ class ArsipController extends Controller
             ], 403);
         }
 
-        $isAllowedLhp = !empty($user->divisi_id) && !str_contains($userRoleLower, 'tamu');
-        foreach ($allowedRoles as $role) {
-            if (str_contains($userRoleLower, $role) && !str_contains($userRoleLower, 'tamu')) {
+        $isAllowedLhp = false;
+        foreach ($allowedRoles as $r) {
+            if (str_contains($userRoleLower, $r)) {
                 $isAllowedLhp = true;
                 break;
             }
@@ -142,6 +145,9 @@ class ArsipController extends Controller
         $request->validate([
             'file_dokumen' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
             'catatan_revisi' => 'required|string'
+        ], [
+            'file_dokumen.mimes' => 'Format berkas tidak didukung. Sistem menolak berkas berformat selain PDF, DOC, DOCX, JPG, dan PNG (seperti .zip atau .exe).',
+            'file_dokumen.max' => 'Ukuran berkas melebihi batas maksimal 5 MB.'
         ]);
 
         $arsip = $this->arsipService->reviseArsip(
@@ -174,32 +180,110 @@ class ArsipController extends Controller
     }
 
     /**
+     * Pratinjau Dokumen Digital Inline pada Peramban & Catat Audit Trail
+     */
+    public function preview(Request $request, string $id)
+    {
+        $arsip = Arsip::findOrFail($id);
+        $user = $request->user();
+        $accountName = $user ? ($user->username ?? $user->name ?? $user->email) : 'staf_persuratan';
+        $ip = $request->ip() ?: '127.0.0.1';
+        $now = Carbon::now();
+
+        Log::info("AUDIT TRAIL: Pratinjau berkas digital nomor {$arsip->no_surat} dibuka oleh {$accountName} (IP: {$ip}).");
+
+        AuditLog::create([
+            'log_id' => (string) Str::uuid(),
+            'actor_id' => $user->user_id ?? (string) Str::uuid(),
+            'action' => 'VIEW_ARSIP',
+            'target_entity' => 'arsip:' . $arsip->id,
+            'ip_address' => $ip,
+            'reason' => 'Pratinjau dokumen: ' . $arsip->no_surat,
+            'timestamp' => $now,
+        ]);
+
+        if (!Storage::disk('public')->exists($arsip->file_path)) {
+            return response()->json(['message' => 'Berkas digital tidak ditemukan di server penyimpanan.'], 404);
+        }
+
+        $fullPath = Storage::disk('public')->path($arsip->file_path);
+        $extension = strtolower(pathinfo($arsip->file_path, PATHINFO_EXTENSION));
+        $cleanFileName = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $arsip->no_surat) . '.' . $extension;
+
+        if ($extension === 'pdf') {
+            $watermarkService = app(\App\Services\WatermarkService::class);
+            $watermarkedContent = $watermarkService->applyDynamicWatermark(
+                $fullPath,
+                $accountName,
+                $ip,
+                $now
+            );
+
+            return response($watermarkedContent, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="' . $cleanFileName . '"',
+                'Content-Length' => strlen($watermarkedContent),
+                'Cache-Control' => 'no-cache, private',
+            ]);
+        }
+
+        $mime = Storage::disk('public')->mimeType($arsip->file_path) ?: 'application/octet-stream';
+
+        return response()->file($fullPath, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => 'inline; filename="' . basename($arsip->file_path) . '"'
+        ]);
+    }
+
+    /**
      * Download dengan Dynamic Watermark & Audit
      */
     public function download(Request $request, string $id)
     {
         $arsip = Arsip::findOrFail($id);
         $user = $request->user();
+        $accountName = $user ? ($user->username ?? $user->name ?? $user->email) : 'staf_persuratan';
+        $ip = $request->ip() ?: '127.0.0.1';
+        $now = Carbon::now();
 
-        // MOCK: Proses injeksi watermark (menggunakan library PDF)
-        // Logika aslinya akan membuka PDF, me-render teks transparan nama pengunduh & IP, lalu mem-buffer ke response.
-        Log::info("AUDIT TRAIL: Dokumen {$arsip->no_surat} diunduh oleh {$user->username} dengan IP {$request->ip()}. Dynamic Watermark diaplikasikan.");
+        Log::info("AUDIT TRAIL: Dokumen {$arsip->no_surat} diunduh oleh {$accountName} dengan IP {$ip}. Dynamic Watermark diaplikasikan.");
 
         AuditLog::create([
             'log_id' => (string) Str::uuid(),
-            'actor_id' => $user->user_id,
+            'actor_id' => $user->user_id ?? (string) Str::uuid(),
             'action' => 'DOWNLOAD_ARSIP',
             'target_entity' => 'arsip:' . $arsip->id,
-            'ip_address' => $request->ip(),
+            'ip_address' => $ip,
             'reason' => 'Download dokumen: ' . $arsip->no_surat,
-            'timestamp' => Carbon::now(),
+            'timestamp' => $now,
         ]);
 
         if (!Storage::disk('public')->exists($arsip->file_path)) {
             return response()->json(['message' => 'File tidak ditemukan di server.'], 404);
         }
 
-        return response()->download(Storage::disk('public')->path($arsip->file_path));
+        $fullPath = Storage::disk('public')->path($arsip->file_path);
+        $extension = strtolower(pathinfo($arsip->file_path, PATHINFO_EXTENSION));
+        $cleanFileName = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $arsip->no_surat) . '.' . $extension;
+
+        if ($extension === 'pdf') {
+            $watermarkService = app(\App\Services\WatermarkService::class);
+            $watermarkedContent = $watermarkService->applyDynamicWatermark(
+                $fullPath,
+                $accountName,
+                $ip,
+                $now
+            );
+
+            return response($watermarkedContent, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $cleanFileName . '"',
+                'Content-Length' => strlen($watermarkedContent),
+                'Cache-Control' => 'no-cache, private',
+            ]);
+        }
+
+        return response()->download($fullPath, $cleanFileName);
     }
 
     /**
@@ -243,7 +327,7 @@ class ArsipController extends Controller
     public function logs(Request $request)
     {
         $logs = AuditLog::with('user')
-            ->whereIn('action', ['UPLOAD_ARSIP', 'DOWNLOAD_ARSIP', 'EDIT_ARSIP', 'DELETE_ARSIP'])
+            ->whereIn('action', ['UPLOAD_ARSIP', 'DOWNLOAD_ARSIP', 'EDIT_ARSIP', 'DELETE_ARSIP', 'VIEW_ARSIP'])
             ->orderBy('timestamp', 'desc')
             ->limit(100)
             ->get();

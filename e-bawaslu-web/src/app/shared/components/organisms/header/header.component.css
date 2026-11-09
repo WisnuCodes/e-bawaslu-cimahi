@@ -2,29 +2,20 @@
 .header {
   position: relative;
   height: 64px;
-  background: linear-gradient(135deg, #172b3a 0%, #1e3a4f 60%, #1a3244 100%);
+  background: #0f1f2e;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
   gap: 16px;
-  box-shadow: 0 2px 12px rgba(23, 43, 58, 0.15);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
   z-index: 10;
 }
 
-/* ── Accent stripe at bottom ─────────────────────────────────── */
+/* ── Accent stripe (hidden for clean, professional look) ─────── */
 .header-accent {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg,
-    var(--color-primary) 0%,
-    var(--color-gold) 50%,
-    var(--color-primary) 100%
-  );
-  opacity: 0.85;
+  display: none;
 }
 
 /* ── Left Section ────────────────────────────────────────────── */
@@ -160,32 +151,31 @@
 .struktur-link {
   text-decoration: none;
   font-size: 12.5px;
-  font-weight: 600;
-  color: rgba(202, 212, 219, 0.85);
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  height: 38px;
+  font-weight: 500;
+  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  height: 36px;
   padding: 0 14px;
-  border-radius: 10px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   gap: 7px;
   white-space: nowrap;
-  transition: all 150ms;
+  transition: all 150ms ease;
 }
 
 .struktur-link:hover {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.18);
-  color: #fff;
-  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
 }
 
 .struktur-link mat-icon {
   font-size: 16px;
   width: 16px;
   height: 16px;
-  color: var(--color-gold);
+  color: #cbd5e1;
 }
 
 /* ── Divider ─────────────────────────────────────────────────── */
@@ -274,7 +264,7 @@
 .role-dot {
   width: 5px;
   height: 5px;
-  background: var(--color-gold);
+  background: var(--color-primary, #e71925);
   border-radius: 50%;
   flex-shrink: 0;
 }

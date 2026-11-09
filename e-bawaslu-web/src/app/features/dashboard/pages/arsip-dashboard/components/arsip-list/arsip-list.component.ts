@@ -53,6 +53,7 @@ export class ArsipListComponent implements OnInit, OnDestroy {
   // Local state for modals
   revisiCatatan: string = '';
   revisiFile: File | null = null;
+  revisiFileError: string = '';
   deleteReason: string = '';
 
   private searchSubject = new Subject<string>();
@@ -92,6 +93,7 @@ export class ArsipListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.searchSubscription?.unsubscribe();
+    this.facade.closePreview();
   }
 
   ngAfterViewInit() {
@@ -113,20 +115,66 @@ export class ArsipListComponent implements OnInit, OnDestroy {
     this.facade.setSelectedArsip(doc);
     this.revisiCatatan = '';
     this.revisiFile = null;
+    this.revisiFileError = '';
     this.facade.setModal('showRevisiModal', true);
   }
 
   onRevisiFileSelected(event: any) {
-    if (event.target.files.length > 0) {
-      this.revisiFile = event.target.files[0];
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    this.revisiFile = null;
+    this.revisiFileError = '';
+    if (!file) return;
+
+    const fileName = file.name.toLowerCase();
+    const ext = fileName.split('.').pop() || '';
+
+    // Menolak file format exe, zip, dan executable / archive lainnya
+    if (['zip', 'exe', 'rar', '7z', 'tar', 'gz', 'bat', 'cmd', 'sh', 'bin', 'msi', 'com'].includes(ext)) {
+      this.revisiFileError = `Format berkas tidak didukung. Sistem menolak pemilihan file berkas .${ext}. Berkas revisi tidak boleh berupa arsip terkompresi (.zip) atau berkas program/executable (.exe). Harap unggah dokumen dengan format PDF, DOC, DOCX, JPG, atau PNG.`;
+      input.value = '';
+      this.facade.showNotification(`Format berkas tidak didukung: Pemilihan file .${ext} ditolak oleh sistem.`, 'error');
+      return;
     }
+
+    // Validasi format dokumen yang diizinkan (PDF, DOC, DOCX, JPG, JPEG, PNG)
+    if (!/\.(pdf|docx?|jpe?g|png)$/i.test(file.name)) {
+      this.revisiFileError = 'Format berkas tidak didukung. Harap pilih dokumen dengan format PDF, DOC, DOCX, JPG, atau PNG.';
+      input.value = '';
+      this.facade.showNotification('Format berkas tidak didukung. Harap gunakan format berkas dokumen resmi.', 'error');
+      return;
+    }
+
+    // Validasi batas ukuran file (maks 5 MB)
+    if (file.size > 5 * 1024 * 1024) {
+      this.revisiFileError = 'Ukuran berkas melebihi batas maksimal 5 MB.';
+      input.value = '';
+      this.facade.showNotification('Ukuran berkas melebihi batas maksimal 5 MB.', 'error');
+      return;
+    }
+
+    this.revisiFile = file;
   }
 
   submitRevisi() {
-    if (!this.revisiFile || !this.revisiCatatan.trim()) {
-      this.facade.showNotification('Mohon pilih berkas revisi dan berikan catatan alasan revisi.', 'error');
+    if (!this.revisiFile) {
+      this.facade.showNotification('Mohon pilih berkas revisi yang valid.', 'error');
       return;
     }
+
+    const fileName = this.revisiFile.name.toLowerCase();
+    const ext = fileName.split('.').pop() || '';
+    if (['zip', 'exe'].includes(ext) || !/\.(pdf|docx?|jpe?g|png)$/i.test(this.revisiFile.name)) {
+      this.revisiFileError = 'Format berkas tidak didukung. Berkas format .zip atau .exe ditolak oleh sistem.';
+      this.facade.showNotification('Format berkas tidak didukung. Revisi ditolak.', 'error');
+      return;
+    }
+
+    if (!this.revisiCatatan.trim()) {
+      this.facade.showNotification('Mohon berikan catatan alasan revisi.', 'error');
+      return;
+    }
+
     const doc = this.facade.selectedArsip();
     if (doc) {
       const formData = new FormData();

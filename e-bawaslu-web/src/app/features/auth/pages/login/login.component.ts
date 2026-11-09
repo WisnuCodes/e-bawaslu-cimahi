@@ -37,19 +37,20 @@ export class LoginComponent {
 
   isLoading = false;
   errorMessage = '';
+  hidePassword = true;
 
-  // Quick Demo Accounts based on Bagan Struktur Organisasi Bawaslu Kota Cimahi
+  // Akun Aparatur Bawaslu Kota Cimahi
   demoAccounts = [
-    { title: '🌟 Ketua Bawaslu', name: 'Fathir Rizka Latif, S.H.', email: 'ketua@cimahi.bawaslu.go.id', role: 'Ketua Bawaslu' },
-    { title: '🏛️ Kepala Sekretariat', name: 'Sita Dewanur Nugroho, S.STP., M.Si.', email: 'kasek@cimahi.bawaslu.go.id', role: 'Kepala Sekretariat' },
-    { title: '👥 Kordiv SDMOD', name: 'Ahmad Hidayat, S.H.I., M.M.', email: 'ahmad.hidayat@cimahi.bawaslu.go.id', role: 'Kordiv SDMOD' },
-    { title: '🗳️ Kordiv P2H (Parmas Humas)', name: 'Akhmad Yasin Nugraha, S.H.', email: 'akhmad.yasin@cimahi.bawaslu.go.id', role: 'Kordiv P2H' },
-    { title: '⚖️ Kordiv HPS (Hukum Sengketa)', name: 'Jusapuandy, S.I.P.', email: 'jusapuandy@cimahi.bawaslu.go.id', role: 'Kordiv HPS' },
-    { title: '📋 Kordiv PP Datin', name: 'Zaenal Ghazali, S.Pd.I., M.I.Pol.', email: 'zaenal.ghazali@cimahi.bawaslu.go.id', role: 'Kordiv PP Datin' },
-    { title: '💰 Bendahara Pengeluaran', name: 'Sundari Eka Gayatri, S.P.', email: 'bendahara@cimahi.bawaslu.go.id', role: 'Bendahara' },
-    { title: '👩‍💼 Staf SDMOD', name: 'Risa Novitasari, S.AP.', email: 'risa.novitasari@cimahi.bawaslu.go.id', role: 'Staf SDMOD' },
-    { title: '👨‍💼 Staf P2H', name: 'Moch. Akbar Pajri, S.H.', email: 'akbar.pajri@cimahi.bawaslu.go.id', role: 'Staf P2H' },
-    { title: '🔍 Panwaslu Kecamatan', name: 'Panwascam Cimahi Tengah', email: 'panwascam.tengah@cimahi.bawaslu.go.id', role: 'Panwascam' },
+    { name: 'Fathir Rizka Latif, S.H.', email: 'ketua@cimahi.bawaslu.go.id', role: 'Ketua Bawaslu' },
+    { name: 'Sita Dewanur Nugroho, S.STP., M.Si.', email: 'kasek@cimahi.bawaslu.go.id', role: 'Kepala Sekretariat' },
+    { name: 'Ahmad Hidayat, S.H.I., M.M.', email: 'ahmad.hidayat@cimahi.bawaslu.go.id', role: 'Kordiv SDMOD' },
+    { name: 'Akhmad Yasin Nugraha, S.H.', email: 'akhmad.yasin@cimahi.bawaslu.go.id', role: 'Kordiv P2H' },
+    { name: 'Jusapuandy, S.I.P.', email: 'jusapuandy@cimahi.bawaslu.go.id', role: 'Kordiv HPS' },
+    { name: 'Zaenal Ghazali, S.Pd.I., M.I.Pol.', email: 'zaenal.ghazali@cimahi.bawaslu.go.id', role: 'Kordiv PP Datin' },
+    { name: 'Sundari Eka Gayatri, S.P.', email: 'bendahara@cimahi.bawaslu.go.id', role: 'Bendahara Pengeluaran' },
+    { name: 'Risa Novitasari, S.AP.', email: 'risa.novitasari@cimahi.bawaslu.go.id', role: 'Staf SDMOD' },
+    { name: 'Moch. Akbar Pajri, S.H.', email: 'akbar.pajri@cimahi.bawaslu.go.id', role: 'Staf P2H' },
+    { name: 'Panwascam Cimahi Tengah', email: 'panwascam.tengah@cimahi.bawaslu.go.id', role: 'Panwaslu Kecamatan' },
   ];
 
   selectDemoAccount(email: string) {
@@ -59,13 +60,25 @@ export class LoginComponent {
     });
   }
 
+  onSelectDemo(event: Event) {
+    const target = event.target as HTMLSelectElement;
+    if (target && target.value) {
+      this.selectDemoAccount(target.value);
+    }
+  }
+
   onSubmit() {
     if (this.loginForm.invalid) return;
 
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.authService.login(this.loginForm.value).subscribe({
+    const payload = {
+      email: this.loginForm.value.email?.trim(),
+      password: this.loginForm.value.password
+    };
+
+    this.authService.login(payload).subscribe({
       next: () => {
         this.isLoading = false;
         // Redirect to MFA step

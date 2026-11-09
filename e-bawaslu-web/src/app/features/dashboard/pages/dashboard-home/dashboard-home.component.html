@@ -1,253 +1,286 @@
 <div class="dashboard-home animate-fade-in">
   
-  <div class="welcome-header">
+  <!-- WELCOME BANNER -->
+  <section class="welcome-header">
     <div class="welcome-content-wrapper">
       <div class="welcome-title">
+        <div class="welcome-badges">
+          <span class="role-badge">{{ authService.currentUser()?.role || 'Aparatur' }}</span>
+          <span class="date-badge">
+            <mat-icon>calendar_today</mat-icon>
+            {{ today | bawasluDate:'EEEE, dd MMMM yyyy' }}
+          </span>
+        </div>
         <h1>Selamat Datang, {{ authService.currentUser()?.username || 'Aparatur Bawaslu' }}</h1>
-        <p class="date">
-          <mat-icon class="styled-a4e791" >calendar_today</mat-icon>
-          {{ today | bawasluDate:'EEEE, dd MMMM yyyy' }}
-        </p>
         <p class="subtitle">
-          Portal Terpadu Sistem Informasi Manajemen Presensi WFH, E-Arsip Digital, Pengawasan Form C1, dan Audit Trail Bawaslu Kota Cimahi.
+          Sistem Informasi Manajemen Terpadu Presensi WFH, Administrasi E-Arsip Digital, dan Rekapitulasi Pengawasan Pemilu Bawaslu Kota Cimahi.
         </p>
       </div>
       <div class="welcome-logo hide-mobile">
-        <img src="assets/icon/icon_bawaslu.jpg" alt="Logo Bawaslu" />
+        <img src="assets/icon/logo-bawaslu-cimahi.png" alt="Logo Bawaslu Kota Cimahi" />
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- FR-REP-01: EXECUTIVE LIVE PROGRESS & ALERTS -->
-  <div class="progress-banner" *ngIf="authService.canAccessC1">
-    <div class="styled-b73d46" >
-      <div class="styled-e4f36c" >
-        <mat-icon class="styled-636807" >bar_chart</mat-icon>
-        <strong class="styled-a2f7de" >Live Progress Form C1 Pemilu Kota Cimahi</strong>
-      </div>
-      <span class="styled-6e2641" >
-        <strong>{{ totalC1 }}</strong> dari <strong>{{ totalTpsTarget }} TPS</strong> Masuk ({{ c1ProgressPercentage }}%)
-      </span>
-    </div>
-    <mat-progress-bar class="styled-bfe983" mode="determinate" [value]="c1ProgressPercentage" ></mat-progress-bar>
-    <div class="styled-c20deb" >
-      <span>Cakupan: Kec. Cimahi Utara, Cimahi Tengah, Cimahi Selatan</span>
-      <a class="styled-878db5" routerLink="/dashboard/c1" >
-        Lihat Detail Rekapitulasi <mat-icon class="styled-39bb04" >chevron_right</mat-icon>
-      </a>
-    </div>
-  </div>
+  <!-- EXECUTIVE LIVE PROGRESS (PEMILU & PILKADA) -->
+  <section class="progress-section" *ngIf="authService.canAccessC1">
+    <div class="progress-grid">
+      
+      <!-- C1 Pemilu -->
+      <div class="progress-card">
+        <div class="progress-card-top">
+          <div class="progress-header-info">
+            <div class="progress-icon-badge badge-red">
+              <mat-icon>how_to_vote</mat-icon>
+            </div>
+            <div>
+              <span class="progress-kamar-tag tag-red">KAMAR PEMILU 2024</span>
+              <h2 class="progress-title">Live Progress Form C1 Pemilu</h2>
+            </div>
+          </div>
+          <div class="progress-counter">
+            <span class="counter-main">{{ totalC1 }} <small>/ {{ totalTpsTarget }} TPS</small></span>
+            <span class="counter-percent">({{ c1ProgressPercentage }}%)</span>
+          </div>
+        </div>
 
-  <!-- FR-REP-01: EXECUTIVE LIVE PROGRESS PILKADA -->
-  <div class="progress-banner" *ngIf="authService.canAccessC1" style="margin-top: 15px;">
-    <div class="styled-b73d46" >
-      <div class="styled-e4f36c" >
-        <mat-icon class="styled-636807" >bar_chart</mat-icon>
-        <strong class="styled-a2f7de" >Live Progress Form C1 Pilkada Kota Cimahi</strong>
+        <div class="progress-bar-wrapper">
+          <mat-progress-bar class="custom-progress-bar progress-red" mode="determinate" [value]="c1ProgressPercentage"></mat-progress-bar>
+        </div>
+
+        <div class="progress-card-footer">
+          <span class="progress-scope">Cakupan: Kec. Cimahi Utara, Cimahi Tengah, Cimahi Selatan</span>
+          <a class="progress-link link-red" routerLink="/dashboard/c1">
+            <span>Detail Rekapitulasi</span>
+            <mat-icon>arrow_forward</mat-icon>
+          </a>
+        </div>
       </div>
-      <span class="styled-6e2641" >
-        <strong>{{ totalC1Pilkada }}</strong> dari <strong>{{ totalTpsTarget }} TPS</strong> Masuk ({{ c1PilkadaProgressPercentage }}%)
-      </span>
+
+      <!-- C1 Pilkada -->
+      <div class="progress-card">
+        <div class="progress-card-top">
+          <div class="progress-header-info">
+            <div class="progress-icon-badge badge-indigo">
+              <mat-icon>how_to_vote</mat-icon>
+            </div>
+            <div>
+              <span class="progress-kamar-tag tag-indigo">PILKADA KOTA CIMAHI</span>
+              <h2 class="progress-title">Live Progress Form C1 Pilkada</h2>
+            </div>
+          </div>
+          <div class="progress-counter">
+            <span class="counter-main">{{ totalC1Pilkada }} <small>/ {{ totalTpsTarget }} TPS</small></span>
+            <span class="counter-percent">({{ c1PilkadaProgressPercentage }}%)</span>
+          </div>
+        </div>
+
+        <div class="progress-bar-wrapper">
+          <mat-progress-bar class="custom-progress-bar progress-indigo" mode="determinate" [value]="c1PilkadaProgressPercentage"></mat-progress-bar>
+        </div>
+
+        <div class="progress-card-footer">
+          <span class="progress-scope">Cakupan: Pemilihan Kepala Daerah / Wali Kota Cimahi</span>
+          <a class="progress-link link-indigo" routerLink="/dashboard/c1" [queryParams]="{kamar: 'Pilkada'}">
+            <span>Detail Rekapitulasi</span>
+            <mat-icon>arrow_forward</mat-icon>
+          </a>
+        </div>
+      </div>
+
     </div>
-    <mat-progress-bar class="styled-bfe983" mode="determinate" [value]="c1PilkadaProgressPercentage" ></mat-progress-bar>
-    <div class="styled-c20deb" >
-      <span>Cakupan: Pemilihan Kepala Daerah / Wali Kota Cimahi</span>
-      <a class="styled-878db5" routerLink="/dashboard/c1" [queryParams]="{kamar: 'Pilkada'}" >
-        Lihat Detail Rekapitulasi <mat-icon class="styled-39bb04" >chevron_right</mat-icon>
-      </a>
-    </div>
-  </div>
+  </section>
 
   <!-- STATISTIK KINERJA UTAMA -->
-  <div class="stats-grid">
-    
-    <!-- Status Presensi Hari Ini -->
-    <div class="stat-card-modern">
-      <div class="stat-card-header">
-        <h3 class="stat-title">Status Presensi<br>Hari Ini</h3>
-        <div class="stat-icon-wrapper">
-          <mat-icon>fingerprint</mat-icon>
+  <section class="stats-section">
+    <div class="stats-grid">
+      
+      <!-- Status Presensi Hari Ini -->
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-title">Status Presensi Hari Ini</span>
+          <div class="stat-icon-badge badge-blue">
+            <mat-icon>fingerprint</mat-icon>
+          </div>
+        </div>
+        <div class="stat-value" [ngClass]="{'stat-checked-in': presensiTodayStatus === 'Checked In', 'stat-checked-out': presensiTodayStatus === 'Checked Out', 'stat-absent': presensiTodayStatus === 'Belum Presensi'}">
+          {{ presensiTodayStatus }}
+        </div>
+        <div class="stat-action">
+          <span class="stat-subtitle">Aktivitas Kehadiran Pegawai</span>
+          <a routerLink="/dashboard/wfh" class="stat-link">
+            <span>{{ presensiTodayStatus === 'Belum Presensi' ? 'Buka Presensi' : 'Lihat Worklog' }}</span>
+            <mat-icon>chevron_right</mat-icon>
+          </a>
         </div>
       </div>
-      <div class="stat-value" [ngClass]="{'stat-checked-in': presensiTodayStatus === 'Checked In', 'stat-checked-out': presensiTodayStatus === 'Checked Out', 'stat-absent': presensiTodayStatus === 'Belum Presensi'}">
-        {{ presensiTodayStatus }}
-      </div>
-      <div class="stat-action">
-        <span class="stat-subtitle">Aktivitas Harian</span>
-        <a routerLink="/dashboard/wfh" class="stat-link">
-          {{ presensiTodayStatus === 'Belum Presensi' ? 'Buka Presensi' : 'Lihat Worklog' }} <mat-icon class="styled-725580" >chevron_right</mat-icon>
-        </a>
-      </div>
-    </div>
 
-    <!-- Dokumen E-Arsip -->
-    <div class="stat-card-modern">
-      <div class="stat-card-header">
-        <h3 class="stat-title">Dokumen<br>E-Arsip</h3>
-        <div class="stat-icon-wrapper">
-          <mat-icon>snippet_folder</mat-icon>
+      <!-- Dokumen E-Arsip -->
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-title">Dokumen E-Arsip</span>
+          <div class="stat-icon-badge badge-green">
+            <mat-icon>folder_shared</mat-icon>
+          </div>
+        </div>
+        <div class="stat-value">
+          {{ totalArsip }}
+        </div>
+        <div class="stat-action">
+          <span class="stat-subtitle">Total Berkas Digital Dinas</span>
+          <a routerLink="/dashboard/arsip" class="stat-link">
+            <span>Kelola Arsip</span>
+            <mat-icon>chevron_right</mat-icon>
+          </a>
         </div>
       </div>
-      <div class="stat-value">
-        {{ totalArsip }}
-      </div>
-      <div class="stat-action">
-        <span class="stat-subtitle">Total Berkas Digital</span>
-        <a routerLink="/dashboard/arsip" class="stat-link">
-          Kelola Arsip <mat-icon class="styled-9e39ef" >chevron_right</mat-icon>
-        </a>
-      </div>
-    </div>
 
-    <!-- Berkas C1 Terenkripsi -->
-    <div class="stat-card-modern" *ngIf="authService.canAccessC1">
-      <div class="stat-card-header">
-        <h3 class="stat-title">Form C1<br>(Kamar Pemilu)</h3>
-        <div class="stat-icon-wrapper">
-          <mat-icon>fact_check</mat-icon>
+      <!-- Form C1 (Kamar Pemilu) -->
+      <div class="stat-card" *ngIf="authService.canAccessC1">
+        <div class="stat-card-header">
+          <span class="stat-title">Form C1 (Kamar Pemilu)</span>
+          <div class="stat-icon-badge badge-red">
+            <mat-icon>fact_check</mat-icon>
+          </div>
+        </div>
+        <div class="stat-value">
+          {{ totalC1 }}
+        </div>
+        <div class="stat-action">
+          <span class="stat-subtitle">
+            <ng-container *ngIf="c1MismatchCount === 0">
+              <span class="sync-status status-good"><mat-icon>check_circle</mat-icon> Data Sinkron</span>
+            </ng-container>
+            <ng-container *ngIf="c1MismatchCount > 0">
+              <span class="sync-status status-alert"><mat-icon>warning</mat-icon> {{ c1MismatchCount }} Mismatch</span>
+            </ng-container>
+          </span>
+          <a routerLink="/dashboard/c1" class="stat-link">
+            <span>Pantau Form</span>
+            <mat-icon>chevron_right</mat-icon>
+          </a>
         </div>
       </div>
-      <div class="stat-value">
-        {{ totalC1 }}
-      </div>
-      <div class="stat-action">
-        <span class="stat-subtitle">
-          <ng-container *ngIf="c1MismatchCount === 0">
-            <span class="styled-e760ef text-success" ><mat-icon class="styled-75b04d" >check_circle_outline</mat-icon> Semua Sinkron</span>
-          </ng-container>
-          <ng-container *ngIf="c1MismatchCount > 0">
-            <span class="styled-1c2b3f text-error" ><mat-icon class="styled-28f7ff" >error_outline</mat-icon> {{ c1MismatchCount }} Mismatch</span>
-          </ng-container>
-        </span>
-        <a routerLink="/dashboard/c1" class="stat-link">
-          Pantau Form <mat-icon class="styled-d44811" >chevron_right</mat-icon>
-        </a>
-      </div>
-    </div>
 
-    <!-- Manajemen LHP Semua Divisi -->
-    <div class="stat-card-modern" *ngIf="authService.canAccessLhp">
-      <div class="stat-card-header">
-        <h3 class="stat-title">Manajemen LHP<br>(Kamar Pemilu)</h3>
-        <div class="stat-icon-wrapper">
-          <mat-icon>assignment</mat-icon>
+      <!-- Manajemen LHP -->
+      <div class="stat-card" *ngIf="authService.canAccessLhp">
+        <div class="stat-card-header">
+          <span class="stat-title">Manajemen LHP</span>
+          <div class="stat-icon-badge badge-teal">
+            <mat-icon>assignment</mat-icon>
+          </div>
+        </div>
+        <div class="stat-value stat-value-text">
+          Semua Divisi
+        </div>
+        <div class="stat-action">
+          <span class="stat-subtitle">Tahapan Pengawasan Pemilu</span>
+          <a routerLink="/dashboard/lhp" class="stat-link">
+            <span>Kelola LHP</span>
+            <mat-icon>chevron_right</mat-icon>
+          </a>
         </div>
       </div>
-      <div class="styled-dcfb5b stat-value" >
-        Semua Divisi
-      </div>
-      <div class="stat-action">
-        <span class="stat-subtitle">Sesuai Tahapan Pengawasan</span>
-        <a routerLink="/dashboard/lhp" class="stat-link">
-          Kelola LHP <mat-icon class="styled-caba4f" >chevron_right</mat-icon>
-        </a>
-      </div>
-    </div>
 
-    <!-- Pending Approval Counter (Untuk Pimpinan & Kordiv) -->
-    <div class="stat-card-modern" *ngIf="authService.canApprove">
-      <div class="stat-card-header">
-        <h3 class="stat-title">Menunggu<br>Approval</h3>
-        <div class="stat-icon-wrapper">
-          <mat-icon>assignment_late</mat-icon>
+      <!-- Menunggu Approval -->
+      <div class="stat-card" *ngIf="authService.canApprove">
+        <div class="stat-card-header">
+          <span class="stat-title">Menunggu Approval</span>
+          <div class="stat-icon-badge badge-orange">
+            <mat-icon>notification_important</mat-icon>
+          </div>
+        </div>
+        <div class="stat-value" [class.stat-has-pending]="pendingApprovalWorklog > 0">
+          {{ pendingApprovalWorklog }}
+        </div>
+        <div class="stat-action">
+          <span class="stat-subtitle">Worklog & Laporan Tertunda</span>
+          <a routerLink="/dashboard/wfh" class="stat-link">
+            <span>Tinjau Sekarang</span>
+            <mat-icon>chevron_right</mat-icon>
+          </a>
         </div>
       </div>
-      <div class="styled-cacbb4 stat-value" >
-        {{ pendingApprovalWorklog }}
-      </div>
-      <div class="stat-action">
-        <span class="stat-subtitle">Worklog Pegawai</span>
-        <a routerLink="/dashboard/wfh" class="stat-link">
-          Tinjau Sekarang <mat-icon class="styled-4b461e" >chevron_right</mat-icon>
-        </a>
-      </div>
-    </div>
 
-    <div class="stat-card-modern" *ngIf="authService.canAccessC1 || authService.canAccessLhp">
-      <div class="stat-card-header"><h3 class="stat-title">Kamar Pilkada</h3><mat-icon>how_to_vote</mat-icon></div>
-      <p>Pemilihan Kepala Daerah / Wali Kota</p>
-      <div class="stat-action">
-        <a *ngIf="authService.canAccessC1" routerLink="/dashboard/c1" [queryParams]="{kamar: 'Pilkada'}" class="stat-link">Form C1</a>
-        <a *ngIf="authService.canAccessLhp" routerLink="/dashboard/lhp" [queryParams]="{kamar: 'Pilkada'}" class="stat-link">Kelola LHP</a>
-      </div>
     </div>
-  </div>
+  </section>
 
-  <!-- AKSI CEPAT LAYANAN INTEGRASI -->
-  <div class="quick-actions-section">
-    <h3>
-      Aksi Cepat Layanan Bawaslu
-    </h3>
+  <!-- AKSI CEPAT LAYANAN BAWASLU -->
+  <section class="quick-actions-section">
+    <div class="section-header">
+      <mat-icon class="section-icon">dashboard_customize</mat-icon>
+      <h3>Aksi Cepat Layanan Bawaslu</h3>
+    </div>
 
     <div class="quick-actions-grid">
       
       <!-- Presensi WFH -->
-      <a routerLink="/dashboard/wfh" class="action-tile-modern">
-        <div class="action-tile-icon">
-          <mat-icon>add_a_photo</mat-icon>
+      <a routerLink="/dashboard/wfh" class="action-tile">
+        <div class="action-tile-icon icon-blue">
+          <mat-icon>camera_alt</mat-icon>
         </div>
         <div class="action-tile-content">
-          <span class="action-tile-title">Check In / Out WFH</span>
-          <span class="action-tile-desc">Swafoto & Timestamp Server anti-spoofing</span>
+          <span class="action-tile-title">Check In / Out Presensi</span>
+          <span class="action-tile-desc">Swafoto & timestamp geolokasi absensi dinas</span>
         </div>
       </a>
 
       <!-- E-Arsip -->
-      <a routerLink="/dashboard/arsip" class="action-tile-modern">
-        <div class="action-tile-icon">
+      <a routerLink="/dashboard/arsip" class="action-tile">
+        <div class="action-tile-icon icon-green">
           <mat-icon>drive_folder_upload</mat-icon>
         </div>
         <div class="action-tile-content">
           <span class="action-tile-title">Unggah E-Arsip Digital</span>
-          <span class="action-tile-desc">Sistem Versioning & Pencarian Full-Text OCR</span>
+          <span class="action-tile-desc">Pengelolaan naskah dinas & repositori berkas</span>
         </div>
       </a>
 
-      <!-- C1 -->
-      <a routerLink="/dashboard/c1" class="action-tile-modern" *ngIf="authService.canAccessC1">
-        <div class="action-tile-icon">
-          <mat-icon>admin_panel_settings</mat-icon>
+      <!-- C1 Pemilu -->
+      <a routerLink="/dashboard/c1" class="action-tile" *ngIf="authService.canAccessC1">
+        <div class="action-tile-icon icon-red">
+          <mat-icon>fact_check</mat-icon>
         </div>
         <div class="action-tile-content">
-          <span class="action-tile-title">Live Form C1 (Pemilu)</span>
-          <span class="action-tile-desc">Enkripsi AES-256 & Validasi Integritas SHA-256</span>
+          <span class="action-tile-title">Rekapitulasi C1 (Pemilu)</span>
+          <span class="action-tile-desc">Tabulasi suara Pemilu terenkripsi & audit trail</span>
         </div>
       </a>
 
       <!-- C1 Pilkada -->
-      <a routerLink="/dashboard/c1" [queryParams]="{kamar: 'Pilkada'}" class="action-tile-modern" *ngIf="authService.canAccessC1">
-        <div class="styled-9ccc00 action-tile-icon" >
+      <a routerLink="/dashboard/c1" [queryParams]="{kamar: 'Pilkada'}" class="action-tile" *ngIf="authService.canAccessC1">
+        <div class="action-tile-icon icon-indigo">
           <mat-icon>how_to_vote</mat-icon>
         </div>
         <div class="action-tile-content">
-          <span class="styled-9c44da action-tile-title" >Live Form C1 (Pilkada)</span>
-          <span class="action-tile-desc">Pengawasan Pemilihan Kepala Daerah / Wali Kota</span>
+          <span class="action-tile-title">Rekapitulasi C1 (Pilkada)</span>
+          <span class="action-tile-desc">Tabulasi suara Pemilihan Wali Kota Cimahi</span>
         </div>
       </a>
 
       <!-- Ekspor Laporan BPK -->
-      <a routerLink="/dashboard/reports" class="action-tile-modern" *ngIf="authService.canExportReport">
-        <div class="action-tile-icon">
+      <a routerLink="/dashboard/reports" class="action-tile" *ngIf="authService.canExportReport">
+        <div class="action-tile-icon icon-amber">
           <mat-icon>file_download</mat-icon>
         </div>
         <div class="action-tile-content">
-          <span class="action-tile-title">Ekspor PDF BPK</span>
-          <span class="action-tile-desc">Unduh berkas audit dengan Dynamic Watermarking</span>
+          <span class="action-tile-title">Ekspor Laporan Resmi</span>
+          <span class="action-tile-desc">Unduh berkas audit & rekapitulasi terintegrasi</span>
         </div>
       </a>
 
       <!-- Struktur Organisasi -->
-      <a routerLink="/dashboard/struktur-organisasi" class="action-tile-modern">
-        <div class="action-tile-icon">
+      <a routerLink="/dashboard/struktur-organisasi" class="action-tile">
+        <div class="action-tile-icon icon-slate">
           <mat-icon>corporate_fare</mat-icon>
         </div>
         <div class="action-tile-content">
-          <span class="action-tile-title">Bagan Organisasi Bawaslu</span>
-          <span class="action-tile-desc">Pemetaan Role-Based Access Control Kota Cimahi</span>
+          <span class="action-tile-title">Bagan Struktur Organisasi</span>
+          <span class="action-tile-desc">Struktur komisioner & sekretariat Bawaslu Cimahi</span>
         </div>
       </a>
 
     </div>
-  </div>
+  </section>
 
 </div>

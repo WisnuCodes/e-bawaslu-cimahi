@@ -1,7 +1,10 @@
 <header class="auth-heading">
-  <p class="auth-step">AKSES AKUN</p>
+  <div class="auth-badge">
+    <span class="auth-badge-dot"></span>
+    <span>AUTENTIKASI APARATUR</span>
+  </div>
   <h2>Masuk ke SIMBA</h2>
-  <p>Gunakan akun Bawaslu Anda untuk melanjutkan.</p>
+  <p>Gunakan akun aparatur Bawaslu Anda untuk mengakses sistem.</p>
 </header>
 
 <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
@@ -15,36 +18,41 @@
 
   <!-- Password Field -->
   <mat-form-field appearance="outline" class="auth-field">
-    <mat-label>Kata sandi</mat-label>
-    <input matInput type="password" formControlName="password" autocomplete="current-password" placeholder="Masukkan kata sandi">
-    <mat-icon matSuffix>lock_outline</mat-icon>
+    <mat-label>Kata Sandi</mat-label>
+    <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" autocomplete="current-password" placeholder="Masukkan kata sandi">
+    <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword" [attr.aria-label]="'Sembunyikan password'" [attr.aria-pressed]="hidePassword" tabindex="-1" class="password-toggle-btn">
+      <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+    </button>
     <mat-error *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">Kata sandi wajib diisi</mat-error>
   </mat-form-field>
 
-  <!-- Submit -->
+  <!-- Submit Button -->
   <button mat-flat-button type="submit" [disabled]="loginForm.invalid || isLoading" class="auth-button">
     <mat-spinner *ngIf="isLoading" diameter="18"></mat-spinner>
-    <span>{{ isLoading ? 'Memverifikasi...' : 'Masuk' }}</span>
+    <span>{{ isLoading ? 'Memverifikasi...' : 'Masuk ke Sistem' }}</span>
     <mat-icon *ngIf="!isLoading" iconPositionEnd>arrow_forward</mat-icon>
   </button>
 
-  <!-- Error -->
+  <!-- Error Alert -->
   <div class="auth-error" *ngIf="errorMessage" role="alert">
     <mat-icon>error_outline</mat-icon>
     <span>{{ errorMessage }}</span>
   </div>
 
-  <!-- Demo Accounts -->
-  <details class="demo-accounts-panel">
-    <summary>
-      <span class="summary-icon">👤</span>
-      Pilihan akun aparatur
-    </summary>
-    <p>Pilih akun untuk mengisi formulir masuk secara otomatis.</p>
-    <div class="demo-list">
-      <button type="button" *ngFor="let acc of demoAccounts" (click)="selectDemoAccount(acc.email)" class="demo-btn">
-        <span class="demo-role">{{ acc.role }}</span>
-      </button>
+  <!-- Quick Demo Access Dropdown -->
+  <div class="quick-demo-box">
+    <div class="quick-demo-header">
+      <mat-icon class="quick-demo-icon">badge</mat-icon>
+      <span class="quick-demo-title">Simulasi Akun Aparatur</span>
     </div>
-  </details>
+    <div class="quick-demo-select-wrapper">
+      <select class="quick-demo-select" (change)="onSelectDemo($event)" aria-label="Pilih akun simulasi">
+        <option value="" disabled selected>— Pilih akun aparatur untuk login otomatis —</option>
+        <option *ngFor="let acc of demoAccounts" [value]="acc.email">
+          {{ acc.role }} — {{ acc.name }}
+        </option>
+      </select>
+      <mat-icon class="select-arrow-icon">expand_more</mat-icon>
+    </div>
+  </div>
 </form>

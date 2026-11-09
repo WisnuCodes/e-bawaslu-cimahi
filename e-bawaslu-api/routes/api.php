@@ -68,8 +68,6 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/worklogs/{id}/approve', [WorklogController::class, 'approve']);
         Route::post('/worklogs/{id}', [WorklogController::class, 'update']);
         Route::delete('/worklogs/{id}', [WorklogController::class, 'destroy']);
-
-
     });
 
     // Arsip Module Routes
@@ -80,6 +78,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/', [ArsipController::class, 'store']);
         Route::post('/{id}/revisi', [ArsipController::class, 'uploadRevisi']);
         Route::get('/{id}/versions', [ArsipController::class, 'getVersions']);
+        Route::get('/{id}/preview', [ArsipController::class, 'preview']); // Pratinjau Dokumen Digital Inline
         Route::get('/{id}/download', [ArsipController::class, 'download']); // Download w/ Watermark
         Route::delete('/{id}', [ArsipController::class, 'destroy']); // Soft Delete w/ Reason
     });
@@ -123,7 +122,6 @@ Route::middleware('auth:api')->group(function () {
 
     // Report (Eksport BPK)
     Route::get('/reports/export', [ReportController::class, 'exportPdf']);
-
 
     // Saksi TPS Module Routes
     Route::prefix('saksi')->group(function () {

@@ -1,87 +1,96 @@
 /* ══════════════════════════════════════════════════════════════
-   LOGIN COMPONENT — Premium Styles
+   LOGIN COMPONENT — Professional Styles
    ══════════════════════════════════════════════════════════════ */
 
 .login-form {
   width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-/* ── Demo Accounts Panel ─────────────────────────────────────── */
-.demo-accounts-panel {
-  margin-top: 28px;
-  border-top: 1px solid #edf0f3;
-  padding-top: 20px;
+/* ── Password Toggle ─────────────────────────────────────────── */
+.password-toggle-btn {
+  width: 32px !important;
+  height: 32px !important;
+  padding: 4px !important;
+  color: #64748b !important;
 }
 
-.demo-accounts-panel summary {
+.password-toggle-btn mat-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+}
+
+/* ── Quick Demo Box (Testing Helper) ─────────────────────────── */
+.quick-demo-box {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.quick-demo-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.quick-demo-icon {
+  font-size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
+  color: #64748b;
+}
+
+.quick-demo-title {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #475569;
+  letter-spacing: 0.02em;
+}
+
+.quick-demo-select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.quick-demo-select {
+  width: 100%;
+  height: 38px;
+  padding: 0 32px 0 12px;
+  font-family: inherit;
   font-size: 12.5px;
-  font-weight: 600;
-  color: #4a5966;
+  color: #1e293b;
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  outline: none;
   cursor: pointer;
-  padding: 6px 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  -webkit-user-select: none;
-  user-select: none;
-  transition: color 150ms;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: all 150ms ease;
 }
 
-.demo-accounts-panel summary:hover {
-  color: var(--color-secondary);
+.quick-demo-select:hover {
+  background-color: #ffffff;
+  border-color: #94a3b8;
 }
 
-.summary-icon {
-  font-size: 14px;
+.quick-demo-select:focus {
+  background-color: #ffffff;
+  border-color: var(--color-primary, #e71925);
+  box-shadow: 0 0 0 2px rgba(231, 25, 37, 0.1);
 }
 
-.demo-accounts-panel p {
-  font-size: 11.5px;
-  color: #8a9aa6;
-  margin: 12px 0;
-  line-height: 1.5;
-}
-
-.demo-list {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  max-height: 240px;
-  overflow: auto;
-  padding: 4px 2px;
-}
-
-.demo-btn {
-  background: #fff;
-  border: 1px solid #e0e5ea;
-  border-radius: 10px;
-  padding: 12px 14px;
-  cursor: pointer;
-  text-align: left;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  transition: all 200ms ease;
-}
-
-.demo-btn:hover {
-  background: var(--color-primary-light);
-  border-color: var(--color-primary);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(231, 25, 37, 0.1);
-}
-
-.demo-btn:active {
-  transform: translateY(0);
-}
-
-.demo-role {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: #344754;
-  line-height: 1.4;
-}
-
-.demo-btn:hover .demo-role {
-  color: var(--color-primary-hover);
+.select-arrow-icon {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  color: #64748b;
 }
